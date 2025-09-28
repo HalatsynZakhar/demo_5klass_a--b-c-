@@ -3,6 +3,7 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import random
 import math
+from tkinter import font as tkfont  # Імпортуємо модуль для роботи зі шрифтами
 
 
 class InteractiveBoardDemo:
@@ -123,7 +124,7 @@ class InteractiveBoardDemo:
         if canvas_width < 100 or canvas_height < 150: return 20
 
         available_width = canvas_width - 40
-        available_height = canvas_height - 180
+        available_height = canvas_height - 200  # Залишаємо ще трохи місця
 
         blocks_per_row = min(10, total_blocks)
         rows_needed = math.ceil(total_blocks / blocks_per_row)
@@ -153,16 +154,32 @@ class InteractiveBoardDemo:
 
         self.draw_blocks_grid(canvas, q['a'], q['b'], q['c'], width / 2, y_text + 40, block_size, method)
 
-        # --- Історія обчислень з фіксованим відступом ---
+        # --- НАДІЙНЕ ВІДОБРАЖЕННЯ ІСТОРІЇ ДІЙ ---
         calc_history = self.get_calc_history(method)
-        y_calc = height - 100  # Початкова позиція для першого рядка знизу
-        for i, line in enumerate(reversed(calc_history)):
+        if not calc_history:
+            return
+
+        # 1. Створюємо об'єкт шрифта, щоб отримати його точні розміри
+        history_font = tkfont.Font(family="Segoe UI", size=font_size + 2, weight="bold")
+
+        # 2. Отримуємо точну висоту рядка і додаємо відступ для читабельності
+        line_height = history_font.metrics('linespace') + 10
+
+        # 3. Розраховуємо початкову позицію Y для першого рядка
+        total_text_height = (len(calc_history) - 1) * line_height
+        y_start = height - 40 - total_text_height
+
+        # 4. Малюємо кожен рядок з розрахованим інтервалом
+        current_y = y_start
+        for line in calc_history:
             canvas.create_text(
-                width / 2, y_calc - i * (font_size + 15),  # Кожен новий рядок на 15px + розмір шрифту вище
+                width / 2, current_y,
                 text=line,
-                font=("Segoe UI", font_size + 2, "bold"),
-                fill=self.style.colors.primary
+                font=history_font,
+                fill=self.style.colors.primary,
+                anchor='center'  # Центруємо текст по вертикалі і горизонталі
             )
+            current_y += line_height  # Переходимо до наступного рядка
 
     def get_step_info(self, method):
         q = self.current_question
@@ -204,7 +221,6 @@ class InteractiveBoardDemo:
         total_width = blocks_per_row * (block_size + 5) - 5
         start_x = center_x - total_width / 2
 
-        # --- Рамка для виділення групи ---
         if method == 'sum' and self.animation_step == 1:
             group_start_index = a - (b + c)
             start_row = group_start_index // blocks_per_row
@@ -215,27 +231,22 @@ class InteractiveBoardDemo:
             y2 = start_y + (math.ceil(a / blocks_per_row) - 1) * (block_size + 5) + block_size + 5
             canvas.create_rectangle(x1, y1, x2, y2, fill=self.style.colors.light, stipple="gray25", outline="")
 
-        # Визначення стану та малювання кожного блоку
         x, y = start_x, start_y
         for i in range(a):
             info = {'color': self.style.colors.success, 'alpha': 1.0, 'visible': True}
 
             if method == 'sum':
-                # --- ЛОГІКА ДВОКОЛІРНОГО ПІДСВІЧУВАННЯ ---
                 if self.animation_step == 1:
-                    # 'c' блоків - одним кольором
                     if i >= a - c:
                         info['color'] = self.style.colors.warning
-                    # 'b' блоків - іншим кольором
                     elif i >= a - b - c:
                         info['color'] = self.style.colors.info
-                # ---------------------------------------------
                 elif self.animation_step == 2 and i >= a - (b + c):
                     info['color'] = self.style.colors.danger
                     info['alpha'] = 0.5
                 elif self.animation_step >= 3 and i >= a - (b + c):
                     info['visible'] = False
-            else:  # sequential
+            else:
                 if self.animation_step == 1 and i >= a - b:
                     info['color'] = self.style.colors.info
                     info['alpha'] = 0.5
