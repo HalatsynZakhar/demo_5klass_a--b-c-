@@ -166,7 +166,7 @@ class FractionVisualizerApp(tk.Tk):
         frame = ttk.Frame(parent)
         frame.grid(row=0, column=col, padx=20, sticky="nsew")
         frame.columnconfigure(0, weight=1)
-        ttk.Label(frame, text=title, style="Title.TLabel", foreground="navy").pack(pady=(0, 20))
+        #ttk.Label(frame, text=title, style="Title.TLabel", foreground="navy").pack(pady=(0, 20))
 
         whole_widgets = self._create_slider_unit(frame, "Ціла частина:", whole_var)
         whole_widgets['frame'].pack(pady=5, fill="x", expand=True)
