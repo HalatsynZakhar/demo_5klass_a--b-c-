@@ -76,7 +76,7 @@ class PrimeCompositeTrainerApp(tk.Tk):
         top_frame = tk.Frame(self, bg="#ffffff")
         top_frame.pack(fill=tk.X, padx=20, pady=10)
 
-        tk.Label(top_frame, text="Детектив чисел 🕵️‍♂️", font=self.font_title, bg="#ffffff", fg="navy").pack(
+        tk.Label(top_frame, text="Детектив чисел", font=self.font_title, bg="#ffffff", fg="navy").pack(
             side=tk.LEFT)
         self.score_label = tk.Label(top_frame, text="Рахунок: 0 / 0", font=self.font_main, bg="#ffffff", fg="green")
         self.score_label.pack(side=tk.RIGHT)

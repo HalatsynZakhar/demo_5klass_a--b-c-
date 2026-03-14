@@ -1,5 +1,6 @@
 """
-Тренажер обчислень у стовпчик — десяткові дроби.
+Тренажер обчислень у стовпчик — десяткові дроби (§ 43-47).
+Покращена візуалізація для інтерактивної дошки.
 """
 
 import tkinter as tk
@@ -15,8 +16,12 @@ BORDER    = "#e2e0dc"
 BORDER2   = "#c9c6c0"
 TEXT      = "#1c1917"
 MUTED     = "#78716c"
-ACC       = "#2563eb"
-ACC_BG    = "#dbeafe"
+
+# Visual Highlight Colors
+ACC       = "#d97706"       # Amber-600 (Text for active)
+ACC_BG    = "#fef3c7"       # Amber-100 (Background for active)
+ACC_BORDER= "#f59e0b"       # Amber-500 (Border for active)
+
 GREEN     = "#16a34a"
 GREEN_BG  = "#dcfce7"
 RED       = "#dc2626"
@@ -28,6 +33,7 @@ CARRY_C   = "#7c3aed"
 CARRY_BG  = "#ede9fe"
 GIVEN_BG  = "#f0ede8"
 HDR_BG    = "#1c1917"
+
 OK_BG     = GREEN_BG
 OK_FG     = GREEN
 ERR_BG    = RED_BG
@@ -40,21 +46,21 @@ OP_COLORS = {'+': ('#14532d','#dcfce7'),
              '×': ('#3b0764','#f3e8ff'),
              '÷': ('#1e3a8a','#dbeafe')}
 
-CELL_W  = 52
-CELL_H  = 52
-CARRY_H = 20
-GAP     = 6
+CELL_W  = 70   # Bigger cells
+CELL_H  = 70
+CARRY_H = 25
+GAP     = 8
 
-FONT_TASK   = ("Segoe UI",    48, "bold")
-FONT_MONO   = ("Courier New", 26, "bold")
-FONT_MONO_S = ("Courier New", 16, "bold")
-FONT_MONO_XS= ("Courier New", 12, "bold")
-FONT_HDR    = ("Segoe UI",    16, "bold")
-FONT_UI_B   = ("Segoe UI",    12, "bold")
-FONT_UI     = ("Segoe UI",    12)
-FONT_SMALL  = ("Segoe UI",    10)
-FONT_HINT_T = ("Segoe UI",    11, "italic")
-FONT_PAD    = ("Segoe UI",    22, "bold")
+FONT_TASK   = ("Segoe UI",    56, "bold")
+FONT_MONO   = ("Courier New", 36, "bold")
+FONT_MONO_S = ("Courier New", 24, "bold")
+FONT_MONO_XS= ("Courier New", 18, "bold")
+FONT_HDR    = ("Segoe UI",    24, "bold")
+FONT_UI_B   = ("Segoe UI",    16, "bold")
+FONT_UI     = ("Segoe UI",    16)
+FONT_SMALL  = ("Segoe UI",    14)
+FONT_HINT_T = ("Segoe UI",    18, "italic")
+FONT_PAD    = ("Segoe UI",    28, "bold")
 
 # ══════════════════════════════════════════════════════════════════
 #  МАТЕМАТИКА
@@ -121,7 +127,6 @@ def gen_numbers(op, diff):
     # Сложение / Вычитание
     dp1 = 1 if diff=='easy' else rnd(1,3)
     dp2 = 1 if diff=='easy' else rnd(1,3)
-    # З більшою ймовірністю генеруємо різну кількість знаків після коми
     if diff != 'easy' and random.random() < 0.7:
         while dp1 == dp2: dp2 = rnd(1,3)
 
@@ -237,7 +242,7 @@ class Cell:
         self.state    = 'idle'
         self.user_val = ''
         self.has_dot  = False
-        self.phase    = phase  # Для поэтапного отображения
+        self.phase    = phase
 
 def _make_matrix(nrows, ncols):
     return [[Cell(EMPTY, row=r, col=c) for c in range(ncols)] for r in range(nrows)]
@@ -392,7 +397,6 @@ def build_matrix_division(info):
 
     input_order.extend(final_rem_cells)
 
-    # Скриваємо стовпчик до завершення перетворення (переходу в фазу 2)
     if has_shift:
         for r in range(R, n_rows):
             for c in range(len(matrix[r])):
@@ -539,9 +543,9 @@ def build_matrix_multiplication(info):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Тренажер — Стовпчик")
+        self.title("Тренажер — Стовпчик (§ 43-47)")
         self.configure(bg=BG)
-        self.resizable(True, True)
+        self.attributes("-fullscreen", True) # Fullscreen
 
         self.op        = '÷'
         self.diff      = 'med'
@@ -572,22 +576,27 @@ class App(tk.Tk):
         self.geometry(f"{w}x{h}+{(sw-w)//2}+{(sh-h)//2}")
         self.minsize(960, 640)
 
-        hdr = tk.Frame(self, bg=HDR_BG, height=50)
+        hdr = tk.Frame(self, bg=HDR_BG, height=80)
         hdr.pack(fill='x')
         hdr.pack_propagate(False)
-        tk.Label(hdr, text="÷  Тренажер — Стовпчик", bg=HDR_BG, fg=WHITE, font=FONT_HDR).place(x=18, rely=.5, anchor='w')
+        tk.Label(hdr, text="÷  Тренажер — Стовпчик (§ 43-47)", bg=HDR_BG, fg=WHITE, font=FONT_HDR).place(x=30, rely=.5, anchor='w')
+        
+        # Exit Button
+        tk.Button(hdr, text="❌ Вихід", font=("Segoe UI", 16, "bold"), bg="red", fg="white",
+                  command=self.destroy).place(relx=1, x=-30, rely=.5, anchor='e')
+        
         self._lbl_score = tk.Label(hdr, text="Вірно: 0 / 0", bg=HDR_BG, fg='#a1a1aa', font=FONT_UI)
-        self._lbl_score.place(relx=1, x=-18, rely=.5, anchor='e')
+        self._lbl_score.place(relx=1, x=-150, rely=.5, anchor='e')
 
         body = tk.Frame(self, bg=BG)
         body.pack(fill='both', expand=True)
 
-        left = tk.Frame(body, bg=WHITE, width=190, highlightbackground=BORDER, highlightthickness=1)
+        left = tk.Frame(body, bg=WHITE, width=220, highlightbackground=BORDER, highlightthickness=1)
         left.pack(side='left', fill='y')
         left.pack_propagate(False)
         self._build_left(left)
 
-        right = tk.Frame(body, bg=WHITE, width=210, highlightbackground=BORDER, highlightthickness=1)
+        right = tk.Frame(body, bg=WHITE, width=260, highlightbackground=BORDER, highlightthickness=1)
         right.pack(side='right', fill='y')
         right.pack_propagate(False)
         self._build_right(right)
@@ -598,61 +607,61 @@ class App(tk.Tk):
 
     def _build_left(self, parent):
         p = tk.Frame(parent, bg=WHITE)
-        p.pack(fill='both', expand=True, padx=12, pady=16)
+        p.pack(fill='both', expand=True, padx=20, pady=20)
 
-        tk.Label(p, text="ОПЕРАЦІЯ", bg=WHITE, fg=MUTED, font=("Segoe UI", 10, "bold")).pack(anchor='w', pady=(0,6))
+        tk.Label(p, text="ОПЕРАЦІЯ", bg=WHITE, fg=MUTED, font=("Segoe UI", 14, "bold")).pack(anchor='w', pady=(0,10))
         self._op_btns = {}
         for op, label in[('÷','Ділення'),('×','Множення'), ('+','Додавання'),('−','Віднімання')]:
             fg_c, bg_c = OP_COLORS[op]
             btn = tk.Button(p, text=f"  {op}  {label}", bg=WHITE, fg=MUTED, font=FONT_UI_B,
-                            relief='flat', bd=0, cursor='hand2', anchor='w', padx=8, pady=7,
+                            relief='flat', bd=0, cursor='hand2', anchor='w', padx=10, pady=10,
                             highlightbackground=BORDER, highlightthickness=1, command=lambda o=op: self._set_op(o))
-            btn.pack(fill='x', pady=2)
+            btn.pack(fill='x', pady=5)
             self._op_btns[op] = (btn, fg_c, bg_c)
 
-        tk.Frame(p, bg=BORDER, height=1).pack(fill='x', pady=10)
+        tk.Frame(p, bg=BORDER, height=2).pack(fill='x', pady=20)
 
-        tk.Label(p, text="РІВЕНЬ", bg=WHITE, fg=MUTED, font=("Segoe UI", 10, "bold")).pack(anchor='w', pady=(0,6))
+        tk.Label(p, text="РІВЕНЬ", bg=WHITE, fg=MUTED, font=("Segoe UI", 14, "bold")).pack(anchor='w', pady=(0,10))
         self._diff_btns = {}
         for d, label, col in[('easy','🟢 Легкий', GREEN), ('med', '🟡 Середній', YELLOW), ('hard','🔴 Складний', RED)]:
             btn = tk.Button(p, text=label, bg=WHITE, fg=MUTED, font=FONT_UI_B, relief='flat', bd=0,
-                            cursor='hand2', anchor='w', padx=8, pady=7, highlightbackground=BORDER, highlightthickness=1,
+                            cursor='hand2', anchor='w', padx=10, pady=10, highlightbackground=BORDER, highlightthickness=1,
                             command=lambda x=d: self._set_diff(x))
-            btn.pack(fill='x', pady=2)
+            btn.pack(fill='x', pady=5)
             self._diff_btns[d] = (btn, col)
 
-        tk.Frame(p, bg=BORDER, height=1).pack(fill='x', pady=10)
+        tk.Frame(p, bg=BORDER, height=2).pack(fill='x', pady=20)
         tk.Button(p, text="↺  Нове завдання", bg=BG, fg=TEXT, font=FONT_UI_B, relief='flat', bd=0, cursor='hand2',
-                  padx=8, pady=8, highlightbackground=BORDER2, highlightthickness=1, command=self._new_task).pack(fill='x')
+                  padx=10, pady=15, highlightbackground=BORDER2, highlightthickness=1, command=self._new_task).pack(fill='x')
 
     def _build_center(self, parent):
         task_frame = tk.Frame(parent, bg=WHITE, highlightbackground=BORDER2, highlightthickness=1)
-        task_frame.pack(fill='x', padx=16, pady=(14, 6))
+        task_frame.pack(fill='x', padx=30, pady=(30, 10))
 
         inner_task = tk.Frame(task_frame, bg=WHITE)
-        inner_task.pack(pady=14)
+        inner_task.pack(pady=20)
 
         self._lbl_task = tk.Label(inner_task, text="", bg=WHITE, fg=TEXT, font=FONT_TASK)
         self._lbl_task.pack(side='left')
 
-        self._lbl_step = tk.Label(inner_task, text="", bg=WHITE, fg=MUTED, font=("Segoe UI", 13))
-        self._lbl_step.pack(side='left', padx=(24, 0))
+        self._lbl_step = tk.Label(inner_task, text="", bg=WHITE, fg=MUTED, font=("Segoe UI", 20))
+        self._lbl_step.pack(side='left', padx=(40, 0))
 
         canvas_frame = tk.Frame(parent, bg=BG)
-        canvas_frame.pack(fill='both', expand=True, padx=16, pady=4)
+        canvas_frame.pack(fill='both', expand=True, padx=30, pady=10)
 
         self._canvas = tk.Canvas(canvas_frame, bg=WHITE, highlightbackground=BORDER2, highlightthickness=1)
         self._canvas.pack(fill='both', expand=True)
         self._canvas.bind('<Configure>', lambda e: self._redraw())
 
-        self._lbl_prompt = tk.Label(parent, text="", bg=BG, fg=MUTED, font=FONT_HINT_T, wraplength=560, justify='center')
-        self._lbl_prompt.pack(pady=(2, 0))
+        self._lbl_prompt = tk.Label(parent, text="", bg=BG, fg=MUTED, font=FONT_HINT_T, wraplength=800, justify='center')
+        self._lbl_prompt.pack(pady=(5, 0))
 
         bottom = tk.Frame(parent, bg=BG)
-        bottom.pack(pady=(4, 12))
+        bottom.pack(pady=(10, 30))
 
         self._lbl_msg = tk.Label(bottom, text="", bg=BG, fg=RED, font=FONT_UI_B)
-        self._lbl_msg.pack(pady=(0, 6))
+        self._lbl_msg.pack(pady=(0, 10))
 
         numpad = tk.Frame(bottom, bg=BG)
         numpad.pack()
@@ -668,9 +677,9 @@ class App(tk.Tk):
                 else: bg_c, fg_c = WHITE, TEXT
 
                 btn = tk.Button(parent, text=label, bg=bg_c, fg=fg_c, font=FONT_PAD, relief='solid', bd=1,
-                                cursor='hand2', width=3, highlightbackground=BORDER2, highlightthickness=1,
+                                cursor='hand2', width=4, highlightbackground=BORDER2, highlightthickness=1,
                                 command=lambda l=label: self._numpad_press(l))
-                btn.grid(row=ri, column=ci, padx=4, pady=4, ipadx=4, ipady=6)
+                btn.grid(row=ri, column=ci, padx=8, pady=8, ipadx=10, ipady=10)
 
     def _numpad_press(self, label):
         if label == '⌫':
@@ -682,33 +691,33 @@ class App(tk.Tk):
 
     def _build_right(self, parent):
         p = tk.Frame(parent, bg=WHITE)
-        p.pack(fill='both', expand=True, padx=10, pady=14)
-        tk.Label(p, text="АЛГОРИТМ", bg=WHITE, fg=MUTED, font=("Segoe UI", 10, "bold")).pack(anchor='w', pady=(0,6))
+        p.pack(fill='both', expand=True, padx=20, pady=20)
+        tk.Label(p, text="АЛГОРИТМ", bg=WHITE, fg=MUTED, font=("Segoe UI", 14, "bold")).pack(anchor='w', pady=(0,10))
         self._rule_frames = {}
         rules = {
-            '÷': ("Ділення у стовпчик", "1. Зробіть дільник цілим.\n2. Беремо цифри зліва.\n3. Скільки разів ділиться?\n4. Кома після цілої частини діленого.", "12,6 ÷ 4 = 3,15"),
-            '×': ("Множення у стовпчик", "1. Рахуємо як цілі.\n2. Зсув на 1 вліво кожен рядок.\n3. Складаємо рядки.\n4. Кома = сума знаків.", "2,3×1,4 = 23×14 = 322 → 3,22"),
-            '+': ("Додавання у стовпчик", "1. Зрівняйте знаки (додайте 0).\n2. Складаємо справа наліво.\n3. Перенос якщо ≥ 10.", "3,70+1,45 = 5,15"),
-            '−': ("Віднімання у стовпчик", "1. Зрівняйте знаки (додайте 0).\n2. Віднімаємо справа наліво.\n3. Позика якщо розряд < 0.", "5,30−2,74 = 2,56"),
+            '÷': ("Ділення", "1. Зробіть дільник цілим.\n2. Беремо цифри зліва.\n3. Скільки разів ділиться?\n4. Кома після цілої частини діленого.", "12,6 ÷ 4 = 3,15"),
+            '×': ("Множення", "1. Рахуємо як цілі.\n2. Зсув на 1 вліво кожен рядок.\n3. Складаємо рядки.\n4. Кома = сума знаків.", "2,3×1,4 = 3,22"),
+            '+': ("Додавання", "1. Зрівняйте знаки (додайте 0).\n2. Складаємо справа наліво.\n3. Перенос якщо ≥ 10.", "3,70+1,45 = 5,15"),
+            '−': ("Віднімання", "1. Зрівняйте знаки (додайте 0).\n2. Віднімаємо справа наліво.\n3. Позика якщо розряд < 0.", "5,30−2,74 = 2,56"),
         }
         for op, (title, text, example) in rules.items():
             f = tk.Frame(p, bg=WHITE)
-            tk.Label(f, text=title, bg=WHITE, fg=TEXT, font=("Segoe UI", 11, "bold")).pack(anchor='w')
-            tk.Label(f, text=text, bg=WHITE, fg=TEXT, font=("Segoe UI", 10), justify='left', wraplength=185).pack(anchor='w', pady=(4,0))
+            tk.Label(f, text=title, bg=WHITE, fg=TEXT, font=("Segoe UI", 16, "bold")).pack(anchor='w')
+            tk.Label(f, text=text, bg=WHITE, fg=TEXT, font=("Segoe UI", 14), justify='left', wraplength=220).pack(anchor='w', pady=(5,0))
             self._rule_frames[op] = f
 
-        tk.Frame(p, bg=BORDER, height=1).pack(fill='x', pady=10)
-        tk.Label(p, text="ПРОГРЕС", bg=WHITE, fg=MUTED, font=("Segoe UI", 10, "bold")).pack(anchor='w', pady=(0,4))
-        self._prog_lbl = tk.Label(p, text="0%", bg=WHITE, fg=MUTED, font=FONT_SMALL)
+        tk.Frame(p, bg=BORDER, height=2).pack(fill='x', pady=20)
+        tk.Label(p, text="ПРОГРЕС", bg=WHITE, fg=MUTED, font=("Segoe UI", 14, "bold")).pack(anchor='w', pady=(0,5))
+        self._prog_lbl = tk.Label(p, text="0%", bg=WHITE, fg=MUTED, font=FONT_UI)
         self._prog_lbl.pack(anchor='e')
-        prog_outer = tk.Frame(p, bg=BORDER, height=8)
+        prog_outer = tk.Frame(p, bg=BORDER, height=12)
         prog_outer.pack(fill='x')
-        self._prog_inner = tk.Frame(prog_outer, bg=ACC, height=8)
+        self._prog_inner = tk.Frame(prog_outer, bg=ACC, height=12)
         self._prog_inner.place(x=0, y=0, relheight=1, relwidth=0)
 
-        tk.Frame(p, bg=BORDER, height=1).pack(fill='x', pady=10)
+        tk.Frame(p, bg=BORDER, height=2).pack(fill='x', pady=20)
         tk.Button(p, text="💡 Підказка", bg=WHITE, fg=MUTED, font=FONT_UI_B, relief='flat', bd=0, cursor='hand2',
-                  padx=12, pady=8, highlightbackground=BORDER2, highlightthickness=1, command=self._give_hint).pack(fill='x')
+                  padx=15, pady=15, highlightbackground=BORDER2, highlightthickness=1, command=self._give_hint).pack(fill='x')
 
         self._show_rule('÷')
 
@@ -783,7 +792,7 @@ class App(tk.Tk):
         total_w = n_cols * (CELL_W + GAP)
 
         cw, ch = c.winfo_width() or 600, c.winfo_height() or 400
-        ox, oy = max(16, (cw - total_w) // 2), max(16, (ch - total_h) // 2)
+        ox, oy = max(30, (cw - total_w) // 2), max(30, (ch - total_h) // 2)
 
         y = oy
         for r, row in enumerate(self.matrix):
@@ -805,19 +814,24 @@ class App(tk.Tk):
         t = cell.ctype
         if t == EMPTY: return
         if t == LINE:
-            c.create_line(x, y + h//2, x + w, y + h//2, fill=BORDER2, width=2)
+            c.create_line(x, y + h//2, x + w, y + h//2, fill=BORDER2, width=3)
             return
         if t == VLINE:
-            c.create_line(x + w//2, y - GAP, x + w//2, y + h + GAP, fill=BORDER2, width=2)
+            c.create_line(x + w//2, y - GAP, x + w//2, y + h + GAP, fill=BORDER2, width=3)
             return
 
         st = cell.state
+        bg_c, br_c, fg_c = WHITE, BORDER, TEXT
+        width_c = 1
+        
         if t in (GIVEN, OP_SYM):
             if t == OP_SYM: bg_c, br_c, fg_c = BG, BG, OP_COLORS[cell.value][0] if cell.value in OP_COLORS else MUTED
             else: bg_c, br_c, fg_c = GIVEN_BG, BORDER, TEXT
         elif t == INPUT:
             if   st == 'idle':       bg_c, br_c, fg_c = WHITE,    BORDER,  WHITE
-            elif st == 'active':     bg_c, br_c, fg_c = ACC_BG,   ACC,     ACC
+            elif st == 'active':     
+                bg_c, br_c, fg_c = ACC_BG,   ACC_BORDER,     ACC
+                width_c = 4  # Thick border for active
             elif st == 'ok':         bg_c, br_c, fg_c = OK_BG,    GREEN,   OK_FG
             elif st == 'error':      bg_c, br_c, fg_c = ERR_BG,   RED,     ERR_FG
             elif st == 'hint_shown': bg_c, br_c, fg_c = HINT_BG,  YELLOW,  HINT_FG
@@ -826,8 +840,9 @@ class App(tk.Tk):
             bg_c, br_c, fg_c = WHITE, BORDER, TEXT
 
         if t != OP_SYM:
-            r_c = 5 if t == INPUT else 3
-            c.create_polygon(x+r_c,y, x+w-r_c,y, x+w,y, x+w,y+r_c, x+w,y+h-r_c, x+w,y+h, x+w-r_c,y+h, x+r_c,y+h, x,y+h, x,y+h-r_c, x,y+r_c, x,y, smooth=True, fill=bg_c, outline=br_c, width=1)
+            r_c = 8 if t == INPUT else 4
+            c.create_polygon(x+r_c,y, x+w-r_c,y, x+w,y, x+w,y+r_c, x+w,y+h-r_c, x+w,y+h, x+w-r_c,y+h, x+r_c,y+h, x,y+h, x,y+h-r_c, x,y+r_c, x,y, 
+                             smooth=True, fill=bg_c, outline=br_c, width=width_c)
 
         tv = ''
         if t in (GIVEN, OP_SYM): tv = cell.value
