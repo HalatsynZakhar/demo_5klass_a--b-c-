@@ -126,8 +126,8 @@ class ExpressionsApp(tk.Tk):
         # Example calculation
         ex_f = tk.Frame(f, bg=YELLOW_BG, bd=1, relief="solid", padx=20, pady=15)
         ex_f.pack(fill="x", pady=20)
-        tk.Label(ex_f, text="Приклад: Знайти значення 7 + b, якщо b = 5", font=("Segoe UI", 18, "bold"), bg=YELLOW_BG).pack(anchor="w")
-        tk.Label(ex_f, text="Якщо b = 5, то 7 + b = 7 + 5 = 12", font=("Consolas", 20), bg=YELLOW_BG).pack(anchor="w")
+        tk.Label(ex_f, text="Приклад: Знайти значення p + 18, якщо p = 27", font=("Segoe UI", 18, "bold"), bg=YELLOW_BG).pack(anchor="w")
+        tk.Label(ex_f, text="Якщо p = 27, то p + 18 = 27 + 18 = 45", font=("Consolas", 20), bg=YELLOW_BG).pack(anchor="w")
 
     # ══════════════════════════════════════════════════════════════════
     #  SCENE 2: FORMULAS
@@ -197,10 +197,10 @@ class ExpressionsApp(tk.Tk):
         tk.Label(f, text="Приклади завдань", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20))
         
         tasks = [
-            ("443. Було b кг бананів, продали 215 кг.", "Вираз: b - 215"),
-            ("444. 30 дітей зробили по x фігурок.", "Вираз: 30 ∙ x"),
-            ("447. Знайти (a + b) ∙ c, якщо a=113, b=227, c=13", "Обчислення: (113 + 227) ∙ 13 = 340 ∙ 13 = 4420"),
-            ("459. Їхав a год (70 км/год) та b год (80 км/год)", "Формула: s = 70a + 80b")
+            ("1) На складі було b кг товару, відвантажили 215 кг. Скільки залишилось?", "Вираз: b - 215"),
+            ("2) У класі n учнів, кожен зробив по x фігурок. Скільки всього фігурок?", "Вираз: n ∙ x"),
+            ("3) Два числа a і b спочатку додали, а потім результат помножили на c.", "Вираз: (a + b) ∙ c"),
+            ("4) Авто їхало a год зі швидкістю v₁, а потім b год зі швидкістю v₂. Яка відстань?", "Формула: s = v₁a + v₂b")
         ]
         
         for q, ans in tasks:
@@ -294,13 +294,13 @@ class ExpressionsApp(tk.Tk):
         t = random.choice(types)
         
         if t == "simple_add":
-            b = random.randint(10, 100)
-            val = random.randint(5, 50)
-            self.task = {"ans": b + val, "text": f"Обчисли 7 + b, якщо b = {val}" if b==7 else f"Обчисли {b} + x, якщо x = {val}"}
+            p = random.randint(10, 90)
+            c = random.randint(5, 50)
+            self.task = {"ans": p + c, "text": f"Обчисли p + {c}, якщо p = {p}"}
         elif t == "simple_sub":
             m = random.randint(200, 500)
-            val = random.randint(50, 150)
-            self.task = {"ans": m - val, "text": f"Обчисли m - {val}, якщо m = {m}"}
+            c = random.randint(50, 150)
+            self.task = {"ans": m - c, "text": f"Обчисли m - {c}, якщо m = {m}"}
         elif t == "formula_y":
             x = random.randint(2, 10)
             # y = 3x - 2
