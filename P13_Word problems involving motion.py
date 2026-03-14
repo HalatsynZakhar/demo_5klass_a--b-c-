@@ -330,10 +330,95 @@ class MotionProblemsApp(tk.Tk):
         )
         tk.Label(hint_box, text=hints, font=("Segoe UI", 12), bg="#eff6ff", justify="left").pack()
 
+        self.task_hint_shown = False
+        self.btn_task_hint = tk.Button(
+            rpad,
+            text="Підказка до задачі (схема)",
+            font=("Segoe UI", 14, "bold"),
+            bg=BTN_NUM,
+            fg=TEXT,
+            relief="flat",
+            padx=15,
+            pady=8,
+            command=self.toggle_task_hint,
+        )
+        self.btn_task_hint.pack(fill="x", pady=(10, 0))
+
+        self.task_hint_frame = tk.Frame(rpad, bg=WHITE, bd=1, relief="solid", padx=12, pady=12)
+        self.task_hint_title = tk.Label(self.task_hint_frame, text="", font=("Segoe UI", 14, "bold"), bg=WHITE, fg=INDIGO)
+        self.task_hint_title.pack(anchor="w")
+        self.task_hint_formula = tk.Label(self.task_hint_frame, text="", font=("Consolas", 14, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10, pady=5)
+        self.task_hint_formula.pack(anchor="w", pady=(8, 8))
+        self.task_hint_canvas = tk.Canvas(self.task_hint_frame, bg=WHITE, height=110, highlightthickness=0)
+        self.task_hint_canvas.pack(fill="x")
+        self.task_hint_desc = tk.Label(self.task_hint_frame, text="", font=("Segoe UI", 11), bg=WHITE, fg=MUTED, justify="left", wraplength=RW-80)
+        self.task_hint_desc.pack(anchor="w", pady=(8, 0))
+
         self.lbl_score = tk.Label(rpad, text="Рахунок: 0 / 0", font=("Segoe UI", 24, "bold"), bg=PANEL, fg=ACCENT)
         self.lbl_score.pack(side="bottom", pady=40)
 
         self.next_task()
+
+    def toggle_task_hint(self):
+        self.task_hint_shown = not self.task_hint_shown
+        if self.task_hint_shown:
+            self.task_hint_frame.pack(fill="x", pady=(10, 0))
+            self.btn_task_hint.config(text="Сховати підказку (схема)")
+        else:
+            self.task_hint_frame.pack_forget()
+            self.btn_task_hint.config(text="Підказка до задачі (схема)")
+        self._render_task_hint()
+
+    def _render_task_hint(self):
+        if not getattr(self, "task_hint_shown", False):
+            return
+        if not getattr(self, "task", None):
+            return
+
+        kind = self.task.get("kind")
+        title = self.task.get("hint_title", "")
+        formula = self.task.get("hint_formula", "")
+        desc = self.task.get("hint_desc", "")
+
+        self.task_hint_title.config(text=title)
+        self.task_hint_formula.config(text=formula)
+        self.task_hint_desc.config(text=desc)
+
+        cv = self.task_hint_canvas
+        cv.delete("all")
+        w = max(320, int(cv.winfo_width() or 320))
+        y = 60
+        cv.create_line(20, y, w - 20, y, fill=MUTED, dash=(4, 4))
+
+        if kind == "simple":
+            cv.create_oval(40, y - 10, 60, y + 10, fill=ACCENT, outline="")
+            cv.create_line(65, y, 180, y, arrow="last", width=4, fill=ACCENT)
+            cv.create_text(120, y - 20, text="V", font=("Segoe UI", 12, "bold"), fill=ACCENT)
+            cv.create_text(220, y + 20, text="t", font=("Segoe UI", 12, "bold"), fill=MUTED)
+        elif kind == "river_down":
+            cv.create_rectangle(20, y - 18, w - 20, y + 18, fill="#e0f2fe", outline="")
+            cv.create_line(40, y, 120, y, arrow="last", width=3, fill=SKY)
+            cv.create_polygon(170, y - 12, 220, y - 12, 210, y + 12, 180, y + 12, fill=ORANGE, outline="")
+            cv.create_line(225, y, 270, y, arrow="last", width=4, fill=ORANGE)
+        elif kind == "river_up":
+            cv.create_rectangle(20, y - 18, w - 20, y + 18, fill="#e0f2fe", outline="")
+            cv.create_line(40, y, 120, y, arrow="last", width=3, fill=SKY)
+            cv.create_polygon(220, y - 12, 170, y - 12, 180, y + 12, 210, y + 12, fill=ORANGE, outline="")
+            cv.create_line(165, y, 120, y, arrow="last", width=4, fill=ORANGE)
+        elif kind == "meeting":
+            cv.create_oval(50, y - 10, 70, y + 10, fill=ACCENT, outline="")
+            cv.create_line(75, y, 140, y, arrow="last", width=3, fill=ACCENT)
+            cv.create_oval(w - 70, y - 10, w - 50, y + 10, fill=ORANGE, outline="")
+            cv.create_line(w - 75, y, w - 140, y, arrow="last", width=3, fill=ORANGE)
+        elif kind == "opposite":
+            cv.create_oval(w // 2 - 8, y - 8, w // 2 + 8, y + 8, fill=MUTED, outline="")
+            cv.create_line(w // 2 - 15, y, w // 2 - 90, y, arrow="last", width=3, fill=ACCENT)
+            cv.create_line(w // 2 + 15, y, w // 2 + 90, y, arrow="last", width=3, fill=ORANGE)
+        elif kind == "chase":
+            cv.create_oval(50, y - 10, 70, y + 10, fill=ACCENT, outline="")
+            cv.create_line(75, y, 170, y, arrow="last", width=4, fill=ACCENT)
+            cv.create_oval(190, y - 10, 210, y + 10, fill=ORANGE, outline="")
+            cv.create_line(215, y, 255, y, arrow="last", width=2, fill=ORANGE)
 
     def _key_press(self, ch):
         if self.phase != "answer": return
@@ -360,6 +445,10 @@ class MotionProblemsApp(tk.Tk):
             time_val = random.randint(2, 6)
             ans = v * time_val
             text = f"Автомобіль рухався {time_val} год зі швидкістю {v} км/год. Яку відстань він подолав?"
+            kind = "simple"
+            hint_title = "Тип: один об'єкт"
+            hint_formula = "s = V ∙ t"
+            hint_desc = "Коли відома швидкість V і час t, відстань s знаходимо множенням."
         elif t == "river":
             v_own = random.randint(15, 25)
             v_river = random.randint(2, 4)
@@ -367,30 +456,51 @@ class MotionProblemsApp(tk.Tk):
             if random.choice([True, False]): # Downstream
                 ans = (v_own + v_river) * time_val
                 text = f"Власна швидкість катера {v_own} км/год, а швидкість течії {v_river} км/год. Яку відстань пропливе катер за {time_val} год за течією?"
+                kind = "river_down"
+                hint_title = "Тип: рух по річці (за течією)"
+                hint_formula = "V = Vвлас. + Vтеч."
+                hint_desc = "За течією швидкість збільшується: додаємо швидкість течії. Далі s = V ∙ t."
             else: # Upstream
                 ans = (v_own - v_river) * time_val
                 text = f"Власна швидкість човна {v_own} км/год, а швидкість течії {v_river} км/год. Яку відстань пропливе човен за {time_val} год проти течії?"
+                kind = "river_up"
+                hint_title = "Тип: рух по річці (проти течії)"
+                hint_formula = "V = Vвлас. - Vтеч."
+                hint_desc = "Проти течії швидкість зменшується: віднімаємо швидкість течії. Далі s = V ∙ t."
         elif t == "meeting":
             v1 = random.randint(10, 15)
             v2 = random.randint(10, 15)
             time_val = random.randint(2, 4)
             ans = (v1 + v2) * time_val
             text = f"Два велосипедисти виїхали назустріч один одному. Швидкість одного {v1} км/год, іншого — {v2} км/год. Яка відстань була між ними спочатку, якщо вони зустрілися через {time_val} год?"
+            kind = "meeting"
+            hint_title = "Тип: рух назустріч"
+            hint_formula = "Vзбл. = V₁ + V₂"
+            hint_desc = "Коли рухаються назустріч, за 1 годину відстань зменшується на V₁ + V₂. Тоді s = (V₁ + V₂) ∙ t."
         elif t == "opposite":
             v1 = random.randint(60, 80)
             v2 = random.randint(60, 80)
             time_val = random.randint(2, 3)
             ans = (v1 + v2) * time_val
             text = f"Два автомобілі виїхали з однієї точки у протилежних напрямках. Швидкість одного {v1} км/год, іншого — {v2} км/год. Яка відстань буде між ними через {time_val} год?"
+            kind = "opposite"
+            hint_title = "Тип: у протилежні напрямки"
+            hint_formula = "Vвід. = V₁ + V₂"
+            hint_desc = "Коли роз'їжджаються у різні боки, за 1 годину відстань збільшується на V₁ + V₂. Тоді s = (V₁ + V₂) ∙ t."
         else: # chase
             v_slow = random.randint(5, 8)
             v_fast = v_slow + random.randint(2, 5)
             time_val = random.randint(2, 4)
             ans = (v_fast - v_slow) * time_val
             text = f"Хлопчик зі швидкістю {v_fast} км/год наздоганяє дівчинку, яка йде попереду зі швидкістю {v_slow} км/год. На скільки кілометрів скоротиться відстань між ними через {time_val} год?"
+            kind = "chase"
+            hint_title = "Тип: рух навздогін"
+            hint_formula = "Vзбл. = V₁ - V₂"
+            hint_desc = "Коли наздоганяємо в одному напрямку, за 1 годину відстань зменшується на різницю швидкостей. Тоді sзбл. = (V₁ - V₂) ∙ t."
 
-        self.task = {"ans": ans, "text": text}
+        self.task = {"ans": ans, "text": text, "kind": kind, "hint_title": hint_title, "hint_formula": hint_formula, "hint_desc": hint_desc}
         self.task_text.config(text=text)
+        self._render_task_hint()
 
     def check_answer(self):
         if self.phase != "answer" or not self.user_input: return
