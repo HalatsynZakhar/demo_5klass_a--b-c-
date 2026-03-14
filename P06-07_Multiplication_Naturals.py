@@ -77,7 +77,8 @@ class MultiplicationApp(tk.Tk):
         btn_font = ("Segoe UI", 16, "bold")
         tk.Button(nav, text="1. Основні властивості", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_intro).pack(side="left", padx=20)
         tk.Button(nav, text="2. Розподільна властивість", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_distributive).pack(side="left", padx=20)
-        tk.Button(nav, text="3. Тренажер: Зручні обчислення", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_rational_trainer).pack(side="left", padx=20)
+        tk.Button(nav, text="3. Візуалізація закону", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_distributive_viz).pack(side="left", padx=20)
+        tk.Button(nav, text="4. Тренажер: Зручні обчислення", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_rational_trainer).pack(side="left", padx=20)
 
         # ── Main Content Area
         self.main_area = tk.Frame(self, bg=BG)
@@ -143,7 +144,102 @@ class MultiplicationApp(tk.Tk):
             tk.Label(p_frame, text=f"Приклад: {example}", font=("Segoe UI", 18, "italic"), bg=WHITE, fg=MUTED).pack(anchor="w")
 
     # ══════════════════════════════════════════════════════════════════
-    #  SCENE 3: RATIONAL MULTIPLICATION TRAINER
+    #  SCENE 3: DISTRIBUTIVE VIZ (FROM P11)
+    # ══════════════════════════════════════════════════════════════════
+    def show_distributive_viz(self):
+        self.clear_main()
+        
+        # Random parameters for visualization
+        self.dist_a = random.randint(2, 4) # Rows
+        self.dist_b = random.randint(2, 5) # Blue cols
+        self.dist_c = random.randint(2, 5) # Red cols
+        
+        f = tk.Frame(self.main_area, bg=BG)
+        f.pack(expand=True, fill="both", padx=40, pady=20)
+        
+        tk.Label(f, text="Візуалізація розподільного закону", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack()
+        tk.Label(f, text=f"{self.dist_a} × ({self.dist_b} + {self.dist_c})", font=("Consolas", 36, "bold"), bg=BG, fg=ACCENT).pack(pady=10)
+        
+        self.canvas = tk.Canvas(f, bg="white", height=400, bd=2, relief="ridge")
+        self.canvas.pack(fill="both", expand=True, padx=20)
+        
+        self.lbl_expl = tk.Label(f, text=f"{self.dist_a} ряди по {self.dist_b} синіх і {self.dist_c} червоних блоків", font=("Segoe UI", 18), bg=BG, fg=TEXT)
+        self.lbl_expl.pack(pady=10)
+        
+        btn_frame = tk.Frame(f, bg=BG)
+        btn_frame.pack(pady=10)
+        
+        tk.Button(btn_frame, text=f"Спосіб 1: {self.dist_a} × ({self.dist_b} + {self.dist_c})", font=("Segoe UI", 14, "bold"), bg=ACCENT, fg=WHITE, 
+                  command=self.dist_method1, padx=20).pack(side="left", padx=10)
+        
+        tk.Button(btn_frame, text=f"Спосіб 2: {self.dist_a} × {self.dist_b} + {self.dist_a} × {self.dist_c}", font=("Segoe UI", 14, "bold"), bg=ORANGE, fg=WHITE, 
+                  command=self.dist_method2, padx=20).pack(side="left", padx=10)
+
+        tk.Button(btn_frame, text="🎲 Нові числа", font=("Segoe UI", 14, "bold"), bg=GREEN, fg=WHITE, 
+                  command=self.show_distributive_viz, padx=20).pack(side="left", padx=10)
+
+        self.reset_blocks()
+
+    def reset_blocks(self):
+        self.canvas.delete("all")
+        self.blocks_blue = []
+        self.blocks_red = []
+        
+        size = 50
+        gap = 8
+        total_w = (self.dist_b + self.dist_c) * (size + gap) + 40
+        start_x = (self.SW - total_w) // 2 - 100 # Adjust for sidebar if needed
+        start_y = 50
+        
+        for r in range(self.dist_a):
+            y = start_y + r * (size + gap)
+            for c in range(self.dist_b):
+                x = start_x + c * (size + gap)
+                rect = self.canvas.create_rectangle(x, y, x+size, y+size, fill=ACCENT, outline=WHITE, width=2)
+                self.blocks_blue.append({'id': rect, 'x': x, 'y': y, 'row': r, 'color': ACCENT})
+            
+            for c in range(self.dist_c):
+                x = start_x + (self.dist_b * (size + gap)) + 40 + c * (size + gap)
+                rect = self.canvas.create_rectangle(x, y, x+size, y+size, fill=RED, outline=WHITE, width=2)
+                self.blocks_red.append({'id': rect, 'x': x, 'y': y, 'row': r, 'color': RED})
+
+    def dist_method1(self):
+        self.reset_blocks()
+        sum_bc = self.dist_b + self.dist_c
+        res = self.dist_a * sum_bc
+        self.lbl_expl.config(text=f"Спосіб 1: Спочатку додаємо в дужках: {self.dist_b} + {self.dist_c} = {sum_bc} в ряду.\nПотім множимо на кількість рядів: {self.dist_a} × {sum_bc} = {res}.")
+        
+        # Animation: Slide red blocks to the left
+        target_dx = -40
+        steps = 20
+        step_dx = target_dx / steps
+        def anim(step=0):
+            if step < steps:
+                for b in self.blocks_red:
+                    self.canvas.move(b['id'], step_dx, 0)
+                self.after(20, lambda: anim(step+1))
+        anim()
+
+    def dist_method2(self):
+        self.reset_blocks()
+        prod1 = self.dist_a * self.dist_b
+        prod2 = self.dist_a * self.dist_c
+        total = prod1 + prod2
+        self.lbl_expl.config(text=f"Спосіб 2: Множимо групи окремо: {self.dist_a} × {self.dist_b} синіх та {self.dist_a} × {self.dist_c} червоних.\n{prod1} + {prod2} = {total}.")
+        
+        # Animation: Move red blocks further right
+        target_dx = 40
+        steps = 20
+        step_dx = target_dx / steps
+        def anim(step=0):
+            if step < steps:
+                for b in self.blocks_red:
+                    self.canvas.move(b['id'], step_dx, 0)
+                self.after(20, lambda: anim(step+1))
+        anim()
+
+    # ══════════════════════════════════════════════════════════════════
+    #  SCENE 4: RATIONAL MULTIPLICATION TRAINER
     # ══════════════════════════════════════════════════════════════════
     def show_rational_trainer(self):
         self.clear_main()
