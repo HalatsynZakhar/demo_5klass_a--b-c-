@@ -148,6 +148,10 @@ class App(tk.Tk):
         self._setup_styles()
         self._build_ui()
         
+        # Ініціалізація елементів керування
+        self._digit_labels = []
+        self._set_places(self.places)
+        
         # Запуск першого оновлення
         self.after(100, self._full_refresh)
 
@@ -384,12 +388,39 @@ class App(tk.Tk):
             tk.Label(row, text=PLACE_MULTS[i], bg=SRF2, fg=TEXT3, font=("Segoe UI", 12)).pack(side="right", padx=10)
 
     def _change_digit(self, idx, delta):
-        # Якщо ми в режимі порівняння і редагуємо число B
-        # Але тут редагується тільки основне число (А)
-        val = self.digits[idx] + delta
-        if 0 <= val <= 9:
-            self.digits[idx] = val
-            self._full_refresh()
+        # Перетворення в ціле число на основі максимальної точності (5 знаків)
+        # precision factor = 100,000
+        factor = 100000
+        
+        current_val = self.digits[0] * factor
+        for i in range(1, 6):
+            w = 10**(5-i)
+            current_val += self.digits[i] * w
+        
+        # Визначаємо вагу зміни
+        if idx == 0:
+            change = delta * factor
+        else:
+            change = delta * (10**(5-idx))
+            
+        new_val = current_val + change
+        
+        if new_val < 0: return # Не дозволяємо від'ємні числа
+        if new_val > 4 * factor: return # Обмеження до 4.0
+        
+        # Конвертуємо назад у цифри
+        new_int = new_val // factor
+        rem = new_val % factor
+        
+        self.digits[0] = new_int
+        
+        for i in range(1, 6):
+            w = 10**(5-i)
+            d = rem // w
+            self.digits[i] = d
+            rem %= w
+            
+        self._full_refresh()
 
     def _full_refresh(self):
         # 1. Оновлення дисплею числа
@@ -447,10 +478,34 @@ class App(tk.Tk):
         self._redraw()
 
     def _change_b(self, idx, delta):
-        val = self.cmp_digits_b[idx] + delta
-        if 0 <= val <= 9:
-            self.cmp_digits_b[idx] = val
-            self._redraw()
+        # Аналогічно, перетворення B в ціле число
+        factor = 100000
+        current_val = self.cmp_digits_b[0] * factor
+        for i in range(1, 6):
+            w = 10**(5-i)
+            current_val += self.cmp_digits_b[i] * w
+            
+        if idx == 0:
+            change = delta * factor
+        else:
+            change = delta * (10**(5-idx))
+            
+        new_val = current_val + change
+        if new_val < 0: return
+        if new_val > 4 * factor: return
+
+        # Конвертуємо назад
+        new_int = new_val // factor
+        rem = new_val % factor
+        self.cmp_digits_b[0] = new_int
+        
+        for i in range(1, 6):
+            w = 10**(5-i)
+            d = rem // w
+            self.cmp_digits_b[i] = d
+            rem %= w
+            
+        self._redraw()
 
     # ══ ВІЗУАЛІЗАЦІЯ ══════════════════════════════════════════════
     def _redraw(self):
@@ -538,8 +593,8 @@ class App(tk.Tk):
         
         # Скільки квадратів малювати?
         # Якщо число 2.35 -> Малюємо 2 повних + 1 частковий
-        total_grids = int_part + 1
-        if total_grids > 4: total_grids = 4 # Обмеження для екрану
+        total_grids = int_part + 1 if frac_part > 0 or int_part == 0 else int_part
+        if total_grids == 0: total_grids = 1
         
         gs = gridspec.GridSpec(1, total_grids, figure=self.fig)
         
@@ -555,7 +610,8 @@ class App(tk.Tk):
                 color = C_BLUE
             elif i == int_part:
                 fill_count = int(round(frac_part * 100))
-                title = f"Дробова: {fill_count}/100"
+                # Використовуємо LaTeX для вертикального дробу
+                title = f"Дробова: $\\frac{{{fill_count}}}{{100}}$"
                 color = C_CYAN
             else:
                 fill_count = 0
@@ -580,54 +636,65 @@ class App(tk.Tk):
     # ── 3. ТОРТ (Кругова діаграма) ────────────────────────────────
     def _draw_pie(self):
         val = digits_to_val(self.digits)
-        frac = val - int(val)
+        int_part = int(val)
+        frac = val - int_part
         
-        ax = self.fig.add_subplot(111)
-        ax.set_aspect("equal")
-        ax.axis("off")
+        # Визначаємо скільки "тортів" нам потрібно
+        # Якщо є дробова частина, то int_part + 1, інакше int_part
+        total_pies = int_part + 1 if frac > 0 or int_part == 0 else int_part
+        if total_pies == 0: total_pies = 1 # Мінімум один для 0
         
-        # Коло
-        radius = 1.0
+        gs = gridspec.GridSpec(1, total_pies, figure=self.fig)
         
-        if frac > 0:
-            # Сектор заповнення
-            # Matplotlib wedge: theta1, theta2 (degrees)
-            # 0 degrees is right (3 o'clock). We want to start at top (12 o'clock) -> 90 deg
-            # And go clockwise -> negative degrees
-            angle = 360 * frac
+        for i in range(total_pies):
+            ax = self.fig.add_subplot(gs[i])
+            ax.set_aspect("equal")
+            ax.axis("off")
             
-            # Фон
-            ax.add_patch(Circle((0,0), radius, facecolor="white", edgecolor=BORDER))
+            radius = 1.0
             
-            # Сектор
-            w = Wedge((0,0), radius, 90 - angle, 90, facecolor=C_BLUE, edgecolor="white")
-            ax.add_patch(w)
+            # Фон (білий круг з рамкою)
+            ax.add_patch(Circle((0,0), radius, facecolor="white", edgecolor=BORDER, lw=2))
             
-            ax.text(0, -1.3, f"{fmt(frac, self.places)}", ha="center", fontsize=30, fontweight="bold", color=C_BLUE)
-            
-        else:
-            ax.add_patch(Circle((0,0), radius, facecolor="white", edgecolor=BORDER))
-            ax.text(0, 0, "0", ha="center", va="center", fontsize=40, color=TEXT3)
+            # Логіка заповнення
+            if i < int_part:
+                # Повний торт
+                ax.add_patch(Circle((0,0), radius, facecolor=C_BLUE, edgecolor="white"))
+                ax.text(0, -1.3, "1 ціла", ha="center", fontsize=20, color=TEXT2)
+            else:
+                # Дробова частина
+                if frac > 0:
+                    angle = 360 * frac
+                    w = Wedge((0,0), radius, 90 - angle, 90, facecolor=C_CYAN, edgecolor="white")
+                    ax.add_patch(w)
+                    ax.text(0, -1.3, f"{fmt(frac, self.places)}", ha="center", fontsize=24, fontweight="bold", color=C_CYAN)
+                    
+                    # Підказка про дріб
+                    self._draw_fraction_hint(ax, frac)
+                else:
+                    ax.text(0, 0, "0", ha="center", va="center", fontsize=40, color=TEXT3)
 
-        # Додамо підказки про поширені дроби
+            ax.set_xlim(-1.2, 1.2)
+            ax.set_ylim(-1.5, 1.2)
+
+    def _draw_fraction_hint(self, ax, frac):
         common_fractions = {
-            0.5: "1/2", 0.25: "1/4", 0.75: "3/4", 
-            0.2: "1/5", 0.4: "2/5", 0.6: "3/5", 0.8: "4/5",
-            0.1: "1/10"
+            0.5: (1, 2), 0.25: (1, 4), 0.75: (3, 4), 
+            0.2: (1, 5), 0.4: (2, 5), 0.6: (3, 5), 0.8: (4, 5),
+            0.1: (1, 10)
         }
         
         closest = None
         min_diff = 0.001
-        for v, s in common_fractions.items():
+        for v, (n, d) in common_fractions.items():
             if abs(v - frac) < min_diff:
-                closest = s
+                closest = (n, d)
                 break
         
         if closest:
-            ax.text(1.5, 0, f"Це {closest}", fontsize=24, color=C_ORANGE, fontweight="bold")
-
-        ax.set_xlim(-2, 2)
-        ax.set_ylim(-1.5, 1.5)
+            n, d = closest
+            # LaTeX для вертикального дробу
+            ax.text(0, 0, f"$\\frac{{{n}}}{{{d}}}$", ha="center", va="center", fontsize=36, color="white", fontweight="bold")
 
     # ── 4. РОЗРЯДИ (Таблиця) ──────────────────────────────────────
     def _draw_place(self):
@@ -657,29 +724,33 @@ class App(tk.Tk):
                     color=col, fontsize=60, fontweight="bold")
             
             # Значення (x0.1)
-            ax.text(0.5, 0.2, PLACE_MULTS[i], ha="center", color=TEXT2, fontsize=14)
+            ax.text(0.5, 0.2, PLACE_MULTS[i], ha="center", color=TEXT2, fontsize=14, zorder=10)
             
             # Кома після цілих
             if i == 0:
-                ax.text(1.1, 0.3, ",", ha="center", fontsize=80, fontweight="bold", transform=ax.transAxes)
+                ax.text(1.1, 0.3, ",", ha="center", fontsize=80, fontweight="bold", transform=ax.transAxes, zorder=20)
 
     # ── 5. ПОРІВНЯННЯ ─────────────────────────────────────────────
     def _draw_cmp(self):
         val_a = digits_to_val(self.digits)
         val_b = digits_to_val(self.cmp_digits_b)
         
-        ax = self.fig.add_subplot(111)
-        ax.axis("off")
-        ax.set_xlim(0, 10)
-        ax.set_ylim(0, 10)
+        # Розбиваємо область на 2 частини: текст і лінія
+        gs = gridspec.GridSpec(2, 1, figure=self.fig, height_ratios=[1, 1], hspace=0.3)
+        
+        # --- Частина 1: Текст ---
+        ax1 = self.fig.add_subplot(gs[0])
+        ax1.axis("off")
+        ax1.set_xlim(0, 10)
+        ax1.set_ylim(0, 10)
         
         # Число А
-        ax.text(2.5, 6, "Число A", ha="center", color=TEXT3, fontsize=18)
-        ax.text(2.5, 5, fmt(val_a, self.places), ha="center", fontsize=50, color=C_BLUE, fontweight="bold")
+        ax1.text(2.5, 6, "Число A", ha="center", color=TEXT3, fontsize=18)
+        ax1.text(2.5, 5, fmt(val_a, self.places), ha="center", fontsize=50, color=C_BLUE, fontweight="bold")
         
         # Число B
-        ax.text(7.5, 6, "Число B", ha="center", color=TEXT3, fontsize=18)
-        ax.text(7.5, 5, fmt(val_b, self.places), ha="center", fontsize=50, color=C_GREEN, fontweight="bold")
+        ax1.text(7.5, 6, "Число B", ha="center", color=TEXT3, fontsize=18)
+        ax1.text(7.5, 5, fmt(val_b, self.places), ha="center", fontsize=50, color=C_GREEN, fontweight="bold")
         
         # Знак порівняння
         if val_a > val_b:
@@ -689,13 +760,71 @@ class App(tk.Tk):
         else:
             sym, col = "=", TEXT
             
-        ax.text(5, 5, sym, ha="center", va="center", fontsize=100, color=col)
+        ax1.text(5, 5, sym, ha="center", va="center", fontsize=100, color=col)
         
-        # Візуалізація різниці (проста лінія)
+        # Візуалізація різниці
         if val_a != val_b:
             diff = abs(val_a - val_b)
-            ax.text(5, 2, f"Різниця: {fmt(diff, 5).rstrip('0').rstrip(',')}", 
+            ax1.text(5, 2, f"Різниця: {fmt(diff, 5).rstrip('0').rstrip(',')}", 
                     ha="center", fontsize=24, color=TEXT2)
+
+        # --- Частина 2: Числова пряма ---
+        ax2 = self.fig.add_subplot(gs[1])
+        ax2.set_facecolor(BG)
+        ax2.axis("off")
+        
+        # Визначаємо межі графіка
+        vmin = min(val_a, val_b)
+        vmax = max(val_a, val_b)
+        
+        # Якщо числа рівні або дуже близькі
+        if vmax - vmin < 1e-9:
+            span = 1.0 # Дефолтний діапазон
+        else:
+            span = (vmax - vmin) * 2.0 # Додаємо відступи
+            
+        center = (vmin + vmax) / 2
+        start = center - span/2
+        end = center + span/2
+        
+        ax2.set_xlim(start, end)
+        ax2.set_ylim(-1, 1)
+        
+        # Крок сітки
+        step = 1.0
+        if span < 0.005: step = 0.0001
+        elif span < 0.05: step = 0.001
+        elif span < 0.5: step = 0.01
+        elif span < 5: step = 0.1
+        
+        # Малюємо поділки
+        t = math.floor(start / step) * step
+        while t <= end + step:
+            t_r = round(t, 6)
+            if start <= t_r <= end:
+                is_int = abs(t_r - round(t_r)) < 1e-9
+                hh = 0.3 if is_int else 0.15
+                col = TEXT if is_int else TEXT2
+                lw = 2 if is_int else 1
+                
+                ax2.plot([t_r, t_r], [-hh, hh], color=col, lw=lw)
+                
+                # Підписи тільки якщо не надто густо
+                if span / step < 20 or is_int:
+                    lbl = fmt(t_r, 5).rstrip("0").rstrip(",") if not is_int else str(int(t_r))
+                    ax2.text(t_r, -hh - 0.2, lbl, ha="center", va="top", color=col, fontsize=12)
+            t += step
+
+        # Головна лінія
+        ax2.axhline(0, color=TEXT2, lw=2)
+        
+        # Точка A
+        ax2.plot(val_a, 0, "o", color=C_BLUE, markersize=15, zorder=10, label="A")
+        ax2.text(val_a, 0.4, "A", ha="center", va="bottom", color=C_BLUE, fontsize=20, fontweight="bold")
+        
+        # Точка B
+        ax2.plot(val_b, 0, "o", color=C_GREEN, markersize=15, zorder=10, label="B")
+        ax2.text(val_b, -0.4, "B", ha="center", va="top", color=C_GREEN, fontsize=20, fontweight="bold")
 
     # ══ ПОДІЇ МИШІ ════════════════════════════════════════════════
     def _wheel(self, event):
