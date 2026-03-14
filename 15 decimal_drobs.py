@@ -72,7 +72,9 @@ def frac_str(val, precision=100000):
 
 def num_name(digits, places):
     int_p = digits[0]
-    dec_s = "".join(str(digits[i]) for i in range(1, places+2)).rstrip("0")
+    # Обмежуємо діапазон, щоб не вийти за межі списку digits
+    limit = min(places + 2, len(digits))
+    dec_s = "".join(str(digits[i]) for i in range(1, limit)).rstrip("0")
     parts = []
     if int_p:
         parts.append(f"{int_p} {'ціла' if int_p==1 else 'цілих'}")
