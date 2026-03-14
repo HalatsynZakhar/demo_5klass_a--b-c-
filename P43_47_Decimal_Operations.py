@@ -46,15 +46,15 @@ OP_COLORS = {'+': ('#14532d','#dcfce7'),
              '×': ('#3b0764','#f3e8ff'),
              '÷': ('#1e3a8a','#dbeafe')}
 
-CELL_W  = 70   # Bigger cells
-CELL_H  = 70
-CARRY_H = 25
-GAP     = 8
+CELL_W  = 40   # Scaled down further
+CELL_H  = 40
+CARRY_H = 15
+GAP     = 3
 
-FONT_TASK   = ("Segoe UI",    56, "bold")
-FONT_MONO   = ("Courier New", 36, "bold")
-FONT_MONO_S = ("Courier New", 24, "bold")
-FONT_MONO_XS= ("Courier New", 18, "bold")
+FONT_TASK   = ("Segoe UI",    40, "bold")
+FONT_MONO   = ("Courier New", 22, "bold")
+FONT_MONO_S = ("Courier New", 16, "bold")
+FONT_MONO_XS= ("Courier New", 14, "bold")
 FONT_HDR    = ("Segoe UI",    24, "bold")
 FONT_UI_B   = ("Segoe UI",    16, "bold")
 FONT_UI     = ("Segoe UI",    16)
@@ -636,10 +636,10 @@ class App(tk.Tk):
 
     def _build_center(self, parent):
         task_frame = tk.Frame(parent, bg=WHITE, highlightbackground=BORDER2, highlightthickness=1)
-        task_frame.pack(fill='x', padx=30, pady=(30, 10))
+        task_frame.pack(fill='x', padx=30, pady=(15, 5))
 
         inner_task = tk.Frame(task_frame, bg=WHITE)
-        inner_task.pack(pady=20)
+        inner_task.pack(pady=10)
 
         self._lbl_task = tk.Label(inner_task, text="", bg=WHITE, fg=TEXT, font=FONT_TASK)
         self._lbl_task.pack(side='left')
@@ -648,20 +648,20 @@ class App(tk.Tk):
         self._lbl_step.pack(side='left', padx=(40, 0))
 
         canvas_frame = tk.Frame(parent, bg=BG)
-        canvas_frame.pack(fill='both', expand=True, padx=30, pady=10)
+        canvas_frame.pack(fill='both', expand=True, padx=30, pady=5)
 
         self._canvas = tk.Canvas(canvas_frame, bg=WHITE, highlightbackground=BORDER2, highlightthickness=1)
         self._canvas.pack(fill='both', expand=True)
         self._canvas.bind('<Configure>', lambda e: self._redraw())
 
         self._lbl_prompt = tk.Label(parent, text="", bg=BG, fg=MUTED, font=FONT_HINT_T, wraplength=800, justify='center')
-        self._lbl_prompt.pack(pady=(5, 0))
+        self._lbl_prompt.pack(pady=(2, 0))
 
         bottom = tk.Frame(parent, bg=BG)
-        bottom.pack(pady=(10, 30))
+        bottom.pack(pady=(5, 10))
 
         self._lbl_msg = tk.Label(bottom, text="", bg=BG, fg=RED, font=FONT_UI_B)
-        self._lbl_msg.pack(pady=(0, 10))
+        self._lbl_msg.pack(pady=(0, 5))
 
         numpad = tk.Frame(bottom, bg=BG)
         numpad.pack()
@@ -792,7 +792,16 @@ class App(tk.Tk):
         total_w = n_cols * (CELL_W + GAP)
 
         cw, ch = c.winfo_width() or 600, c.winfo_height() or 400
-        ox, oy = max(30, (cw - total_w) // 2), max(30, (ch - total_h) // 2)
+        
+        # Determine how much vertical space we actually need
+        max_y_needed = total_h + 60
+        
+        # Make canvas scrollable if content is taller than available height
+        c.config(scrollregion=(0, 0, max(cw, total_w + 60), max(ch, max_y_needed)))
+        
+        # Center horizontally, but start from top if too tall
+        ox = max(30, (cw - total_w) // 2)
+        oy = max(30, (ch - total_h) // 2) if total_h < ch else 30
 
         y = oy
         for r, row in enumerate(self.matrix):
@@ -809,6 +818,26 @@ class App(tk.Tk):
             px = ox + pc_idx * (CELL_W + GAP) + CELL_W // 2
             py = oy + sum(row_h[i] + GAP for i in range(pr)) + row_h[pr] // 2
             c.create_text(px, py, text=self._pending_digit, fill=ACC, font=FONT_MONO, anchor='center')
+            
+            # Auto-scroll to active cell if it's off-screen
+            # Convert py (absolute coordinate) to relative position
+            if max_y_needed > ch:
+                # We need to scroll. Ensure `py` is visible.
+                # If `py` is near the bottom, scroll down.
+                current_view_top = c.canvasy(0)
+                current_view_bottom = current_view_top + ch
+                
+                # Keep a padding of about 2 cells (80px) at the bottom so it's not hidden by UI elements
+                padding = 80
+                
+                if py > current_view_bottom - padding:
+                    # Scroll down so `py` is near the center or bottom-visible
+                    fraction = (py - ch + padding) / max_y_needed
+                    c.yview_moveto(max(0, fraction))
+                elif py < current_view_top + padding:
+                    # Scroll up
+                    fraction = (py - padding) / max_y_needed
+                    c.yview_moveto(max(0, fraction))
 
     def _draw_cell(self, c, cell, x, y, w, h):
         t = cell.ctype

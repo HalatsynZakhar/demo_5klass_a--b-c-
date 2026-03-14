@@ -28,8 +28,11 @@ class DecimalIntroApp(tk.Tk):
 
         self.mode = "tenths" # "tenths", "hundredths", "thousandths", "ten_thousandths"
         self.value = 0       # Кількість зафарбованих частин
+        self.rows = 10
+        self.cols = 1
         
         self.task_mode = False
+        self.task_locked = False
         self.target_value = 0
         self.task_score = 0
         self.task_total = 0
@@ -126,6 +129,10 @@ class DecimalIntroApp(tk.Tk):
 
     def set_mode(self, mode):
         self.mode = mode
+        if self.mode == "tenths": self.rows, self.cols = 10, 1
+        elif self.mode == "hundredths": self.rows, self.cols = 10, 10
+        elif self.mode == "thousandths": self.rows, self.cols = 20, 50
+        elif self.mode == "ten_thousandths": self.rows, self.cols = 100, 100
         
         # Стилі кнопок
         def reset_btns():
@@ -158,6 +165,7 @@ class DecimalIntroApp(tk.Tk):
             self.lbl_score.configure(text="")
             
     def _new_task(self):
+        self.task_locked = False
         total_cells = self._get_total_cells()
         self.target_value = random.randint(1, total_cells)
         
@@ -239,6 +247,10 @@ class DecimalIntroApp(tk.Tk):
                 self.canvas.create_line(x, y0, x, y0+size, fill=C_BORDER)
 
     def _on_click(self, event):
+        # Prevent input if task is locked
+        if self.task_mode and self.task_locked:
+            return
+
         # Визначаємо клітинку
         if not hasattr(self, 'grid_size'): return
         
@@ -281,6 +293,7 @@ class DecimalIntroApp(tk.Tk):
 
     def _check_task(self):
         if self.value == self.target_value:
+            self.task_locked = True
             self.task_score += 1
             self.task_total += 1
             self.lbl_message.configure(text="✅ Правильно!", fg=C_GREEN)
