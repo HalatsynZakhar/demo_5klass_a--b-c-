@@ -1,6 +1,9 @@
 import tkinter as tk
 import random
 import math
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 
 # ── Palette ───────────────────────────────────────────────────────────────────
 BG        = "#f0f4f8"
@@ -1442,6 +1445,481 @@ class App(tk.Tk):
         if self.t3_score_lbl:
             self.t3_score_lbl.config(text=self._t3_score_text())
 
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Trainer 3 (matplotlib version) — overrides above implementation
+# ──────────────────────────────────────────────────────────────────────────────
+    def show_trainer_3(self):
+        self.clear_main()
+        self.mode = "trainer3"
+
+        self.t3_user_whole_var = tk.IntVar(value=0)
+        self.t3_user_num_var = tk.IntVar(value=0)
+        self.t3_user_den_var = tk.IntVar(value=1)
+        self.t3_success_var = tk.StringVar()
+        self.t3_solved = False
+
+        cf = self.current_frame
+
+        sbar = tk.Frame(cf, bg=PANEL, height=56,
+                        highlightbackground=BORDER, highlightthickness=1)
+        sbar.pack(fill="x")
+        sbar.pack_propagate(False)
+        self.t3_score_lbl = tk.Label(
+            sbar, text=self._t3_score_text(), font=F_SCORE, bg=PANEL, fg=GREEN
+        )
+        self.t3_score_lbl.pack(side="left", padx=30)
+        tk.Label(
+            sbar,
+            text="Візуальна практика — керуй числами і дивись на частини",
+            font=("Segoe UI", 15, "bold"), bg=PANEL, fg=ORANGE
+        ).pack(side="left", padx=10)
+
+        ws = tk.Frame(cf, bg=BG)
+        ws.pack(fill="both", expand=True, padx=20, pady=14)
+
+        left = tk.Frame(ws, bg=PANEL, highlightbackground=BORDER, highlightthickness=1)
+        left.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        tk.Label(left, text="Завдання", font=F_SUB, bg=PANEL, fg=MUTED).pack(
+            anchor="w", padx=20, pady=(12, 4)
+        )
+        tk.Frame(left, bg=BORDER, height=1).pack(fill="x")
+
+        self.t3_task_canvas = tk.Canvas(left, height=90, bg=PANEL, highlightthickness=0)
+        self.t3_task_canvas.pack(fill="x", padx=20, pady=10)
+
+        toolbar = tk.Frame(left, bg=PANEL)
+        toolbar.pack(fill="x", padx=20, pady=(4, 8))
+        self.t3_success_label = tk.Label(
+            toolbar, textvariable=self.t3_success_var, font=F_BODYB, fg=GREEN, bg=PANEL
+        )
+        self.t3_success_label.pack(side="left", expand=True, anchor="w")
+        mkbtn(toolbar, "Нове", self._t3_new_task, bg=ORANGE,
+              w=10, h=1, font=("Segoe UI", 12, "bold")).pack(side="right", padx=6)
+        mkbtn(toolbar, "Рішення", self._t3_open_solution_window, bg=ACCENT2,
+              w=11, h=1, font=("Segoe UI", 12, "bold")).pack(side="right", padx=6)
+
+        self.t3_controls = {}
+        self.t3_controls["whole"] = self._t3_create_slider_unit(
+            left, "Ціла частина:", self.t3_user_whole_var, GREEN
+        )
+        self.t3_controls["whole"]["frame"].pack(fill="x", padx=20, pady=6)
+        self.t3_controls["num"] = self._t3_create_slider_unit(
+            left, "Чисельник:", self.t3_user_num_var, ACCENT2
+        )
+        self.t3_controls["num"]["frame"].pack(fill="x", padx=20, pady=6)
+        self.t3_controls["den"] = self._t3_create_slider_unit(
+            left, "Знаменник:", self.t3_user_den_var, ACCENT
+        )
+        self.t3_controls["den"]["frame"].pack(fill="x", padx=20, pady=6)
+
+        right = tk.Frame(ws, bg=PANEL, highlightbackground=BORDER, highlightthickness=1)
+        right.pack(side="right", fill="both", expand=True, padx=(10, 0))
+
+        tk.Label(right, text="Візуалізація", font=F_SUB, bg=PANEL, fg=MUTED).pack(
+            anchor="w", padx=20, pady=(12, 4)
+        )
+        tk.Frame(right, bg=BORDER, height=1).pack(fill="x")
+
+        plot_frame = tk.Frame(right, bg=PANEL)
+        plot_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.t3_figure = plt.figure(figsize=(12, 6), dpi=90)
+        self.t3_canvas = FigureCanvasTkAgg(self.t3_figure, plot_frame)
+        self.t3_canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
+
+        self._t3_new_task()
+
+    def _t3_create_slider_unit(self, parent, label_text, var, color):
+        frame = tk.Frame(parent, bg=PANEL)
+        tk.Label(frame, text=label_text, font=F_BODYB, bg=PANEL, fg=color).grid(
+            row=0, column=0, columnspan=4, sticky="w"
+        )
+        btn_minus = tk.Button(
+            frame, text="−", font=("Segoe UI", 18, "bold"),
+            width=2, bg=BTN_NUM, fg=TEXT, relief="flat", cursor="hand2",
+            command=lambda v=var: self._t3_adjust_value(v, -1)
+        )
+        btn_minus.grid(row=1, column=0, padx=(0, 6), pady=4)
+        scale = tk.Scale(
+            frame, from_=0, to=99, variable=var,
+            command=lambda val, v=var: self._t3_on_slider_change(val, v),
+            orient="horizontal", showvalue=0, bg=PANEL, troughcolor=BTN_NUM,
+            highlightthickness=0, length=300
+        )
+        scale.grid(row=1, column=1, sticky="ew", pady=4)
+        frame.columnconfigure(1, weight=1)
+        btn_plus = tk.Button(
+            frame, text="+", font=("Segoe UI", 18, "bold"),
+            width=2, bg=BTN_NUM, fg=TEXT, relief="flat", cursor="hand2",
+            command=lambda v=var: self._t3_adjust_value(v, 1)
+        )
+        btn_plus.grid(row=1, column=2, padx=6, pady=4)
+        val_lbl = tk.Label(frame, textvariable=var, font=F_BODYB, bg=PANEL, fg=color, width=4)
+        val_lbl.grid(row=1, column=3, padx=(10, 0), pady=4)
+        return {"frame": frame, "scale": scale, "plus": btn_plus, "minus": btn_minus}
+
+    def _t3_adjust_value(self, var, delta):
+        var.set(var.get() + delta)
+        self._t3_on_slider_change()
+
+    def _t3_score_text(self):
+        return f"Правильно: {self.t3_score}  /  Завдань: {self.t3_attempts}"
+
+    def _t3_on_slider_change(self, value=None, var=None):
+        if var is not None and value is not None:
+            var.set(int(float(value)))
+
+        if self.t3_user_den_var.get() < 1:
+            self.t3_user_den_var.set(1)
+        if self.t3_user_whole_var.get() < 0:
+            self.t3_user_whole_var.set(0)
+        if self.t3_user_num_var.get() < 0:
+            self.t3_user_num_var.set(0)
+
+        if self.t3_task_type == "improper_to_mixed":
+            if self.t3_user_num_var.get() >= self.t3_user_den_var.get() and self.t3_user_den_var.get() > 0:
+                self.t3_user_num_var.set(self.t3_user_den_var.get() - 1 if self.t3_user_den_var.get() > 1 else 0)
+
+        self.t3_controls["whole"]["scale"].config(to=5 + 9 * self.t3_user_den_var.get())
+        self.t3_controls["den"]["scale"].config(to=10)
+
+        if self.t3_task_type == "improper_to_mixed":
+            self.t3_controls["num"]["scale"].config(
+                to=self.t3_user_den_var.get() - 1 if self.t3_user_den_var.get() > 1 else 0
+            )
+        else:
+            self.t3_controls["num"]["scale"].config(to=99)
+
+        self._t3_check_answer()
+        self._t3_visualize_fractions()
+
+    def _t3_update_task_display(self):
+        self.t3_task_canvas.delete("all")
+        self.t3_task_canvas.bind("<Configure>", self._t3_draw_task_content, add="+")
+        self.update_idletasks()
+        self._t3_draw_task_content()
+
+    def _t3_draw_task_content(self, event=None):
+        self.t3_task_canvas.delete("all")
+        canvas_w, canvas_h = self.t3_task_canvas.winfo_width(), self.t3_task_canvas.winfo_height()
+        if canvas_w < 50:
+            return
+
+        prefix_text = "Завдання: "
+        prefix_len = len(prefix_text) * 10 + 8
+        self.t3_task_canvas.create_text(
+            10, canvas_h / 2, text=prefix_text, font=F_BODY, anchor="w", fill=ACCENT
+        )
+        x_pos = prefix_len + 10
+
+        if self.t3_task_type == "mixed_to_improper":
+            whole_str = str(self.t3_mixed_whole)
+            whole_w = len(whole_str) * 18 + 10
+            self.t3_task_canvas.create_text(
+                x_pos + whole_w / 2, canvas_h / 2, text=whole_str,
+                font=F_FRAC_S, anchor="center", fill=GREEN
+            )
+
+            frac_x_offset = x_pos + whole_w + 5
+            num_str, den_str = str(self.t3_mixed_num), str(self.t3_mixed_den)
+            num_w = len(num_str) * 12 + 10
+            den_w = len(den_str) * 12 + 10
+            max_frac_w = max(num_w, den_w) + 10
+
+            self.t3_task_canvas.create_text(
+                frac_x_offset + max_frac_w / 2, canvas_h / 2 - 20,
+                text=num_str, font=F_FRAC_S, anchor="center", fill=ACCENT2
+            )
+            self.t3_task_canvas.create_line(
+                frac_x_offset, canvas_h / 2, frac_x_offset + max_frac_w, canvas_h / 2,
+                width=3, fill=ACCENT2
+            )
+            self.t3_task_canvas.create_text(
+                frac_x_offset + max_frac_w / 2, canvas_h / 2 + 20,
+                text=den_str, font=F_FRAC_S, anchor="center", fill=ACCENT2
+            )
+        else:
+            num_str, den_str = str(self.t3_improper_num), str(self.t3_improper_den)
+            num_w = len(num_str) * 12 + 10
+            den_w = len(den_str) * 12 + 10
+            max_w = max(num_w, den_w) + 10
+
+            self.t3_task_canvas.create_text(
+                x_pos + max_w / 2, canvas_h / 2 - 20,
+                text=num_str, font=F_FRAC_S, anchor="center", fill=ACCENT
+            )
+            self.t3_task_canvas.create_line(
+                x_pos, canvas_h / 2, x_pos + max_w, canvas_h / 2, width=3, fill=ACCENT
+            )
+            self.t3_task_canvas.create_text(
+                x_pos + max_w / 2, canvas_h / 2 + 20,
+                text=den_str, font=F_FRAC_S, anchor="center", fill=ACCENT
+            )
+
+    def _t3_open_solution_window(self):
+        self._t3_build_solution_for_task()
+        win = tk.Toplevel(self)
+        win.title("Рішення завдання")
+        win.configure(bg=BG)
+        win.geometry("900x650")
+
+        hdr = tk.Frame(win, bg=HDR_BG, height=60)
+        hdr.pack(fill="x")
+        hdr.pack_propagate(False)
+        tk.Label(hdr, text="Рішення завдання", bg=HDR_BG, fg=WHITE,
+                 font=("Segoe UI", 18, "bold")).pack(side="left", padx=20)
+        mkbtn(hdr, "Закрити", win.destroy, bg=RED,
+              font=("Segoe UI", 12, "bold"), w=10, h=1).pack(side="right", padx=16, pady=12)
+
+        sc = tk.Canvas(win, bg=BG, highlightthickness=0)
+        vsb = tk.Scrollbar(win, orient="vertical", command=sc.yview)
+        sc.configure(yscrollcommand=vsb.set)
+        vsb.pack(side="right", fill="y")
+        sc.pack(side="left", fill="both", expand=True)
+        outer = tk.Frame(sc, bg=BG)
+        win_id = sc.create_window((0, 0), window=outer, anchor="nw")
+        outer.bind("<Configure>", lambda e: sc.configure(scrollregion=sc.bbox("all")))
+        sc.bind("<Configure>", lambda e: sc.itemconfig(win_id, width=e.width))
+
+        pad = tk.Frame(outer, bg=BG)
+        pad.pack(fill="both", expand=True, padx=30, pady=20)
+
+        for style, text in self.t3_solution_steps:
+            card = tk.Frame(pad, bg=PANEL, padx=16, pady=12,
+                            highlightbackground=BORDER, highlightthickness=1)
+            card.pack(fill="x", pady=8)
+            tk.Label(card, text=text, font=F_BODY if style == "normal" else F_SUB,
+                     bg=PANEL, fg=TEXT, anchor="w", justify="left", wraplength=820).pack(anchor="w")
+
+    def _t3_set_controls_state(self, state):
+        for controls in [self.t3_controls["whole"], self.t3_controls["num"], self.t3_controls["den"]]:
+            controls["scale"].config(state=state)
+            controls["plus"].config(state=state)
+            controls["minus"].config(state=state)
+
+    def _t3_new_task(self):
+        self._t3_set_controls_state(tk.NORMAL)
+        self.t3_success_var.set("")
+        self.t3_solved = False
+
+        self.t3_task_type = random.choice(["mixed_to_improper", "improper_to_mixed"])
+
+        den = random.randint(2, 10)
+        num_frac = random.randint(1, den - 1)
+        whole = random.randint(1, 5)
+
+        if self.t3_task_type == "mixed_to_improper":
+            self.t3_mixed_whole = whole
+            self.t3_mixed_num = num_frac
+            self.t3_mixed_den = den
+            self.t3_improper_num = whole * den + num_frac
+            self.t3_improper_den = den
+            self.t3_user_whole_var.set(0)
+            self.t3_user_num_var.set(0)
+            self.t3_user_den_var.set(1)
+            self._t3_set_control_visibility(whole_part=False)
+        else:
+            while True:
+                improper_num = random.randint(den + 1, den * 6)
+                if improper_num % den != 0:
+                    break
+            self.t3_improper_num = improper_num
+            self.t3_improper_den = den
+            self.t3_mixed_whole = improper_num // den
+            self.t3_mixed_num = improper_num % den
+            self.t3_mixed_den = den
+            self.t3_user_whole_var.set(0)
+            self.t3_user_num_var.set(0)
+            self.t3_user_den_var.set(1)
+            self._t3_set_control_visibility(whole_part=True)
+
+        self.t3_attempts += 1
+        if self.t3_score_lbl:
+            self.t3_score_lbl.config(text=self._t3_score_text())
+
+        self._t3_update_task_display()
+        self._t3_on_slider_change()
+
+    def _t3_set_control_visibility(self, whole_part):
+        state_whole_ctrl = tk.NORMAL if whole_part else tk.DISABLED
+        self.t3_controls["whole"]["scale"].config(state=state_whole_ctrl)
+        self.t3_controls["whole"]["plus"].config(state=state_whole_ctrl)
+        self.t3_controls["whole"]["minus"].config(state=state_whole_ctrl)
+
+        self.t3_controls["den"]["scale"].config(to=10)
+        if whole_part:
+            self.t3_controls["num"]["scale"].config(
+                to=self.t3_user_den_var.get() - 1 if self.t3_user_den_var.get() > 1 else 0
+            )
+        else:
+            self.t3_controls["num"]["scale"].config(to=99)
+
+    def _t3_check_answer(self):
+        user_w = self.t3_user_whole_var.get()
+        user_n = self.t3_user_num_var.get()
+        user_d = self.t3_user_den_var.get()
+
+        if user_d == 0:
+            self.t3_success_var.set("")
+            return
+
+        is_correct = False
+
+        if self.t3_task_type == "mixed_to_improper":
+            if user_w != 0:
+                self.t3_success_var.set("")
+                return
+            gcd_user = math.gcd(user_n, user_d)
+            simplified_user_n = user_n // gcd_user
+            simplified_user_d = user_d // gcd_user
+            gcd_correct = math.gcd(self.t3_improper_num, self.t3_improper_den)
+            simplified_correct_n = self.t3_improper_num // gcd_correct
+            simplified_correct_d = self.t3_improper_den // gcd_correct
+            if simplified_user_n == simplified_correct_n and simplified_user_d == simplified_correct_d:
+                is_correct = True
+        else:
+            if user_n >= user_d and user_d > 0:
+                self.t3_success_var.set("")
+                return
+            if user_w == self.t3_mixed_whole:
+                gcd_user_frac = math.gcd(user_n, user_d)
+                gcd_correct_frac = math.gcd(self.t3_mixed_num, self.t3_mixed_den)
+                if (user_n // gcd_user_frac == self.t3_mixed_num // gcd_correct_frac and
+                        user_d // gcd_user_frac == self.t3_mixed_den // gcd_correct_frac):
+                    is_correct = True
+
+        if is_correct:
+            self.t3_success_var.set("ПРАВИЛЬНО!")
+            if not self.t3_solved:
+                self.t3_solved = True
+                self.t3_score += 1
+                if self.t3_score_lbl:
+                    self.t3_score_lbl.config(text=self._t3_score_text())
+            self._t3_set_controls_state(tk.DISABLED)
+        else:
+            self.t3_success_var.set("")
+
+    def _t3_build_solution_for_task(self):
+        if self.t3_task_type == "mixed_to_improper":
+            w, n, d = self.t3_mixed_whole, self.t3_mixed_num, self.t3_mixed_den
+            step1_res = w * d
+            final_num = step1_res + n
+            self.t3_solution_steps = [
+                ("bold", f"Перетворення мішаного числа {w} {n}/{d} в неправильний дріб"),
+                ("normal", f"{w} × {d} = {step1_res}"),
+                ("normal", f"{step1_res} + {n} = {final_num}"),
+                ("normal", f"{w} {n}/{d} -> {final_num}/{d}")
+            ]
+        else:
+            num_imp, den_imp = self.t3_improper_num, self.t3_improper_den
+            whole_res = num_imp // den_imp
+            remainder_res = num_imp % den_imp
+            simplified_num, simplified_den = remainder_res, den_imp
+            if remainder_res != 0:
+                gcd_frac = math.gcd(remainder_res, den_imp)
+                simplified_num = remainder_res // gcd_frac
+                simplified_den = den_imp // gcd_frac
+            self.t3_solution_steps = [
+                ("bold", f"Перетворення неправильного дробу {num_imp}/{den_imp} в мішане число"),
+                ("normal", f"{num_imp} ÷ {den_imp} = {whole_res} (ціла частина) з залишком {remainder_res}"),
+                ("normal", f"({num_imp}/{den_imp}) -> {whole_res} {remainder_res}/{den_imp}"),
+                ("normal", f"Скорочуємо: {remainder_res}/{den_imp} -> {simplified_num}/{simplified_den}")
+            ]
+
+    def _t3_visualize_fractions(self):
+        self.t3_figure.clear()
+
+        task_num_for_pie = 0
+        task_den_for_pie = 1
+        task_title_text = ""
+
+        if self.t3_task_type == "mixed_to_improper":
+            task_num_for_pie = self.t3_mixed_whole * self.t3_mixed_den + self.t3_mixed_num
+            task_den_for_pie = self.t3_mixed_den
+            task_title_text = f"Завдання: {self.t3_mixed_whole} $\\frac{{{self.t3_mixed_num}}}{{{self.t3_mixed_den}}}$"
+        elif self.t3_task_type == "improper_to_mixed":
+            task_num_for_pie = self.t3_improper_num
+            task_den_for_pie = self.t3_improper_den
+            task_title_text = f"Завдання: $\\frac{{{self.t3_improper_num}}}{{{self.t3_improper_den}}}$"
+
+        user_num_for_pie = 0
+        user_den_for_pie = 1
+        user_title_text = ""
+
+        if self.t3_user_den_var.get() > 0:
+            user_num_for_pie = self.t3_user_whole_var.get() * self.t3_user_den_var.get() + self.t3_user_num_var.get()
+            user_den_for_pie = self.t3_user_den_var.get()
+
+        if self.t3_task_type == "improper_to_mixed":
+            user_title_text = f"Ваша відповідь: {self.t3_user_whole_var.get()} $\\frac{{{self.t3_user_num_var.get()}}}{{{self.t3_user_den_var.get()}}}$"
+        else:
+            user_title_text = f"Ваша відповідь: $\\frac{{{self.t3_user_num_var.get()}}}{{{self.t3_user_den_var.get()}}}$"
+
+        ax1 = self.t3_figure.add_subplot(1, 2, 1)
+        ax2 = self.t3_figure.add_subplot(1, 2, 2)
+
+        self._t3_draw_fraction_pie(ax1, task_num_for_pie, task_den_for_pie, task_title_text, "mediumseagreen")
+        self._t3_draw_fraction_pie(ax2, user_num_for_pie, user_den_for_pie, user_title_text, "salmon")
+
+        self.t3_figure.tight_layout(pad=3.0)
+        self.t3_canvas.draw()
+
+    def _t3_draw_fraction_pie(self, ax, numerator, denominator, title, color):
+        ax.clear()
+        ax.set_title(title, fontsize=20, pad=20)
+        ax.set_aspect("equal")
+        ax.axis("off")
+
+        if denominator <= 0:
+            return
+
+        whole_part = numerator // denominator
+        fractional_numerator = numerator % denominator
+
+        pies_to_draw = []
+        for _ in range(whole_part):
+            pies_to_draw.append(denominator)
+        if fractional_numerator > 0:
+            pies_to_draw.append(fractional_numerator)
+        if not pies_to_draw and numerator == 0:
+            pies_to_draw.append(0)
+
+        num_pies = len(pies_to_draw)
+        if num_pies == 0:
+            return
+
+        pie_radius = 0.9 / (2 * num_pies)
+
+        for i, num in enumerate(pies_to_draw):
+            x_center = (2 * i + 1) / (2 * num_pies)
+            y_center = 0.5
+
+            if num > 0:
+                sizes = [num, denominator - num] if denominator - num > 0 else [num]
+                colors = [color, "#E0E0E0"] if denominator - num > 0 else [color]
+            else:
+                sizes = [1]
+                colors = ["#E0E0E0"]
+
+            ax.pie(
+                sizes, colors=colors, startangle=90, counterclock=False,
+                radius=pie_radius, center=(x_center, y_center),
+                wedgeprops={"edgecolor": "black", "linewidth": 1}
+            )
+
+            if denominator <= 20:
+                for j in range(denominator):
+                    angle = np.deg2rad(90 - j * (360.0 / denominator))
+                    x1 = x_center
+                    y1 = y_center
+                    x2 = x_center + pie_radius * np.cos(angle)
+                    y2 = y_center + pie_radius * np.sin(angle)
+                    ax.plot([x1, x2], [y1, y2], color="black", lw=0.7, alpha=0.6)
+
+        ax.set_ylim(0, 1)
+        ax.set_xlim(0, 1)
 
 # ══════════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
