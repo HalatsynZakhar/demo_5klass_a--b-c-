@@ -321,8 +321,7 @@ class AreaApp(tk.Tk):
         f = tk.Frame(self.main_area, bg=BG)
         f.pack(expand=True, fill="both", padx=50, pady=25)
         tk.Label(f, text="Властивості площі", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
-        text_content = """Нехай маємо прямокутник ABCD розміром 4 x 5 клітинок. Тоді його площа дорівнює 4 • 5 = 20 (клітинок).\nЛамана KLMN розбиває прямокутник ABCD на дві частини. Площа однієї з них — 12 клітинок, а іншої — 8 клітинок. Але 12 + 8 = 20, \
-а це те саме значення, що й площа прямокутника ABCD.\n\nОтже, площа прямокутника дорівнює сумі площ його частин.\nПлоща фігури дорівнює сумі площ її частин."""
+        text_content = """Розглянемо прямокутник, який складається з 10 клітинок у довжину і 6 клітинок у ширину. Його загальна площа S = 10 • 6 = 60 клітинок.\n\nЯкщо ми розділимо цей прямокутник на дві частини (наприклад, два менших прямокутники: один розміром 10 х 3 клітинки, а інший також 10 х 3 клітинки), то площа першої частини S1 = 10 • 3 = 30 клітинок, а площа другої частини S2 = 10 • 3 = 30 клітинок.\n\nМи бачимо, що S1 + S2 = 30 + 30 = 60 клітинок, що дорівнює загальній площі вихідного прямокутника.\n\nОтже, площа фігури дорівнює сумі площ її частин."""
         tk.Label(
             f,
             text=text_content,
@@ -345,6 +344,7 @@ class AreaApp(tk.Tk):
         total_width_units = 10
         total_height_units = 6
         unit_size = 40 # Pixels per unit
+        split_height_units = 3 # Split into two parts, 3 units high and 3 units high
 
         total_rect_width = total_width_units * unit_size
         total_rect_height = total_height_units * unit_size
@@ -352,31 +352,30 @@ class AreaApp(tk.Tk):
         start_x = (w - total_rect_width) / 2
         start_y = (h - total_rect_height) / 2
 
-        # Draw the overall grid
+        # Part 1: Top rectangle (fill and outline)
+        part1_height = split_height_units * unit_size
+        cv.create_rectangle(start_x, start_y, start_x + total_rect_width, start_y + part1_height, fill="#fee2e2")
+        cv.create_rectangle(start_x, start_y, start_x + total_rect_width, start_y + part1_height, outline=RED, width=3)
+        
+        # Part 2: Bottom rectangle (fill and outline)
+        part2_start_y = start_y + part1_height
+        part2_height = (total_height_units - split_height_units) * unit_size
+        cv.create_rectangle(start_x, part2_start_y, start_x + total_rect_width, part2_start_y + part2_height, fill="#e0f2fe")
+        cv.create_rectangle(start_x, part2_start_y, start_x + total_rect_width, part2_start_y + part2_height, outline=INDIGO, width=3)
+
+        # Draw the overall grid on top of the filled rectangles
         for r in range(total_height_units):
             for c in range(total_width_units):
                 x1 = start_x + c * unit_size
                 y1 = start_y + r * unit_size
                 cv.create_rectangle(x1, y1, x1 + unit_size, y1 + unit_size, outline=MUTED, width=1)
 
-        # Define split point (e.g., horizontally)
-        split_height_units = 3 # Split into two parts, 3 units high and 3 units high
-
-        # Part 1: Top rectangle
-        part1_height = split_height_units * unit_size
-        cv.create_rectangle(start_x, start_y, start_x + total_rect_width, start_y + part1_height, fill="#fee2e2")
-        cv.create_rectangle(start_x, start_y, start_x + total_rect_width, start_y + part1_height, outline=RED, width=3)
+        # Text labels for dimensions and areas
         area1 = total_width_units * split_height_units
         cv.create_text(start_x + total_rect_width / 2, start_y + part1_height / 2, text=f"S1 = {total_width_units} × {split_height_units} = {area1}", font=("Segoe UI", 18, "bold"), fill=RED)
-        cv.create_text(start_x + total_rect_width / 2, start_y + part1_height + 15, text=f"{total_width_units} од.", font=("Segoe UI", 14), fill=TEXT)
         cv.create_text(start_x - 15, start_y + part1_height / 2, text=f"{split_height_units} од.", font=("Segoe UI", 14), fill=TEXT, angle=90)
+        cv.create_text(start_x + total_rect_width / 2, start_y - 15, text=f"{total_width_units} од.", font=("Segoe UI", 14), fill=TEXT)
 
-
-        # Part 2: Bottom rectangle
-        part2_start_y = start_y + part1_height
-        part2_height = (total_height_units - split_height_units) * unit_size
-        cv.create_rectangle(start_x, part2_start_y, start_x + total_rect_width, part2_start_y + part2_height, fill="#e0f2fe")
-        cv.create_rectangle(start_x, part2_start_y, start_x + total_rect_width, part2_start_y + part2_height, outline=INDIGO, width=3)
         area2 = total_width_units * (total_height_units - split_height_units)
         cv.create_text(start_x + total_rect_width / 2, part2_start_y + part2_height / 2, text=f"S2 = {total_width_units} × {total_height_units - split_height_units} = {area2}", font=("Segoe UI", 18, "bold"), fill=INDIGO)
         cv.create_text(start_x - 15, part2_start_y + part2_height / 2, text=f"{total_height_units - split_height_units} од.", font=("Segoe UI", 14), fill=TEXT, angle=90)
