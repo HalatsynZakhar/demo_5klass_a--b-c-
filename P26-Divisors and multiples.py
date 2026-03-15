@@ -110,6 +110,7 @@ class App(tk.Tk):
         self.div_remaining = []        # divisors still to be found
         self.div_found     = []        # confirmed correct answers so far
         self.div_input     = ""
+        self.theory_div_input = "" # New: input for theory divisors demo
         self.div_score     = 0
         self.div_attempts  = 0        # tasks attempted
         self.div_task_done = False
@@ -122,6 +123,7 @@ class App(tk.Tk):
         self.mul_btns      = []
         self.mul_score     = 0
         self.mul_attempts  = 0
+        self.theory_mul_input = "" # New: input for theory multiples demo
 
         # ── UI refs ────────────────────────────────────────────────────────
         self.div_num_lbl    = None
@@ -201,6 +203,30 @@ class App(tk.Tk):
     def _on_bs(self):
         if self.mode == "div_trainer":
             self._div_key("⌫")
+        elif self.mode == "theory_div":
+            self._theory_div_key("⌫")
+        elif self.mode == "theory_mul":
+            self._theory_mul_key("⌫")
+
+    def _theory_div_key(self, char):
+        if char == "⌫":
+            self.theory_div_input = self.theory_div_input[:-1]
+        elif char == "C":
+            self.theory_div_input = ""
+        elif len(self.theory_div_input) < 4: # Limit input length for reasonable numbers
+            self.theory_div_input += str(char)
+        self.theory_div_entry.delete(0, tk.END)
+        self.theory_div_entry.insert(0, self.theory_div_input)
+
+    def _theory_mul_key(self, char):
+        if char == "⌫":
+            self.theory_mul_input = self.theory_mul_input[:-1]
+        elif char == "C":
+            self.theory_mul_input = ""
+        elif len(self.theory_mul_input) < 4: # Limit input length for reasonable numbers
+            self.theory_mul_input += str(char)
+        self.theory_mul_entry.delete(0, tk.END)
+        self.theory_mul_entry.insert(0, self.theory_mul_input)
 
     # ══════════════════════════════════════════════════════════════════════════
     # MAIN MENU
@@ -247,6 +273,7 @@ class App(tk.Tk):
     def show_divisors_theory(self):
         self.clear_main()
         self.mode = "theory_div"
+        self.theory_div_input = "" # Reset input for new session
 
         scroll_canvas = tk.Canvas(self.current_frame, bg=BG, highlightthickness=0)
         vsb = tk.Scrollbar(self.current_frame, orient="vertical",
@@ -303,18 +330,23 @@ class App(tk.Tk):
         demo_f.pack(fill="x", pady=10)
         tk.Label(demo_f, text="🔢  Спробуйте самі — введіть число:",
                  font=F_BODYB, bg=PANEL, fg=TEXT).pack(anchor="w")
-        row = tk.Frame(demo_f, bg=PANEL)
-        row.pack(anchor="w", pady=8)
-        entry = tk.Entry(row, font=F_HEAD, width=7, bg=BTN_NUM, fg=TEXT,
-                         relief="flat", insertbackground=ACCENT)
-        entry.pack(side="left", ipady=6, padx=(0, 10))
-        res_lbl = tk.Label(row, text="", font=F_BODYB, bg=PANEL, fg=ACCENT,
+        
+        input_area = tk.Frame(demo_f, bg=PANEL)
+        input_area.pack(anchor="w", pady=8)
+
+        self.theory_div_entry_var = tk.StringVar(value=self.theory_div_input)
+        self.theory_div_entry = tk.Entry(input_area, font=F_HEAD, width=7, bg=BTN_NUM, fg=TEXT,
+                                         relief="flat", insertbackground=ACCENT, 
+                                         textvariable=self.theory_div_entry_var)
+        self.theory_div_entry.pack(side="left", ipady=6, padx=(0, 10))
+        
+        res_lbl = tk.Label(input_area, text="", font=F_BODYB, bg=PANEL, fg=ACCENT,
                            wraplength=self.SW - 300, justify="left")
         res_lbl.pack(side="left")
 
         def calc(*_):
             try:
-                n = int(entry.get())
+                n = int(self.theory_div_input)
                 if 1 <= n <= 9999:
                     divs = self._get_divisors(n)
                     res_lbl.config(
@@ -326,9 +358,31 @@ class App(tk.Tk):
                     res_lbl.config(text="Введіть число від 1 до 9999", fg=RED)
             except ValueError:
                 res_lbl.config(text="Введіть ціле число", fg=RED)
+        
+        btn(input_area, "Знайти →", calc, bg=ACCENT, w=9, h=1).pack(side="left")
+        
+        # Numpad for theory divisors demo
+        numpad_frame = tk.Frame(demo_f, bg=PANEL)
+        numpad_frame.pack(anchor="w", pady=(10, 0))
 
-        btn(row, "Знайти →", calc, bg=ACCENT, w=9, h=1).pack(side="left")
-        entry.bind("<Return>", calc)
+        keys = [
+            ('1', '2', '3'),
+            ('4', '5', '6'),
+            ('7', '8', '9'),
+            ('C', '0', '⌫')
+        ]
+
+        for r, row_keys in enumerate(keys):
+            row_frame = tk.Frame(numpad_frame, bg=PANEL)
+            row_frame.pack(fill="x")
+            for c, key in enumerate(row_keys):
+                key_bg = RED if key == 'C' else ACCENT if key == '⌫' else BTN_NUM
+                key_fg = WHITE if key in ('C', '⌫') else TEXT
+                cmd = lambda k=key: self._theory_div_key(k)
+                
+                tk.Button(row_frame, text=key, font=F_NUM, width=4, height=2,
+                          bg=key_bg, fg=key_fg, relief="flat", bd=0, cursor="hand2",
+                          activebackground=_darken(key_bg, 15), command=cmd).pack(side="left", padx=5, pady=5)
 
     # ══════════════════════════════════════════════════════════════════════════
     # THEORY — MULTIPLES
@@ -336,6 +390,7 @@ class App(tk.Tk):
     def show_multiples_theory(self):
         self.clear_main()
         self.mode = "theory_mul"
+        self.theory_mul_input = "" # Reset input for new session
 
         scroll_canvas = tk.Canvas(self.current_frame, bg=BG, highlightthickness=0)
         vsb = tk.Scrollbar(self.current_frame, orient="vertical",
@@ -384,46 +439,68 @@ class App(tk.Tk):
              "Приклад:  28 ÷ 7 = 4  (без остачі)  →  7 — дільник 28,  28 — кратне 7.",
              "#fef9c3")
 
-        # ── Multiples strip demo ────────────────────────────────────────────
+        # ── Live demo ──────────────────────────────────────────────────────
         demo_f = tk.Frame(p, bg=PANEL, padx=22, pady=16,
                           highlightbackground=BORDER, highlightthickness=1)
         demo_f.pack(fill="x", pady=10)
-        tk.Label(demo_f, text="🔢  Оберіть число — побачте кратні:",
+        tk.Label(demo_f, text="🔢  Спробуйте самі — введіть число:",
                  font=F_BODYB, bg=PANEL, fg=TEXT).pack(anchor="w")
+        
+        input_area = tk.Frame(demo_f, bg=PANEL)
+        input_area.pack(anchor="w", pady=8)
 
-        btns_row = tk.Frame(demo_f, bg=PANEL)
-        btns_row.pack(anchor="w", pady=(6, 8))
+        self.theory_mul_entry_var = tk.StringVar(value=self.theory_mul_input)
+        self.theory_mul_entry = tk.Entry(input_area, font=F_HEAD, width=7, bg=BTN_NUM, fg=TEXT,
+                                         relief="flat", insertbackground=ACCENT, 
+                                         textvariable=self.theory_mul_entry_var)
+        self.theory_mul_entry.pack(side="left", ipady=6, padx=(0, 10))
+        
+        res_lbl = tk.Label(input_area, text="", font=F_BODYB, bg=PANEL, fg=ACCENT2,
+                           wraplength=self.SW - 300, justify="left")
+        res_lbl.pack(side="left")
 
-        strip = tk.Frame(demo_f, bg=PANEL)
-        strip.pack(fill="x")
+        def calc_multiples(*_):
+            try:
+                n = int(self.theory_mul_input)
+                if 1 <= n <= 999:
+                    multiples_list = [n * i for i in range(1, 11)] # Display first 10 multiples
+                    res_lbl.config(
+                        text=f"Перші 10 кратних числа {n}:   "
+                             + ",   ".join(map(str, multiples_list)),
+                        fg=ACCENT2)
+                else:
+                    res_lbl.config(text="Введіть число від 1 до 999", fg=RED)
+            except ValueError:
+                res_lbl.config(text="Введіть ціле число", fg=RED)
 
-        COLORS = [ACCENT, ACCENT2, GREEN, ORANGE, "#0891b2", "#be185d",
-                  "#65a30d", "#b45309", "#0f766e", "#7c2d12", "#1d4ed8", "#4f46e5"]
+        btn(input_area, "Знайти →", calc_multiples, bg=ACCENT2, w=9, h=1).pack(side="left")
+        
+        # Numpad for theory multiples demo
+        numpad_frame = tk.Frame(demo_f, bg=PANEL)
+        numpad_frame.pack(anchor="w", pady=(10, 0))
 
-        def show_mul(n):
-            for w in strip.winfo_children():
-                w.destroy()
-            for k in range(1, 13):
-                c = COLORS[(k - 1) % len(COLORS)]
-                box = tk.Frame(strip, bg=c, width=86, height=74)
-                box.pack(side="left", padx=3)
-                box.pack_propagate(False)
-                tk.Label(box, text=f"{n}×{k}", font=("Segoe UI", 11),
-                         bg=c, fg=WHITE).pack(pady=(6, 0))
-                tk.Label(box, text=str(n * k), font=("Segoe UI", 19, "bold"),
-                         bg=c, fg=WHITE).pack()
+        keys = [
+            ('1', '2', '3'),
+            ('4', '5', '6'),
+            ('7', '8', '9'),
+            ('C', '0', '⌫')
+        ]
 
-        for n in [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15]:
-            b = btn(btns_row, str(n), lambda x=n: show_mul(x),
-                    bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 15, "bold"),
-                    w=4, h=1, px=4, py=4)
-            b.pack(side="left", padx=3)
-            # Fix hover for light buttons
-            orig = BTN_NUM
-            b.bind("<Enter>", lambda e, x=b: x.config(bg=BTN_HOV))
-            b.bind("<Leave>", lambda e, x=b: x.config(bg=BTN_NUM))
+        for r, row_keys in enumerate(keys):
+            row_frame = tk.Frame(numpad_frame, bg=PANEL)
+            row_frame.pack()
+            for c, key in enumerate(row_keys):
+                key_bg = RED if key == 'C' else ACCENT2 if key == '⌫' else BTN_NUM
+                key_fg = WHITE if key in ('C', '⌫') else TEXT
+                cmd = lambda k=key: self._theory_mul_key(k)
+                
+                tk.Button(row_frame, text=key, font=F_NUM, width=4, height=2,
+                          bg=key_bg, fg=key_fg, relief="flat", bd=0, cursor="hand2",
+                          activebackground=_darken(key_bg, 15), command=cmd).pack(side="left", padx=5, pady=5)
+                
+                
 
-        show_mul(3)
+
 
     # ══════════════════════════════════════════════════════════════════════════
     # TRAINER — DIVISORS  (one-by-one entry with numpad centred)
