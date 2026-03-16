@@ -234,23 +234,45 @@ class App(tk.Tk):
         sc.bind("<Configure>", lambda e: sc.itemconfig(window_id, width=e.width))
         p.bind("<Configure>", lambda e: sc.configure(scrollregion=sc.bbox("all")))
         
+        # --- ДОДАВАННЯ ---
         theory_card(p, "➕ Додавання дробів", "Щоб додати дроби з однаковими знаменниками, треба додати їхні чисельники і залишити той самий знаменник.", CARD_B, ACCENT)
-        ex1 = tk.Frame(p, bg=WHITE, padx=40, pady=20, highlightbackground=BORDER, highlightthickness=1); ex1.pack(fill="x", padx=100, pady=10)
-        r1 = tk.Frame(ex1, bg=WHITE); r1.pack()
+        
+        ex_add = tk.Frame(p, bg=WHITE, padx=40, pady=20, highlightbackground=BORDER, highlightthickness=1); ex_add.pack(fill="x", padx=100, pady=10)
+        
+        r1 = tk.Frame(ex_add, bg=WHITE); r1.pack()
         frac_w(r1, 1, 4, bg=WHITE, size="big").pack(side="left", padx=20)
         tk.Label(r1, text="+", font=F_BIG, bg=WHITE).pack(side="left")
         frac_w(r1, 2, 4, bg=WHITE, size="big").pack(side="left", padx=20)
         tk.Label(r1, text="=", font=F_BIG, bg=WHITE).pack(side="left")
         frac_w(r1, 3, 4, bg=WHITE, size="big", color=GREEN).pack(side="left", padx=20)
         
+        # Візуалізація тортиками для додавання
+        r1_pie = tk.Frame(ex_add, bg=WHITE); r1_pie.pack(pady=20)
+        draw_pie_canvas(r1_pie, 1, 4, ACCENT, radius=60).pack(side="left", padx=15)
+        tk.Label(r1_pie, text="+", font=F_BIG, bg=WHITE, fg=MUTED).pack(side="left")
+        draw_pie_canvas(r1_pie, 2, 4, ACCENT2, radius=60).pack(side="left", padx=15)
+        tk.Label(r1_pie, text="=", font=F_BIG, bg=WHITE, fg=MUTED).pack(side="left")
+        draw_pie_canvas(r1_pie, 3, 4, GREEN, radius=60).pack(side="left", padx=15)
+        
+        # --- ВІДНІМАННЯ ---
         theory_card(p, "➖ Віднімання дробів", "Щоб відняти дроби з однаковими знаменниками, треба від чисельника зменшуваного відняти чисельник від’ємника і залишити той самий знаменник.", CARD_R, RED)
-        ex2 = tk.Frame(p, bg=WHITE, padx=40, pady=20, highlightbackground=BORDER, highlightthickness=1); ex2.pack(fill="x", padx=100, pady=10)
-        r2 = tk.Frame(ex2, bg=WHITE); r2.pack()
+        
+        ex_sub = tk.Frame(p, bg=WHITE, padx=40, pady=20, highlightbackground=BORDER, highlightthickness=1); ex_sub.pack(fill="x", padx=100, pady=10)
+        
+        r2 = tk.Frame(ex_sub, bg=WHITE); r2.pack()
         frac_w(r2, 5, 8, bg=WHITE, size="big").pack(side="left", padx=20)
         tk.Label(r2, text="−", font=F_BIG, bg=WHITE).pack(side="left")
         frac_w(r2, 3, 8, bg=WHITE, size="big").pack(side="left", padx=20)
         tk.Label(r2, text="=", font=F_BIG, bg=WHITE).pack(side="left")
         frac_w(r2, 2, 8, bg=WHITE, size="big", color=RED).pack(side="left", padx=20)
+        
+        # Візуалізація тортиками для віднімання
+        r2_pie = tk.Frame(ex_sub, bg=WHITE); r2_pie.pack(pady=20)
+        draw_pie_canvas(r2_pie, 5, 8, ACCENT, radius=60).pack(side="left", padx=15)
+        tk.Label(r2_pie, text="−", font=F_BIG, bg=WHITE, fg=MUTED).pack(side="left")
+        draw_pie_canvas(r2_pie, 3, 8, ACCENT2, radius=60).pack(side="left", padx=15)
+        tk.Label(r2_pie, text="=", font=F_BIG, bg=WHITE, fg=MUTED).pack(side="left")
+        draw_pie_canvas(r2_pie, 2, 8, RED, radius=60).pack(side="left", padx=15)
         
         draw_beam_theory_combined(p)
         theory_card(p, "🔄 Результат", "Якщо результатом є неправильний дріб, його зазвичай перетворюють на мішане число.", CARD_Y, ORANGE)
