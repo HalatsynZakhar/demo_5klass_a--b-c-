@@ -1,455 +1,355 @@
 import tkinter as tk
 from tkinter import ttk, font
+import random
+import math
+import re
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.gridspec as gridspec
 import numpy as np
-import math
-import random
-import re
 
+# ── Palette (unified with series) ────────────────────────────────────────────
+BG        = "#f0f4f8"
+PANEL     = "#ffffff"
+BORDER    = "#cbd5e1"
+TEXT      = "#0f172a"
+MUTED     = "#475569"
+WHITE     = "#ffffff"
+BTN_NUM   = "#e2e8f0"
+HDR_BG    = "#1d4ed8"
+NAV_BG    = "#1e3a5f"
+NAV_FG    = "#ffffff"
+ACCENT    = "#1d4ed8"
+ACCENT2   = "#7c3aed"
+GREEN     = "#15803d"
+GREEN_LT  = "#dcfce7"
+RED       = "#b91c1c"
+RED_LT    = "#fee2e2"
+ORANGE    = "#b45309"
+ORANGE_LT = "#fef3c7"
+CARD_B    = "#dbeafe"
+CARD_V    = "#ede9fe"
+CARD_G    = "#dcfce7"
+CARD_Y    = "#fef9c3"
+CARD_R    = "#fee2e2"
+TEAL      = "#0f766e"
 
+# ── Fonts ─────────────────────────────────────────────────────────────────────
+F_TITLE  = ("Segoe UI", 34, "bold")
+F_HEAD   = ("Segoe UI", 26, "bold")
+F_SUB    = ("Segoe UI", 20, "bold")
+F_BODY   = ("Segoe UI", 17)
+F_BODYB  = ("Segoe UI", 17, "bold")
+F_BIG    = ("Segoe UI", 72, "bold")
+F_BTN    = ("Segoe UI", 19, "bold")
+F_NAV    = ("Segoe UI", 14, "bold")
+F_SCORE  = ("Segoe UI", 20, "bold")
+F_FEED   = ("Segoe UI", 16)
+F_NUM    = ("Segoe UI", 26, "bold")
+F_SMALL  = ("Segoe UI", 13)
+F_FRAC   = ("Segoe UI", 44, "bold")
+F_FRAC_S = ("Segoe UI", 26, "bold")
+F_SIGN   = ("Segoe UI", 52, "bold")
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+def _darken(h, a=30):
+    r = max(0, int(h[1:3], 16) - a)
+    g = max(0, int(h[3:5], 16) - a)
+    b = max(0, int(h[5:7], 16) - a)
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+def mkbtn(parent, text, cmd, bg=ACCENT, fg=WHITE, font=F_BTN, w=12, h=2, px=6, py=6):
+    b = tk.Button(parent, text=text, command=cmd, bg=bg, fg=fg,
+                  font=font, width=w, height=h,
+                  relief="flat", bd=0, cursor="hand2",
+                  activebackground=bg, activeforeground=fg,
+                  padx=px, pady=py)
+    orig = bg
+    b.bind("<Enter>", lambda e: b.config(bg=_darken(orig, 25)))
+    b.bind("<Leave>", lambda e: b.config(bg=orig))
+    return b
+
+def theory_card(parent, title, body, bg_c, fg_title=TEXT):
+    f = tk.Frame(parent, bg=bg_c, padx=40, pady=30,
+                 highlightbackground=BORDER, highlightthickness=1)
+    f.pack(fill="x", pady=15, padx=100)
+    tk.Label(f, text=title, font=F_TITLE, bg=bg_c, fg=fg_title, anchor="center").pack(fill="x")
+    tk.Label(f, text=body, font=F_HEAD, bg=bg_c, fg=TEXT,
+             justify="center", wraplength=1000, anchor="center").pack(fill="x", pady=(20, 0))
+    return f
+
+def frac_w(parent, n, d, w_part=0, bg=PANEL, size="big", color=ACCENT):
+    """Вертикальний дріб з горизонтальною рискою."""
+    sizes  = {"big": F_FRAC, "small": F_FRAC_S}
+    widths = {"big": 70,     "small": 48}
+    fn = sizes.get(size, F_FRAC_S)
+    bw = widths.get(size, 48)
+    f = tk.Frame(parent, bg=bg)
+    if w_part and w_part > 0:
+        tk.Label(f, text=str(w_part), font=fn, bg=bg, fg=color).pack(side="left", padx=(0, 5), pady=(10, 0))
+    frac_f = tk.Frame(f, bg=bg)
+    frac_f.pack(side="left")
+    tk.Label(frac_f, text=str(n), font=fn, bg=bg, fg=color).pack()
+    tk.Frame(frac_f, bg=color, height=3, width=bw).pack(pady=2)
+    tk.Label(frac_f, text=str(d), font=fn, bg=bg, fg=color).pack()
+    return f
+
+def draw_pie_canvas(parent, n, d, color, radius=50, bg=WHITE):
+    """Малювання кола на Canvas для розділу Теорія."""
+    cv = tk.Canvas(parent, width=radius*2+20, height=radius*2+20, bg=bg, highlightthickness=0)
+    cx, cy = radius+10, radius+10
+    cv.create_oval(cx-radius, cy-radius, cx+radius, cy+radius, fill="#f3f4f6", outline=MUTED, width=2)
+    if d > 0:
+        step = 360 / d
+        for i in range(min(n, d)):
+            cv.create_arc(cx-radius, cy-radius, cx+radius, cy+radius, start=90-i*step, extent=-step, fill=color, outline=WHITE, width=1)
+        for i in range(d):
+            angle = math.radians(90 - i*step)
+            cv.create_line(cx, cy, cx+radius*math.cos(angle), cy-radius*math.sin(angle), fill=MUTED, width=1)
+    return cv
+
+def draw_beam_theory(parent):
+    """Малювання координатного променя для Теорії."""
+    f = tk.Frame(parent, bg=WHITE, padx=40, pady=30, highlightbackground=BORDER, highlightthickness=1)
+    f.pack(fill="x", padx=100, pady=15)
+    tk.Label(f, text="📍 На координатному промені:", font=F_TITLE, bg=WHITE, fg=TEAL).pack(anchor="center", pady=(0, 20))
+    cv = tk.Canvas(f, bg=WHITE, height=180, highlightthickness=0)
+    cv.pack(fill="x")
+    cv.update_idletasks()
+    W = cv.winfo_width() or 1000
+    margin = 80
+    ly = 100
+    cv.create_line(margin, ly, W-40, ly, width=3, arrow=tk.LAST)
+    unit = (W - 2*margin) // 2
+    for i in range(19): # Мітки для дев'ятих часток
+        x = margin + i * (unit / 9)
+        th = 15 if i % 9 == 0 else 8
+        cv.create_line(x, ly-th, x, ly+th, width=2)
+        if i % 9 == 0:
+            cv.create_text(x, ly+40, text=str(i//9), font=F_HEAD)
+    # Стрибки (дуги)
+    cv.create_arc(margin, ly-50, margin+2*(unit/9), ly+50, start=0, extent=180, style=tk.ARC, outline=ACCENT, width=4)
+    cv.create_text(margin+(unit/9), ly-70, text="2/9", font=F_SUB, fill=ACCENT)
+    cv.create_arc(margin+2*(unit/9), ly-70, margin+7*(unit/9), ly+70, start=0, extent=180, style=tk.ARC, outline=ACCENT2, width=4)
+    cv.create_text(margin+4.5*(unit/9), ly-90, text="5/9", font=F_SUB, fill=ACCENT2)
+    cv.create_text(margin+7*(unit/9), ly+40, text="7/9", font=F_HEAD, fill=GREEN)
+
+# ── Window and App Classes ──────────────────────────────────────────────────
 class SolutionWindow(tk.Toplevel):
-    """Окреме, повністю функціональне вікно для показу рішення"""
-
     def __init__(self, parent, solution_steps):
         super().__init__(parent)
-        self.title("Рішення завдання (5 клас)")
-        self.geometry("800x600")
-
-        self.font_explanation = font.Font(family="Helvetica", size=18)
-        self.font_title = font.Font(family="Helvetica", size=20, weight="bold")
-        self.font_frac = font.Font(family="Helvetica", size=22, weight="bold")
-
-        main_canvas = tk.Canvas(self)
-        scrollbar = ttk.Scrollbar(self, orient="vertical", command=main_canvas.yview)
-        scrollable_frame = ttk.Frame(main_canvas)
-
-        scrollable_frame.bind("<Configure>", lambda e: main_canvas.configure(scrollregion=main_canvas.bbox("all")))
-        main_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        main_canvas.configure(yscrollcommand=scrollbar.set)
-
-        main_canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        row_counter = 0
+        self.title("Рішення завдання")
+        self.geometry("900x700")
+        self.configure(bg=BG)
+        sc = tk.Canvas(self, bg=BG, highlightthickness=0); sc.pack(side="left", fill="both", expand=True)
+        vsb = tk.Scrollbar(self, orient="vertical", command=sc.yview); vsb.pack(side="right", fill="y")
+        p = tk.Frame(sc, bg=BG); sc.create_window((0,0), window=p, anchor="nw")
+        p.bind("<Configure>", lambda e: sc.configure(scrollregion=sc.bbox("all")))
         for style, text in solution_steps:
-            frame = ttk.LabelFrame(scrollable_frame, padding=15)
-            frame.grid(row=row_counter, column=0, sticky="ew", pady=10, padx=10)
-            scrollable_frame.columnconfigure(0, weight=1)
-            row_counter += 1
-
+            f = tk.Frame(p, bg=WHITE, padx=20, pady=15, highlightbackground=BORDER, highlightthickness=1)
+            f.pack(fill="x", padx=20, pady=10)
             lines = text.split('\n')
-
-            title_label = ttk.Label(frame, text=lines[0],
-                                    font=self.font_title if style == "bold" else self.font_explanation)
-            title_label.pack(anchor="w")
-
+            tk.Label(f, text=lines[0], font=F_BODYB if style=="bold" else F_BODY, bg=WHITE, fg=ACCENT if style=="bold" else TEXT, anchor="w").pack(fill="x")
             for line in lines[1:]:
                 if "->" in line:
                     parts = line.split("->")
-                    frac_frame = ttk.Frame(frame)
-                    frac_frame.pack(anchor="w", pady=10)
-
+                    ff = tk.Frame(f, bg=WHITE); ff.pack(anchor="w", pady=10)
                     for i, part in enumerate(parts):
-                        if i > 0:
-                            ttk.Label(frac_frame, text="  =  ", font=self.font_frac).pack(side=tk.LEFT, padx=10)
-                        self.draw_fraction_expression(frac_frame, part.strip())
-                else:
-                    line_label = ttk.Label(frame, text=line, font=self.font_explanation, wraplength=700)
-                    line_label.pack(anchor="w", pady=2)
-                    frame.bind("<Configure>", lambda e, lbl=line_label: lbl.config(wraplength=e.width - 40))
+                        if i > 0: tk.Label(ff, text=" = ", font=F_HEAD, bg=WHITE).pack(side="left", padx=10)
+                        self._draw_expr(ff, part.strip())
+                else: tk.Label(f, text=line, font=F_BODY, bg=WHITE, fg=MUTED, anchor="w").pack(fill="x")
 
-    def draw_fraction_expression(self, parent, expression):
-        tokens = re.split(r'(\s[+-]\s|=)', expression)
-        for token in tokens:
-            token = token.strip()
-            if not token: continue
-            if "/" in token:
-                try:
-                    if ' ' in token:
-                        whole_part, frac_part = token.split(' ')
-                        n_str, d_str = frac_part.split('/')
-                        whole_label = ttk.Label(parent, text=f"{whole_part}", font=self.font_frac)
-                        whole_label.pack(side=tk.LEFT, padx=(0, 5))
-                    else:
-                        n_str, d_str = token.replace('(', '').replace(')', '').split('/')
-                except ValueError:
-                    ttk.Label(parent, text=token, font=self.font_frac).pack(side=tk.LEFT)
-                    continue
-                canvas = tk.Canvas(parent, height=60, bg=self.cget('bg'), highlightthickness=0)
-                canvas.pack(side=tk.LEFT)
-                n_w, d_w = self.font_frac.measure(n_str), self.font_frac.measure(str(d_str))
-                max_w = max(n_w, d_w) + 10
-                canvas.config(width=max_w)
-                canvas.create_text(max_w / 2, 15, text=n_str, font=self.font_frac, anchor="center")
-                canvas.create_line(2, 30, max_w - 2, 30, width=3)
-                canvas.create_text(max_w / 2, 45, text=d_str, font=self.font_frac, anchor="center")
-            else:
-                ttk.Label(parent, text=f" {token} ", font=self.font_frac).pack(side=tk.LEFT)
+    def _draw_expr(self, parent, expr):
+        tokens = re.split(r'(\s[+-]\s|=)', expr)
+        for t in tokens:
+            t = t.strip()
+            if "/" in t:
+                n, d = t.replace("(","").replace(")","").split("/")
+                frac_w(parent, n, d, bg=WHITE, size="small").pack(side="left")
+            elif t: tk.Label(parent, text=f" {t} ", font=F_HEAD, bg=WHITE).pack(side="left")
 
-
-class FractionVisualizerApp(tk.Tk):
+class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Тренажер (5 клас): Введення відповіді (Однакові знаменники)")
-        try:
-            self.state('zoomed')
-        except tk.TclError:
-            self.attributes('-zoomed', True)
+        self.title("§ 38. Додавання і віднімання дробів")
+        self.configure(bg=BG)
+        self.attributes("-fullscreen", True)
+        self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
+        
+        self.SW = self.winfo_screenwidth()
+        self.SH = self.winfo_screenheight()
+        
+        self.task_n1 = self.task_n2 = self.task_d = 0
+        self.operation = "+"
+        self.score = self.total = 0
+        self.correct_flag = False
+        
+        self.ans_n_var = tk.IntVar(value=1)
+        self.ans_d_var = tk.IntVar(value=1)
+        
+        self.ans_n_var.trace_add("write", lambda *a: self._auto_check())
+        self.ans_d_var.trace_add("write", lambda *a: self._auto_check())
 
-        self.MAX_CIRCLES = 6
-        self.MAX_SLIDER_VAL = 50
-        self.color1, self.color2, self.empty_color = 'deepskyblue', 'salmon', '#E0E0E0'
+        self.current_frame = None
+        self._build_chrome()
+        self.show_main_menu()
 
-        self.task_n1, self.task_n2, self.task_d = 0, 0, 1
-        self.correct_n, self.correct_d = 0, 1
+    def _build_chrome(self):
+        hdr = tk.Frame(self, bg=HDR_BG, height=70); hdr.pack(fill="x")
+        hdr.pack_propagate(False)
+        tk.Label(hdr, text="§ 38. Додавання і віднімання звичайних дробів", bg=HDR_BG, fg=WHITE, font=("Segoe UI", 21, "bold")).pack(side="left", padx=30)
+        mkbtn(hdr, "✕  Вийти", self.destroy, bg=RED, w=9, h=1).pack(side="right", padx=18, pady=16)
 
-        self.font_body = font.Font(family="Helvetica", size=16)
-        self.font_title = font.Font(family="Helvetica", size=18, weight="bold")
-        self.font_slider_value = font.Font(family="Helvetica", size=17, weight="bold")
-        self.font_success = font.Font(family="Helvetica", size=18, weight="bold")
+        nav = tk.Frame(self, bg=NAV_BG, height=52); nav.pack(fill="x")
+        for label, cmd in [("🏠 Меню", self.show_main_menu), ("📖 Теорія", self.show_theory), ("🎯 Практика", self.show_practice)]:
+            b = tk.Button(nav, text=label, command=cmd, bg=NAV_BG, fg=NAV_FG, font=F_NAV, relief="flat", bd=0, cursor="hand2", padx=20, pady=14)
+            b.pack(side="left")
+            b.bind("<Enter>", lambda e, x=b: x.config(bg=ACCENT)); b.bind("<Leave>", lambda e, x=b: x.config(bg=NAV_BG))
 
-        self.style = ttk.Style(self)
-        self.style.configure("TLabel", font=self.font_body)
-        self.style.configure("TButton", font=self.font_body, padding=10)
-        self.style.configure("TScale", length=300)
-        self.style.configure("Title.TLabel", font=self.font_title)
-        self.style.configure("Success.TLabel", font=self.font_success, foreground="green")
-        self.style.configure("Error.TLabel", font=self.font_success, foreground="red")
+        self.main_area = tk.Frame(self, bg=BG); self.main_area.pack(fill="both", expand=True)
 
-        self.ans_w_var = tk.IntVar()
-        self.ans_n_var = tk.IntVar()
-        self.ans_d_var = tk.IntVar()
-        self.result_status_var = tk.StringVar()
+    def clear_main(self):
+        if self.current_frame: self.current_frame.destroy()
+        self.current_frame = tk.Frame(self.main_area, bg=BG); self.current_frame.pack(expand=True, fill="both")
 
-        main_pane = ttk.PanedWindow(self, orient=tk.VERTICAL)
-        main_pane.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    def show_main_menu(self):
+        self.clear_main()
+        c = tk.Frame(self.current_frame, bg=BG); c.place(relx=.5, rely=.5, anchor="center")
+        tk.Label(c, text="Додавання і віднімання дробів", font=F_TITLE, bg=BG).pack(pady=20)
+        row = tk.Frame(c, bg=BG); row.pack()
+        for i, t, bg, cmd in [("📖", "Теорія", CARD_B, self.show_theory), ("🎯", "Практика", CARD_G, self.show_practice)]:
+            f = tk.Frame(row, bg=bg, width=250, height=220, highlightbackground=BORDER, highlightthickness=2); f.pack(side="left", padx=20); f.pack_propagate(False)
+            tk.Label(f, text=i, font=("Segoe UI", 50), bg=bg).pack(pady=20); tk.Label(f, text=t, font=F_SUB, bg=bg).pack()
+            f.bind("<Button-1>", lambda e, f=cmd: f())
 
-        top_pane_frame = ttk.Frame(main_pane)
-        top_pane_frame.columnconfigure(0, weight=1)
-        top_pane_frame.rowconfigure(1, weight=1)
-        main_pane.add(top_pane_frame, weight=3)
+    def show_theory(self):
+        self.clear_main()
+        sc = tk.Canvas(self.current_frame, bg=BG, highlightthickness=0); sc.pack(side="left", fill="both", expand=True)
+        vsb = tk.Scrollbar(self.current_frame, orient="vertical", command=sc.yview); vsb.pack(side="right", fill="y")
+        sc.configure(yscrollcommand=vsb.set)
+        p = tk.Frame(sc, bg=BG)
+        window_id = sc.create_window(self.SW//2, 0, window=p, anchor="n")
+        sc.bind("<Configure>", lambda e: sc.itemconfig(window_id, width=e.width))
+        p.bind("<Configure>", lambda e: sc.configure(scrollregion=sc.bbox("all")))
+        
+        theory_card(p, "➕ Додавання дробів", "Щоб додати дроби з однаковими знаменниками, треба додати їхні чисельники і залишити той самий знаменник.", CARD_B, ACCENT)
+        ex1 = tk.Frame(p, bg=WHITE, padx=40, pady=30, highlightbackground=BORDER, highlightthickness=1); ex1.pack(fill="x", padx=100, pady=15)
+        row1 = tk.Frame(ex1, bg=WHITE); row1.pack()
+        frac_w(row1, 1, 4, bg=WHITE, size="big").pack(side="left", padx=20)
+        tk.Label(row1, text="+", font=F_BIG, bg=WHITE).pack(side="left")
+        frac_w(row1, 2, 4, bg=WHITE, size="big").pack(side="left", padx=20)
+        tk.Label(row1, text="=", font=F_BIG, bg=WHITE).pack(side="left")
+        frac_w(row1, 3, 4, bg=WHITE, size="big", color=GREEN).pack(side="left", padx=20)
+        row2 = tk.Frame(ex1, bg=WHITE); row2.pack(pady=30)
+        draw_pie_canvas(row2, 1, 4, ACCENT, radius=60).pack(side="left", padx=15)
+        tk.Label(row2, text="+", font=F_BIG, bg=WHITE, fg=MUTED).pack(side="left")
+        draw_pie_canvas(row2, 2, 4, ACCENT2, radius=60).pack(side="left", padx=15)
+        tk.Label(row2, text="=", font=F_BIG, bg=WHITE, fg=MUTED).pack(side="left")
+        draw_pie_canvas(row2, 3, 4, GREEN, radius=60).pack(side="left", padx=15)
+        theory_card(p, "➖ Віднімання дробів", "Щоб відняти дроби з однаковими знаменниками, треба від чисельника зменшуваного відняти чисельник від’ємника і залишити той самий знаменник.", CARD_R, RED)
+        draw_beam_theory(p)
+        theory_card(p, "🔄 Результат", "Якщо результатом є неправильний дріб, його перетворюють на мішане число.", CARD_Y, ORANGE)
+        tk.Frame(p, bg=BG, height=50).pack()
 
-        task_frame = ttk.Frame(top_pane_frame)
-        task_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        self.task_canvas = tk.Canvas(task_frame, height=70)
-        self.task_canvas.pack(side=tk.LEFT, fill=tk.X, expand=True)
+    def show_practice(self):
+        self.clear_main()
+        top = tk.Frame(self.current_frame, bg=PANEL, height=60, highlightbackground=BORDER, highlightthickness=1); top.pack(fill="x")
+        self.score_lbl = tk.Label(top, text=f"Рахунок: {self.score}/{self.total}", font=F_SCORE, bg=PANEL, fg=GREEN); self.score_lbl.pack(side="left", padx=20)
+        ws = tk.Frame(self.current_frame, bg=BG); ws.pack(fill="both", expand=True, padx=20, pady=10)
+        left = tk.Frame(ws, bg=PANEL, highlightbackground=BORDER, highlightthickness=1); left.pack(side="left", fill="both", expand=True, padx=5)
+        self.task_expr_f = tk.Frame(left, bg=WHITE, pady=20); self.task_expr_f.pack(fill="x")
+        self.fig = plt.figure(figsize=(8, 4), dpi=90); self.canvas_plt = FigureCanvasTkAgg(self.fig, left)
+        self.canvas_plt.get_tk_widget().pack(fill="both", expand=True, pady=10)
+        right = tk.Frame(ws, bg=PANEL, highlightbackground=BORDER, highlightthickness=1, width=480); right.pack(side="right", fill="both", padx=5); right.pack_propagate(False)
+        tk.Label(right, text="Ваша відповідь:", font=F_SUB, bg=PANEL, fg=ACCENT).pack(pady=15)
+        def make_slider(parent, label, var, lo, hi, color):
+            f = tk.Frame(parent, bg=PANEL, pady=10); f.pack(fill="x", padx=30)
+            tk.Label(f, text=label, font=F_BODYB, bg=PANEL, fg=color).pack(anchor="w")
+            row = tk.Frame(f, bg=PANEL); row.pack(fill="x")
+            tk.Button(row, text="-", font=F_HEAD, width=2, command=lambda: self._adj(var, -1)).pack(side="left")
+            ttk.Scale(row, from_=lo, to=hi, variable=var, orient="horizontal", command=lambda v: self._sync(var, v)).pack(side="left", fill="x", expand=True, padx=10)
+            tk.Button(row, text="+", font=F_HEAD, width=2, command=lambda: self._adj(var, 1)).pack(side="left")
+            tk.Label(row, textvariable=var, font=F_HEAD, width=3, bg=PANEL).pack(side="left", padx=5)
+        make_slider(right, "Чисельник:", self.ans_n_var, 0, 30, ACCENT2)
+        make_slider(right, "Знаменник:", self.ans_d_var, 1, 30, ACCENT)
+        self.feed_lbl = tk.Label(right, text="", font=F_FEED, bg=PANEL); self.feed_lbl.pack(pady=20)
+        btns = tk.Frame(right, bg=PANEL); btns.pack(side="bottom", pady=30)
+        self.btn_next = mkbtn(btns, "▶ Наступне", self._new_task, bg=ACCENT, w=14)
+        self.btn_next.pack(side="left", padx=10)
+        self.btn_next.config(state="disabled", bg=BTN_NUM)
+        mkbtn(btns, "💡 Підказка", self._show_sol, bg=ORANGE, w=12).pack(side="left", padx=10)
+        self._new_task()
 
-        toolbar_frame = ttk.Frame(task_frame)
-        toolbar_frame.pack(side=tk.LEFT, padx=20)
-        self.result_status_label = ttk.Label(toolbar_frame, textvariable=self.result_status_var, style="Success.TLabel")
-        self.result_status_label.pack(side=tk.LEFT, padx=20)
-        ttk.Button(toolbar_frame, text="Нове завдання", command=self._generate_new_task).pack(side=tk.LEFT, padx=10)
-        ttk.Button(toolbar_frame, text="Як це розв'язати?", command=self._open_solution_window).pack(side=tk.LEFT,
-                                                                                                     padx=10)
+    def _adj(self, var, d):
+        if self.correct_flag: return
+        val = var.get() + d
+        if var == self.ans_d_var and val < 1: val = 1
+        elif val < 0: val = 0
+        var.set(val)
 
-        controls_frame = ttk.Frame(top_pane_frame)
-        controls_frame.grid(row=1, column=0, sticky="nsew", pady=(10, 0))
-        controls_frame.columnconfigure(0, weight=1)
+    def _sync(self, var, val):
+        if self.correct_flag: return
+        var.set(int(float(val)))
 
-        self.ans_controls = self._create_fraction_controls(controls_frame, "Ваша відповідь:", self.ans_w_var,
-                                                           self.ans_n_var, self.ans_d_var, 0)
-
-        plot_frame = ttk.Frame(main_pane)
-        main_pane.add(plot_frame, weight=7)
-
-        self.figure = plt.figure(figsize=(14, 6), dpi=90)
-        self.canvas = FigureCanvasTkAgg(self.figure, plot_frame)
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-        self._generate_new_task()
-
-    def _create_fraction_controls(self, parent, title, whole_var, num_var, den_var, col):
-        frame = ttk.Frame(parent)
-        frame.grid(row=0, column=col, padx=20, sticky="nsew")
-        frame.columnconfigure(0, weight=1)
-        ttk.Label(frame, text=title, style="Title.TLabel", foreground="navy").pack(pady=(0, 10))
-
-        whole_widgets = self._create_slider_unit(frame, "Ціла частина:", whole_var)
-        whole_widgets['frame'].pack(pady=5, fill="x")
-        ttk.Separator(frame, orient="horizontal").pack(pady=5, fill="x")
-
-        num_widgets = self._create_slider_unit(frame, "Чисельник:", num_var)
-        num_widgets['frame'].pack(pady=5, fill="x")
-        ttk.Separator(frame, orient="horizontal").pack(pady=5, fill="x")
-
-        den_widgets = self._create_slider_unit(frame, "Знаменник:", den_var)
-        den_widgets['frame'].pack(pady=5, fill="x")
-
-        return {'frame': frame, 'whole': whole_widgets, 'num': num_widgets, 'den': den_widgets}
-
-    def _create_slider_unit(self, parent, label_text, var):
-        frame = ttk.Frame(parent)
-        frame.columnconfigure(1, weight=1)
-        ttk.Label(frame, text=label_text).grid(row=0, column=0, columnspan=4, sticky="w")
-
-        scale = ttk.Scale(frame, from_=0, to=self.MAX_SLIDER_VAL, variable=var,
-                          command=lambda val, v=var: self._on_slider_change(val, v), orient="horizontal")
-        scale.grid(row=1, column=1, sticky="ew")
-
-        btn_minus = ttk.Button(frame, text="-", command=lambda v=var: self._adjust_value(v, -1))
-        btn_minus.grid(row=1, column=0, padx=(0, 5))
-        btn_plus = ttk.Button(frame, text="+", command=lambda v=var: self._adjust_value(v, 1))
-        btn_plus.grid(row=1, column=2, padx=5)
-
-        ttk.Label(frame, textvariable=var, font=self.font_slider_value, width=4).grid(row=1, column=3, padx=(10, 0))
-        return {'frame': frame, 'scale': scale, 'plus': btn_plus, 'minus': btn_minus}
-
-    def _adjust_value(self, var, delta):
-        new_val = var.get() + delta
-        if var == self.ans_d_var and new_val < 1: new_val = 1
-        if var != self.ans_d_var and new_val < 0: new_val = 0
-        var.set(new_val)
-        self._on_slider_change()
-
-    def _on_slider_change(self, value=None, var=None):
-        if var is not None and value is not None: var.set(int(float(value)))
-
-        if self.ans_d_var.get() < 1: self.ans_d_var.set(1)
-        if self.ans_n_var.get() < 0: self.ans_n_var.set(0)
-        if self.ans_w_var.get() < 0: self.ans_w_var.set(0)
-
-        self.visualize()
-        self._check_user_answer()
-
-    def _generate_new_task(self):
-        d = random.randint(3, 15)
-        n1 = random.randint(1, d - 1)
-        n2 = random.randint(1, d - 1)
-        self._load_state((n1, n2, d))
-
-    def _load_state(self, state):
-        self._set_controls_state(tk.NORMAL)
-        self.result_status_var.set("")
-        n1, n2, d = state
-        self.task_n1, self.task_n2, self.task_d = n1, n2, d
-
-        self.correct_n = n1 + n2
-        self.correct_d = d
-
-        self.ans_w_var.set(0)
-        self.ans_n_var.set(0)
-        self.ans_d_var.set(d)
-
-        self._update_task_display()
-        self._on_slider_change()
-
-    def _update_task_display(self):
-        self.task_canvas.delete("all")
-        self.task_canvas.bind("<Configure>", lambda e: self._draw_task_text(), add="+")
-        self.update_idletasks()
-        self._draw_task_text()
-
-    def _draw_task_text(self):
-        self.task_canvas.delete("all")
-        canvas_w, canvas_h = self.task_canvas.winfo_width(), self.task_canvas.winfo_height()
-        if canvas_w < 50: return
-
-        task_font = font.Font(family="Helvetica", size=24, weight="bold")
-        prefix_text = "Завдання: "
-        prefix_len = font.Font(font=self.font_body).measure(prefix_text)
-        self.task_canvas.create_text(10, canvas_h / 2, text=prefix_text, font=self.font_body, anchor="w", fill="navy")
-        x_pos = prefix_len + 15
-
-        def draw_frac(n, d, x):
-            n_w, d_w = task_font.measure(str(n)), task_font.measure(str(d))
-            max_w = max(n_w, d_w) + 10
-            self.task_canvas.create_text(x + max_w / 2, canvas_h / 2 - 16, text=str(n), font=task_font, anchor="center")
-            self.task_canvas.create_line(x, canvas_h / 2, x + max_w, canvas_h / 2, width=3)
-            self.task_canvas.create_text(x + max_w / 2, canvas_h / 2 + 16, text=str(d), font=task_font, anchor="center")
-            return x + max_w + 20
-
-        x_pos = draw_frac(self.task_n1, self.task_d, x_pos)
-        self.task_canvas.create_text(x_pos, canvas_h / 2, text="+", font=task_font, anchor="center")
-        x_pos += 40
-        draw_frac(self.task_n2, self.task_d, x_pos)
-
-    def _set_controls_state(self, state):
-        for key in ['whole', 'num', 'den']:
-            self.ans_controls[key]['scale'].config(state=state)
-            self.ans_controls[key]['plus'].config(state=state)
-            self.ans_controls[key]['minus'].config(state=state)
-
-    def visualize(self):
-        self.figure.clear()
-
-        gs_main = gridspec.GridSpec(2, 3, figure=self.figure, height_ratios=[1, 9], hspace=0.1)
-        ax_title1, ax_title2, ax_title3 = (self.figure.add_subplot(gs_main[0, i], facecolor='none') for i in range(3))
-        for ax in [ax_title1, ax_title2, ax_title3]: ax.axis('off')
-
-        ax_title1.set_title(self.format_user_input_title("Перший дріб", 0, self.task_n1, self.task_d), fontsize=18)
-        ax_title2.set_title(self.format_user_input_title("Другий дріб", 0, self.task_n2, self.task_d), fontsize=18)
-
-        user_w, user_n, user_d = self.ans_w_var.get(), self.ans_n_var.get(), self.ans_d_var.get()
-        ax_title3.set_title(self.format_user_input_title("Ваша відповідь", user_w, user_n, user_d), fontsize=18,
-                            color="green")
-
-        ax1, ax2, ax3 = (self.figure.add_subplot(gs_main[1, i]) for i in range(3))
-
-        self._draw_overlapping_circles(ax1, self.task_n1, self.task_d, self.color1)
-        self._draw_overlapping_circles(ax2, self.task_n2, self.task_d, self.color2)
-
-        user_improper_n = user_w * user_d + user_n
-        if user_w == 0 and user_n == 0:
-            self.draw_placeholder(ax3, "Введіть\nрезультат")
+    def _new_task(self):
+        self.correct_flag = False
+        if hasattr(self, 'btn_next'): self.btn_next.config(state="disabled", bg=BTN_NUM)
+        self.operation = random.choice(["+", "-"])
+        self.task_d = random.randint(4, 15)
+        if self.operation == "+":
+            self.task_n1 = random.randint(1, self.task_d-1)
+            self.task_n2 = random.randint(1, self.task_d - self.task_n1)
         else:
-            self._draw_overlapping_circles(ax3, user_improper_n, user_d, 'mediumseagreen')
+            self.task_n1 = random.randint(2, self.task_d-1)
+            self.task_n2 = random.randint(1, self.task_n1)
+        self.ans_n_var.set(1); self.ans_d_var.set(1)
+        self.feed_lbl.config(text="", fg=TEXT)
+        for w in self.task_expr_f.winfo_children(): w.destroy()
+        row = tk.Frame(self.task_expr_f, bg=WHITE); row.pack()
+        frac_w(row, self.task_n1, self.task_d, bg=WHITE).pack(side="left", padx=15)
+        tk.Label(row, text=self.operation, font=F_SIGN, bg=WHITE, fg=ORANGE).pack(side="left")
+        frac_w(row, self.task_n2, self.task_d, bg=WHITE).pack(side="left", padx=15)
+        tk.Label(row, text="= ?", font=F_SIGN, bg=WHITE, fg=ORANGE).pack(side="left", padx=10)
+        self._draw_plt()
 
-        self.figure.tight_layout(pad=2.0)
-        self.canvas.draw()
+    def _draw_plt(self):
+        un, ud = self.ans_n_var.get(), self.ans_d_var.get()
+        self.fig.clear(); gs = gridspec.GridSpec(1, 3, figure=self.fig)
+        ax1 = self.fig.add_subplot(gs[0, 0]); ax2 = self.fig.add_subplot(gs[0, 1]); ax3 = self.fig.add_subplot(gs[0, 2])
+        self._pie(ax1, self.task_n1, self.task_d, "Перший дріб" if self.operation=="+" else "Зменшуване", ACCENT)
+        self._pie(ax2, self.task_n2, self.task_d, "Другий дріб" if self.operation=="+" else "Від’ємник", ACCENT2)
+        pie_color = "mediumseagreen" if self.correct_flag else "salmon"
+        self._pie(ax3, un, ud, "Твій результат", pie_color)
+        self.fig.tight_layout(); self.canvas_plt.draw()
 
-    def _check_user_answer(self):
-        user_w = self.ans_w_var.get()
-        user_n = self.ans_n_var.get()
-        user_d = self.ans_d_var.get()
-
-        if user_d == 0:
-            self.result_status_var.set("Знаменник не може бути нулем!")
-            self.result_status_label.config(style="Error.TLabel")
-            return
-
-        if user_w == 0 and user_n == 0:
-            self.result_status_var.set("")
-            return
-
-        user_improper_n = user_w * user_d + user_n
-
-        is_equivalent = (user_improper_n * self.correct_d == self.correct_n * user_d)
-
-        if is_equivalent:
-            if user_n >= user_d and user_d != 0:
-                self.result_status_var.set("Правильно! Але виділіть цілу частину (чисельник більший за знаменник).")
-                self.result_status_label.config(style="Success.TLabel")
-            elif math.gcd(user_n, user_d) > 1 and user_n != 0:
-                self.result_status_var.set("Правильно! Але дріб ще можна скоротити.")
-                self.result_status_label.config(style="Success.TLabel")
-            else:
-                self.result_status_var.set("✔ ВІДМІННО! Абсолютно правильна відповідь.")
-                self.result_status_label.config(style="Success.TLabel")
-                self._set_controls_state(tk.DISABLED)
+    def _pie(self, ax, n, d, title, color):
+        ax.clear(); ax.set_title(title, fontsize=12, pad=10); ax.axis('off')
+        if d <= 0: return
+        if n > d:
+            ax.pie([1], colors=[color], wedgeprops={"edgecolor":"black", "linewidth":1})
+            ax.set_title(title + "\n(> 1)", fontsize=10)
         else:
-            self.result_status_var.set("Поки що неправильно. Спробуйте ще!")
-            self.result_status_label.config(style="Error.TLabel")
+            # Малювання окремих часток (1/d кожна)
+            ax.pie([1]*d, colors=[color]*n + ["#f3f4f6"]*(d-n), startangle=90, counterclock=False, wedgeprops={"edgecolor":"black", "linewidth":0.5})
 
-    def format_user_input_title(self, base_title, w, n, d):
-        if d == 0: return base_title
+    def _auto_check(self):
+        un, ud = self.ans_n_var.get(), self.ans_d_var.get()
+        self._draw_plt()
+        if self.correct_flag or ud == 0: return
+        corr_n = (self.task_n1 + self.task_n2) if self.operation=="+" else (self.task_n1 - self.task_n2)
+        if un * self.task_d == corr_n * ud:
+            self.correct_flag = True; self.score += 1; self.total += 1
+            self.feed_lbl.config(text="✅ Правильно! Тепер можна йти далі.", fg=GREEN)
+            self.score_lbl.config(text=f"Рахунок: {self.score}/{self.total}")
+            self.btn_next.config(state="normal", bg=ACCENT)
+            self._draw_plt()
 
-        whole_str = f"${w}$" if w > 0 else ""
-        frac_str = f"$\\frac{{{n}}}{{{d}}}$" if n > 0 or (w == 0 and n == 0 and d != 0) else ""
-
-        if w == 0 and n == 0 and d != 0:
-            return f"{base_title}\n$0$"
-        elif w == 0 and n > 0 and d != 0:
-            return f"{base_title}\n{frac_str}"
-        elif w > 0 and n == 0 and d != 0:
-            return f"{base_title}\n{whole_str}"
-
-        return f"{base_title}\n{whole_str}{frac_str}"
-
-    def _draw_overlapping_circles(self, ax, n, d, color):
-        ax.axis('off')
-        ax.set_aspect('equal', adjustable='box')
-        if d == 0: return
-        whole, frac_n = divmod(n, d)
-        total_circles = whole + (1 if frac_n > 0 else 0)
-        if total_circles == 0 and n == 0: self.draw_fraction_pie(ax, [0], [color], d, center=(0, 0)); return
-
-        radius = 1.0
-        overlap = 0.65
-        step = 2 * radius * overlap
-        actual_width = (total_circles - 1) * step + 2 * radius if total_circles > 0 else 0
-
-        max_width_circles = max(self.MAX_CIRCLES, total_circles)
-        max_width = (max_width_circles - 1) * step + 2 * radius
-
-        start_x = -actual_width / 2 + radius
-        for i in range(whole):
-            self.draw_fraction_pie(ax, [d], [color], d, center=(start_x + i * step, 0), radius=radius)
-        if frac_n > 0:
-            self.draw_fraction_pie(ax, [frac_n], [color], d, center=(start_x + whole * step, 0), radius=radius)
-
-        ax.set_xlim(-max_width / 2 - 0.2, max_width / 2 + 0.2)
-        ax.set_ylim(-radius - 1.4, radius + 0.2)
-
-    def _build_solution_for_task(self):
-        n1, n2, d = self.task_n1, self.task_n2, self.task_d
-        self.solution_steps = []
-
-        self.solution_steps.append(("bold", "--- ПРАВИЛО 5 КЛАСУ ---"))
-        self.solution_steps.append(("normal",
-                                    "Щоб додати дроби з однаковими знаменниками,\nтреба додати їхні чисельники, а знаменник залишити тим самим."))
-
-        sum_n = n1 + n2
-
-        self.solution_steps.extend([
-            ("bold", "--- КРОК 1: ДОДАЄМО ЧИСЕЛЬНИКИ ---"),
-            ("normal", f"({n1}/{d}) + ({n2}/{d}) -> ({(n1 + n2)}/{d})")
-        ])
-
-        if sum_n > d:
-            whole, rem = divmod(sum_n, d)
-            self.solution_steps.append(("bold", "--- КРОК 2: ВИДІЛЕННЯ ЦІЛОЇ ЧАСТИНИ ---"))
-            self.solution_steps.append(("normal", f"Дріб неправильний (чисельник більший за знаменник)."))
-            if rem == 0:
-                self.solution_steps.append(("normal", f"{sum_n} поділити на {d} дорівнює {whole}."))
-                sum_n = 0
-            else:
-                self.solution_steps.append(
-                    ("normal", f"{sum_n} поділити на {d} дорівнює {whole} цілих і {rem} остачі."))
-                sum_n = rem
-        elif sum_n == d:
-            self.solution_steps.extend([
-                ("bold", "--- КРОК 2: ЦІЛЕ ЧИСЛО ---"),
-                ("normal", f"Чисельник дорівнює знаменнику, отже це дорівнює 1.")
-            ])
-            whole = 1
-            sum_n = 0
-        else:
-            whole = 0
-
-        if sum_n > 0:
-            gcd = math.gcd(sum_n, d)
-            if gcd > 1:
-                reduced_n, reduced_d = sum_n // gcd, d // gcd
-                self.solution_steps.extend([
-                    ("bold", "--- КРОК 3: СКОРОЧЕННЯ ДРОБУ ---"),
-                    ("normal", f"Чисельник ({sum_n}) і знаменник ({d}) можна поділити на {gcd}."),
-                    ("normal", f"({sum_n}/{d}) -> ({reduced_n}/{reduced_d})")
-                ])
-                sum_n, d = reduced_n, reduced_d
-
-        if whole > 0:
-            if sum_n > 0:
-                self.solution_steps.append(("bold", f"Кінцева відповідь: {whole} {sum_n}/{d}"))
-            else:
-                self.solution_steps.append(("bold", f"Кінцева відповідь: {whole}"))
-        else:
-            self.solution_steps.append(("bold", f"Кінцева відповідь: {sum_n}/{d}"))
-
-    def draw_fraction_pie(self, ax, numerators, colors, denominator, center=(0, 0), radius=1.0):
-        sizes, final_colors = [], []
-        total_num = sum(numerators)
-        if total_num > 0:
-            sizes.extend([n for n in numerators if n > 0])
-            final_colors.extend(colors[:len(sizes)])
-        if denominator - total_num > 0:
-            sizes.append(denominator - total_num)
-            final_colors.append(self.empty_color)
-        if not sizes: sizes, final_colors = [1], [self.empty_color]
-
-        ax.pie(sizes, radius=radius * 2.2, center=center, colors=final_colors, startangle=90, counterclock=False,
-               wedgeprops={'edgecolor': 'black', 'linewidth': 0.8})
-
-    def draw_placeholder(self, ax, text):
-        ax.axis('off')
-        ax.text(0.5, 0.5, text, ha='center', va='center', fontsize=20, color='grey', transform=ax.transAxes, wrap=True)
-
-    def _open_solution_window(self):
-        self._build_solution_for_task()
-        SolutionWindow(self, self.solution_steps)
-
+    def _show_sol(self):
+        d, n1, n2 = self.task_d, self.task_n1, self.task_n2
+        res_n = (n1+n2) if self.operation=="+" else (n1-n2)
+        op_name = "додаємо" if self.operation=="+" else "віднімаємо"
+        steps = [("bold", f"Крок 1: Обчислюємо чисельник"), ("normal", f"Знаменник залишаємо {d}. Чисельники {op_name}:"), ("normal", f"{n1}/{d} {self.operation} {n2}/{d} -> ({n1}{self.operation}{n2})/{d} -> {res_n}/{d}")]
+        SolutionWindow(self, steps)
 
 if __name__ == "__main__":
-    app = FractionVisualizerApp()
-    app.mainloop()
+    App().mainloop()
