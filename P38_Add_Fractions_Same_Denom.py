@@ -108,31 +108,33 @@ def draw_pie_canvas(parent, n, d, color, radius=50, bg=WHITE):
             cv.create_line(cx, cy, cx+radius*math.cos(angle), cy-radius*math.sin(angle), fill=MUTED, width=1)
     return cv
 
-def draw_beam_theory(parent):
-    """Малювання координатного променя для Теорії."""
+def draw_beam_theory_combined(parent):
+    """Малювання комбінованого координатного променя для Теорії."""
     f = tk.Frame(parent, bg=WHITE, padx=40, pady=30, highlightbackground=BORDER, highlightthickness=1)
     f.pack(fill="x", padx=100, pady=15)
     tk.Label(f, text="📍 На координатному промені:", font=F_TITLE, bg=WHITE, fg=TEAL).pack(anchor="center", pady=(0, 20))
-    cv = tk.Canvas(f, bg=WHITE, height=180, highlightthickness=0)
+    cv = tk.Canvas(f, bg=WHITE, height=220, highlightthickness=0)
     cv.pack(fill="x")
     cv.update_idletasks()
     W = cv.winfo_width() or 1000
     margin = 80
-    ly = 100
+    ly = 110
     cv.create_line(margin, ly, W-40, ly, width=3, arrow=tk.LAST)
     unit = (W - 2*margin) // 2
-    for i in range(19): # Мітки для дев'ятих часток
+    for i in range(19):
         x = margin + i * (unit / 9)
         th = 15 if i % 9 == 0 else 8
         cv.create_line(x, ly-th, x, ly+th, width=2)
         if i % 9 == 0:
             cv.create_text(x, ly+40, text=str(i//9), font=F_HEAD)
-    # Стрибки (дуги)
+    # Додавання (верхня дуга)
     cv.create_arc(margin, ly-50, margin+2*(unit/9), ly+50, start=0, extent=180, style=tk.ARC, outline=ACCENT, width=4)
-    cv.create_text(margin+(unit/9), ly-70, text="2/9", font=F_SUB, fill=ACCENT)
-    cv.create_arc(margin+2*(unit/9), ly-70, margin+7*(unit/9), ly+70, start=0, extent=180, style=tk.ARC, outline=ACCENT2, width=4)
-    cv.create_text(margin+4.5*(unit/9), ly-90, text="5/9", font=F_SUB, fill=ACCENT2)
-    cv.create_text(margin+7*(unit/9), ly+40, text="7/9", font=F_HEAD, fill=GREEN)
+    cv.create_text(margin+(unit/9), ly-70, text="+2/9", font=F_SUB, fill=ACCENT)
+    # Віднімання (нижня дуга)
+    cv.create_arc(margin+7*(unit/9), ly-40, margin+3*(unit/9), ly+40, start=180, extent=180, style=tk.ARC, outline=RED, width=4)
+    cv.create_text(margin+5*(unit/9), ly+75, text="-4/9", font=F_SUB, fill=RED)
+    cv.create_text(margin+7*(unit/9), ly-30, text="7/9", font=F_HEAD, fill=GREEN)
+    cv.create_text(margin+3*(unit/9), ly+40, text="3/9", font=F_HEAD, fill=ORANGE)
 
 # ── Window and App Classes ──────────────────────────────────────────────────
 class SolutionWindow(tk.Toplevel):
@@ -171,7 +173,7 @@ class SolutionWindow(tk.Toplevel):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("§ 38. Додавання і віднімання дробів")
+        self.title("§ 38. Додавання та віднімання дробів")
         self.configure(bg=BG)
         self.attributes("-fullscreen", True)
         self.bind("<Escape>", lambda e: self.attributes("-fullscreen", False))
@@ -197,7 +199,7 @@ class App(tk.Tk):
     def _build_chrome(self):
         hdr = tk.Frame(self, bg=HDR_BG, height=70); hdr.pack(fill="x")
         hdr.pack_propagate(False)
-        tk.Label(hdr, text="§ 38. Додавання і віднімання звичайних дробів", bg=HDR_BG, fg=WHITE, font=("Segoe UI", 21, "bold")).pack(side="left", padx=30)
+        tk.Label(hdr, text="§ 38.   Додавання та віднімання звичайних дробів з однаковими знаменниками", bg=HDR_BG, fg=WHITE, font=("Segoe UI", 21, "bold")).pack(side="left", padx=30)
         mkbtn(hdr, "✕  Вийти", self.destroy, bg=RED, w=9, h=1).pack(side="right", padx=18, pady=16)
 
         nav = tk.Frame(self, bg=NAV_BG, height=52); nav.pack(fill="x")
@@ -215,7 +217,7 @@ class App(tk.Tk):
     def show_main_menu(self):
         self.clear_main()
         c = tk.Frame(self.current_frame, bg=BG); c.place(relx=.5, rely=.5, anchor="center")
-        tk.Label(c, text="Додавання і віднімання дробів", font=F_TITLE, bg=BG).pack(pady=20)
+        tk.Label(c, text="Додавання та віднімання дробів", font=F_TITLE, bg=BG).pack(pady=20)
         row = tk.Frame(c, bg=BG); row.pack()
         for i, t, bg, cmd in [("📖", "Теорія", CARD_B, self.show_theory), ("🎯", "Практика", CARD_G, self.show_practice)]:
             f = tk.Frame(row, bg=bg, width=250, height=220, highlightbackground=BORDER, highlightthickness=2); f.pack(side="left", padx=20); f.pack_propagate(False)
@@ -233,22 +235,25 @@ class App(tk.Tk):
         p.bind("<Configure>", lambda e: sc.configure(scrollregion=sc.bbox("all")))
         
         theory_card(p, "➕ Додавання дробів", "Щоб додати дроби з однаковими знаменниками, треба додати їхні чисельники і залишити той самий знаменник.", CARD_B, ACCENT)
-        ex1 = tk.Frame(p, bg=WHITE, padx=40, pady=30, highlightbackground=BORDER, highlightthickness=1); ex1.pack(fill="x", padx=100, pady=15)
-        row1 = tk.Frame(ex1, bg=WHITE); row1.pack()
-        frac_w(row1, 1, 4, bg=WHITE, size="big").pack(side="left", padx=20)
-        tk.Label(row1, text="+", font=F_BIG, bg=WHITE).pack(side="left")
-        frac_w(row1, 2, 4, bg=WHITE, size="big").pack(side="left", padx=20)
-        tk.Label(row1, text="=", font=F_BIG, bg=WHITE).pack(side="left")
-        frac_w(row1, 3, 4, bg=WHITE, size="big", color=GREEN).pack(side="left", padx=20)
-        row2 = tk.Frame(ex1, bg=WHITE); row2.pack(pady=30)
-        draw_pie_canvas(row2, 1, 4, ACCENT, radius=60).pack(side="left", padx=15)
-        tk.Label(row2, text="+", font=F_BIG, bg=WHITE, fg=MUTED).pack(side="left")
-        draw_pie_canvas(row2, 2, 4, ACCENT2, radius=60).pack(side="left", padx=15)
-        tk.Label(row2, text="=", font=F_BIG, bg=WHITE, fg=MUTED).pack(side="left")
-        draw_pie_canvas(row2, 3, 4, GREEN, radius=60).pack(side="left", padx=15)
+        ex1 = tk.Frame(p, bg=WHITE, padx=40, pady=20, highlightbackground=BORDER, highlightthickness=1); ex1.pack(fill="x", padx=100, pady=10)
+        r1 = tk.Frame(ex1, bg=WHITE); r1.pack()
+        frac_w(r1, 1, 4, bg=WHITE, size="big").pack(side="left", padx=20)
+        tk.Label(r1, text="+", font=F_BIG, bg=WHITE).pack(side="left")
+        frac_w(r1, 2, 4, bg=WHITE, size="big").pack(side="left", padx=20)
+        tk.Label(r1, text="=", font=F_BIG, bg=WHITE).pack(side="left")
+        frac_w(r1, 3, 4, bg=WHITE, size="big", color=GREEN).pack(side="left", padx=20)
+        
         theory_card(p, "➖ Віднімання дробів", "Щоб відняти дроби з однаковими знаменниками, треба від чисельника зменшуваного відняти чисельник від’ємника і залишити той самий знаменник.", CARD_R, RED)
-        draw_beam_theory(p)
-        theory_card(p, "🔄 Результат", "Якщо результатом є неправильний дріб, його перетворюють на мішане число.", CARD_Y, ORANGE)
+        ex2 = tk.Frame(p, bg=WHITE, padx=40, pady=20, highlightbackground=BORDER, highlightthickness=1); ex2.pack(fill="x", padx=100, pady=10)
+        r2 = tk.Frame(ex2, bg=WHITE); r2.pack()
+        frac_w(r2, 5, 8, bg=WHITE, size="big").pack(side="left", padx=20)
+        tk.Label(r2, text="−", font=F_BIG, bg=WHITE).pack(side="left")
+        frac_w(r2, 3, 8, bg=WHITE, size="big").pack(side="left", padx=20)
+        tk.Label(r2, text="=", font=F_BIG, bg=WHITE).pack(side="left")
+        frac_w(r2, 2, 8, bg=WHITE, size="big", color=RED).pack(side="left", padx=20)
+        
+        draw_beam_theory_combined(p)
+        theory_card(p, "🔄 Результат", "Якщо результатом є неправильний дріб, його зазвичай перетворюють на мішане число.", CARD_Y, ORANGE)
         tk.Frame(p, bg=BG, height=50).pack()
 
     def show_practice(self):
@@ -275,8 +280,7 @@ class App(tk.Tk):
         self.feed_lbl = tk.Label(right, text="", font=F_FEED, bg=PANEL); self.feed_lbl.pack(pady=20)
         btns = tk.Frame(right, bg=PANEL); btns.pack(side="bottom", pady=30)
         self.btn_next = mkbtn(btns, "▶ Наступне", self._new_task, bg=ACCENT, w=14)
-        self.btn_next.pack(side="left", padx=10)
-        self.btn_next.config(state="disabled", bg=BTN_NUM)
+        self.btn_next.pack(side="left", padx=10); self.btn_next.config(state="disabled", bg=BTN_NUM)
         mkbtn(btns, "💡 Підказка", self._show_sol, bg=ORANGE, w=12).pack(side="left", padx=10)
         self._new_task()
 
@@ -316,8 +320,8 @@ class App(tk.Tk):
         un, ud = self.ans_n_var.get(), self.ans_d_var.get()
         self.fig.clear(); gs = gridspec.GridSpec(1, 3, figure=self.fig)
         ax1 = self.fig.add_subplot(gs[0, 0]); ax2 = self.fig.add_subplot(gs[0, 1]); ax3 = self.fig.add_subplot(gs[0, 2])
-        self._pie(ax1, self.task_n1, self.task_d, "Перший дріб" if self.operation=="+" else "Зменшуване", ACCENT)
-        self._pie(ax2, self.task_n2, self.task_d, "Другий дріб" if self.operation=="+" else "Від’ємник", ACCENT2)
+        self._pie(ax1, self.task_n1, self.task_d, "Зменшуване" if self.operation=="-" else "Доданок 1", ACCENT)
+        self._pie(ax2, self.task_n2, self.task_d, "Від’ємник" if self.operation=="-" else "Доданок 2", ACCENT2)
         pie_color = "mediumseagreen" if self.correct_flag else "salmon"
         self._pie(ax3, un, ud, "Твій результат", pie_color)
         self.fig.tight_layout(); self.canvas_plt.draw()
@@ -329,7 +333,6 @@ class App(tk.Tk):
             ax.pie([1], colors=[color], wedgeprops={"edgecolor":"black", "linewidth":1})
             ax.set_title(title + "\n(> 1)", fontsize=10)
         else:
-            # Малювання окремих часток (1/d кожна)
             ax.pie([1]*d, colors=[color]*n + ["#f3f4f6"]*(d-n), startangle=90, counterclock=False, wedgeprops={"edgecolor":"black", "linewidth":0.5})
 
     def _auto_check(self):
@@ -339,9 +342,7 @@ class App(tk.Tk):
         corr_n = (self.task_n1 + self.task_n2) if self.operation=="+" else (self.task_n1 - self.task_n2)
         if un * self.task_d == corr_n * ud:
             self.correct_flag = True; self.score += 1; self.total += 1
-            self.feed_lbl.config(text="✅ Правильно! Тепер можна йти далі.", fg=GREEN)
-            self.score_lbl.config(text=f"Рахунок: {self.score}/{self.total}")
-            self.btn_next.config(state="normal", bg=ACCENT)
+            self.feed_lbl.config(text="✅ Правильно!", fg=GREEN); self.btn_next.config(state="normal", bg=ACCENT)
             self._draw_plt()
 
     def _show_sol(self):
