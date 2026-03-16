@@ -105,6 +105,7 @@ class App(tk.Tk):
         self.nl_task_mode=False; self.nl_task_target=0.0
         self.nl_task_score=0; self.nl_task_total=0; self.nl_task_locked=False
         self._nl_mpl_fig=None; self._nl_mpl_canvas=None
+        self.pv_nl_scale="tenths"
 
         self._build_chrome()
         self.show_main_menu()
@@ -498,25 +499,52 @@ class App(tk.Tk):
         for n in [1,2,3]:
             b=tk.Button(sbar,text=str(n),font=("Segoe UI",15,"bold"),bg=BTN_NUM,fg=TEXT,width=3,height=1,relief="flat",cursor="hand2",command=lambda k=n:self._pvset(k))
             b.pack(side="left",padx=5,pady=10); self._pv_prec_btns.append(b)
+        
         ws=tk.Frame(cf,bg=BG); ws.pack(fill="both",expand=True,padx=14,pady=10)
         left=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=1,width=480); left.pack(side="left",fill="y"); left.pack_propagate(False)
         tk.Label(left,text="Зміни розряди:",font=F_SUB,bg=PANEL,fg=MUTED).pack(anchor="w",padx=18,pady=(12,4))
         self._pv_ctrl=tk.Frame(left,bg=PANEL); self._pv_ctrl.pack(fill="x",padx=14)
+        
         right=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=1); right.pack(side="right",fill="both",expand=True,padx=(10,0))
         nf=tk.Frame(right,bg=PANEL); nf.pack(expand=True)
-        tk.Label(nf,text="Десятковий дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(0,4))
+        
+        # ── Cake Visualization ──
+        tk.Label(nf,text="Візуалізація (тортики):",font=("Segoe UI",15),bg=PANEL,fg=MUTED).pack(pady=(6,2))
+        self._pv_cake_cv=tk.Canvas(nf,bg=PANEL,height=140,highlightthickness=0); self._pv_cake_cv.pack(fill="x",padx=24)
+        
+        tk.Label(nf,text="Десятковий дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(10,4))
         self._pv_ncv=tk.Canvas(nf,bg=PANEL,height=110,highlightthickness=0); self._pv_ncv.pack(fill="x",padx=24,pady=4)
-        tk.Label(nf,text="Як звичайний дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(14,4))
+        tk.Label(nf,text="Як звичайний дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(10,4))
         self._pv_frow=tk.Frame(nf,bg=PANEL); self._pv_frow.pack()
-        tk.Label(nf,text="Читається:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(14,4))
+        tk.Label(nf,text="Читається:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(10,4))
         self._pv_rlbl=tk.Label(nf,text="",font=("Segoe UI",19,"bold"),bg=PANEL,fg=ACCENT,wraplength=560,justify="center"); self._pv_rlbl.pack(pady=4)
+        
         self._pvset(self.pv_places)
 
         # ── Числова пряма нижче (matplotlib) ──────────────────────────────────
         tk.Frame(cf,bg=BORDER,height=2).pack(fill="x",padx=12,pady=(8,0))
-        tk.Label(cf,text="📏  Числова пряма",font=("Segoe UI",14,"bold"),bg=BG,fg=TEXT).pack(anchor="w",padx=18,pady=(6,0))
+        nl_hdr=tk.Frame(cf,bg=BG); nl_hdr.pack(fill="x",padx=18,pady=(6,0))
+        tk.Label(nl_hdr,text="📏  Числова пряма",font=("Segoe UI",14,"bold"),bg=BG,fg=TEXT).pack(side="left")
+        
+        # Масштаб осі
+        sc_f=tk.Frame(nl_hdr,bg=BG); sc_f.pack(side="left",padx=30)
+        tk.Label(sc_f,text="Масштаб:",font=("Segoe UI",11,"bold"),bg=BG,fg=MUTED).pack(side="left",padx=6)
+        self._pv_nl_sc_btns=[]
+        for sc,lbl2 in [("ones","1"),("tenths","0,1"),("hundredths","0,01"),("thousandths","0,001")]:
+             b=tk.Button(sc_f,text=lbl2,font=("Segoe UI",11,"bold"),bg=BTN_NUM,fg=TEXT,
+                        relief="flat",cursor="hand2",padx=12,pady=2,command=lambda s=sc:self._pv_nl_set_scale(s))
+             b.pack(side="left",padx=3); self._pv_nl_sc_btns.append((b,sc))
+        
+        self._pv_nl_set_scale(self.pv_nl_scale)
         # Малюємо відразу після першої відрисовки
         self.after(200, self._pv_draw_nl)
+
+    def _pv_nl_set_scale(self,sc):
+        self.pv_nl_scale=sc
+        if hasattr(self,"_pv_nl_sc_btns"):
+            for b,s in self._pv_nl_sc_btns:
+                b.config(bg=ACCENT if s==sc else BTN_NUM,fg=WHITE if s==sc else TEXT)
+        self._pv_draw_nl()
 
     def _pv_draw_nl(self):
         """Малює числову пряму на основі поточного значення з розрядів."""
@@ -525,7 +553,11 @@ class App(tk.Tk):
         val=float(self.pv_digits[0])
         for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
         val=round(val,self.pv_places)
-        step={1:0.1,2:0.01,3:0.001}.get(self.pv_places,0.1)
+        
+        # Крок осі залежить від обраного масштабу
+        sc=self.pv_nl_scale
+        step={"ones":1.0, "tenths":0.1, "hundredths":0.01, "thousandths":0.001}.get(sc, 0.1)
+        
         # Закриваємо попередній figure якщо є
         if hasattr(self,'_pv_nl_fig') and self._pv_nl_fig:
             try: plt.close(self._pv_nl_fig)
@@ -534,17 +566,21 @@ class App(tk.Tk):
         if hasattr(self,'_pv_nl_canvas_widget') and self._pv_nl_canvas_widget:
             try: self._pv_nl_canvas_widget.destroy()
             except: pass
-        import matplotlib.pyplot as plt2
-        fig,ax=plt2.subplots(figsize=(10,2.2),facecolor="#f0f4f8")
+            
+        fig,ax=plt.subplots(figsize=(10,2.2),facecolor="#f0f4f8")
         fig.subplots_adjust(left=0.04,right=0.97,top=0.80,bottom=0.28)
         self._pv_nl_fig=fig
-        span=step*14; lo=max(0.0,val-span/2); hi=lo+span
+        
+        # Вікно: 12 кроків навколо точки
+        span=step*12; lo=max(0.0,val-span/2); hi=lo+span
         label_step=step*5
+        
         ax.set_xlim(lo,hi); ax.set_ylim(-0.5,0.7); ax.set_yticks([])
         ax.axhline(0,color='#475569',linewidth=2,zorder=1)
         ax.spines['left'].set_visible(False); ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False); ax.spines['bottom'].set_visible(False)
         ax.annotate('',xy=(hi,0),xytext=(hi-step*0.4,0),arrowprops=dict(arrowstyle='->',color='#475569',lw=2))
+        
         v=lo
         while v<=hi+step*0.001:
             vr=round(v,6); is_int=abs(vr-round(vr))<1e-9
@@ -556,10 +592,12 @@ class App(tk.Tk):
             if is_int:
                 ax.text(vr,-0.30,str(int(round(vr))),ha='center',va='top',fontsize=11,fontweight='bold',color='#0f172a')
             elif is_lbl:
-                places_lbl=self.pv_places
-                lbl=f"{vr:.{places_lbl}f}".replace('.',',')
+                # Скільки знаків показувати на осі
+                axis_pl = {"ones":0, "tenths":1, "hundredths":2, "thousandths":3}.get(sc, 1)
+                lbl=f"{vr:.{axis_pl}f}".replace('.',',')
                 ax.text(vr,-0.30,lbl,ha='center',va='top',fontsize=8,color='#1d4ed8')
             v=round(v+step,10)
+            
         # Точка P
         actual_places=self.pv_places
         for p in [0,1,2,3]:
@@ -569,11 +607,58 @@ class App(tk.Tk):
         ax.plot(val,0,'o',color='#15803d',markersize=10,zorder=5,markeredgecolor='white',markeredgewidth=2)
         ax.text(val,0.44,f"P ({s})",ha='center',va='bottom',fontsize=11,fontweight='bold',color='#15803d')
         ax.set_facecolor('#f0f4f8'); fig.patch.set_facecolor('#f0f4f8')
-        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FCA
-        mpl_cv=FCA(fig,master=cf)
+        
+        mpl_cv=FigureCanvasTkAgg(fig,master=cf)
         self._pv_nl_canvas_widget=mpl_cv.get_tk_widget()
         self._pv_nl_canvas_widget.pack(fill="x",padx=14,pady=(4,12))
         mpl_cv.draw()
+
+    def _pv_draw_cake(self):
+        cv=self._pv_cake_cv; cv.delete("all"); cv.update_idletasks()
+        W=cv.winfo_width() or 600; H=140
+        if W<100: return
+        # 10 тортиків
+        r=40; pad=15; total_w=10*(2*r+pad)-pad
+        x0=(W-total_w)//2; y0=H//2
+        
+        val=float(self.pv_digits[0])
+        for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
+        val=round(val,self.pv_places)
+        
+        for i in range(10):
+            cx=x0+i*(2*r+pad)+r; cy=y0
+            # контур
+            cv.create_oval(cx-r,cy-r,cx+r,cy+r,outline=BORDER,width=2,fill=WHITE)
+            
+            # заповнення
+            if i < int(val):
+                # Повний тортик
+                cv.create_oval(cx-r+2,cy-r+2,cx+r-2,cy+r-2,fill=self.PVCOLORS[0],outline="")
+            elif i == int(val):
+                # Частковий тортик
+                frac = val - int(val)
+                if frac > 0:
+                    # Десяті (сектори по 36 градусів)
+                    tenths = self.pv_digits[1]
+                    for t in range(tenths):
+                        start=90-t*36; extent=-36
+                        cv.create_arc(cx-r+2,cy-r+2,cx+r-2,cy+r-2,start=start,extent=extent,fill=self.PVCOLORS[1],outline=WHITE)
+                    
+                    # Соті (якщо є)
+                    if self.pv_places >= 2:
+                        hundredths = self.pv_digits[2]
+                        # Малюємо соті поверх як тонші сектори або просто зафарбовуємо частину наступного сектора десятих
+                        # Але краще просто показати сумарний кут
+                        # total angle = frac * 360
+                        # Но ми вже намалювали цілі десяті. Додамо соті і тисячні до загального кута.
+                        rem_frac = frac - tenths*0.1
+                        if rem_frac > 0:
+                            start=90-tenths*36; extent=-rem_frac*360
+                            color = self.PVCOLORS[2] if self.pv_places==2 else self.PVCOLORS[3]
+                            cv.create_arc(cx-r+2,cy-r+2,cx+r-2,cy+r-2,start=start,extent=extent,fill=color,outline=WHITE)
+            
+            # Тінь/номер
+            cv.create_text(cx,cy+r+12,text=str(i+1),font=("Segoe UI",9),fill=MUTED)
 
     def _pvset(self,n):
         self.pv_places=n
@@ -590,7 +675,6 @@ class App(tk.Tk):
             def dec(idx=i): self._pvchange(idx,-1)
             def inc(idx=i): self._pvchange(idx,1)
             # Глобальне блокування за повним значенням
-            # max = 9.9/9.99/9.999; min = 0
             _cur=float(self.pv_digits[0])
             for _j in range(1,self.pv_places+1): _cur+=self.pv_digits[_j]*(10**-_j)
             _cur=round(_cur,self.pv_places)
@@ -611,7 +695,6 @@ class App(tk.Tk):
     def _pvchange(self,idx,delta):
         new=self.pv_digits[idx]+delta
         if idx==0:
-            # одиниці: просто затискаємо в [0,9], без кільця і без переносу
             self.pv_digits[0]=max(0,min(9,new))
         elif new>9:
             self.pv_digits[idx]=0; self._pvcarry(idx-1,+1)
@@ -660,7 +743,8 @@ class App(tk.Tk):
         elif wp>0: read=f"{wp} {'ціла' if wp==1 else 'цілих'}"
         else: read=f"нуль цілих  {nm} {pn}"
         self._pv_rlbl.config(text=read)
-        # Оновлюємо числову пряму якщо вона є
+        # Оновлюємо візуалізації
+        self._pv_draw_cake()
         self.after(50, self._pv_draw_nl)
 
     # ══ NUMBER LINE (matplotlib) ═══════════════════════════════════════════════
@@ -995,59 +1079,60 @@ class App(tk.Tk):
         tk.Label(sbar,text="Цифри після коми = чисельник.  Кількість цифр після коми = кількість нулів у знаменнику.",
                  font=("Segoe UI",12),bg=PANEL,fg=ACCENT).pack(side="right",padx=18)
 
-        # Центральний layout: завдання + кроки + кнопки + нумпад по центру
+        # Центральний layout
         body=tk.Frame(cf,bg=BG); body.pack(fill="both",expand=True,padx=20,pady=12)
-        left=tk.Frame(body,bg=BG); left.pack(fill="both",expand=True)
+        left=tk.Frame(body,bg=BG); left.pack(side="left",fill="both",expand=True)
+        
+        # Workspace for task and result
+        ws=tk.Frame(left,bg=BG); ws.pack(fill="both",expand=True)
 
         # ── Завдання
-        tf=tk.Frame(left,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=18)
+        tf=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=18)
         tf.pack(fill="x",pady=(0,10))
         tk.Label(tf,text="Запиши як звичайний дріб:",font=F_SUB,bg=PANEL,fg=TEXT).pack(anchor="w")
         self.ta_task_lbl=tk.Label(tf,text="",font=("Courier New",72,"bold"),bg=PANEL,fg=RED)
         self.ta_task_lbl.pack(pady=6)
 
-        # ── Крок 1: чисельник
-        step1_f=tk.Frame(left,bg=CARD_B,padx=20,pady=14,highlightbackground=ACCENT,highlightthickness=2)
-        step1_f.pack(fill="x",pady=(0,6))
-        step1_hdr=tk.Frame(step1_f,bg=CARD_B); step1_hdr.pack(fill="x")
-        self.ta_s1_lbl=tk.Label(step1_hdr,text="Крок 1  —  Чисельник",font=("Segoe UI",16,"bold"),bg=CARD_B,fg=ACCENT)
-        self.ta_s1_lbl.pack(side="left")
-        self.ta_s1_ok=tk.Label(step1_hdr,text="",font=("Segoe UI",14,"bold"),bg=CARD_B,fg=GREEN)
-        self.ta_s1_ok.pack(side="left",padx=12)
-        s1_inp=tk.Frame(step1_f,bg=CARD_B); s1_inp.pack(anchor="w",pady=(6,0))
-        tk.Label(s1_inp,text="Чисельник:",font=("Segoe UI",16),bg=CARD_B,fg=MUTED).pack(side="left",padx=(0,12))
-        self.ta_n_lbl=tk.Label(s1_inp,text="",font=("Courier New",52,"bold"),bg=CARD_B,fg=ACCENT,width=7,anchor="w")
-        self.ta_n_lbl.pack(side="left")
-        self.ta_n_cur=tk.Label(s1_inp,text="▮",font=("Courier New",52,"bold"),bg=CARD_B,fg=ACCENT2)
+        # ── Введення (дріб)
+        inp_f=tk.Frame(ws,bg=CARD_B,padx=40,pady=20,highlightbackground=ACCENT,highlightthickness=2)
+        inp_f.pack(pady=10)
+        
+        # Чисельник
+        self.ta_n_box=tk.Frame(inp_f,bg=WHITE,highlightthickness=2,highlightbackground=ACCENT)
+        self.ta_n_box.pack(pady=(0,5))
+        self.ta_n_lbl=tk.Label(self.ta_n_box,text="",font=("Courier New",52,"bold"),bg=WHITE,fg=ACCENT,width=8,anchor="center")
+        self.ta_n_lbl.pack(side="left",padx=10)
+        self.ta_n_cur=tk.Label(self.ta_n_box,text="▮",font=("Courier New",52,"bold"),bg=WHITE,fg=ACCENT2)
         self.ta_n_cur.pack(side="left")
 
-        # ── Крок 2: знаменник
-        step2_f=tk.Frame(left,bg=BTN_NUM,padx=20,pady=14,highlightbackground=BORDER,highlightthickness=1)
-        step2_f.pack(fill="x",pady=(0,6))
-        self.ta_step2_f=step2_f
-        step2_hdr=tk.Frame(step2_f,bg=BTN_NUM); step2_hdr.pack(fill="x")
-        self.ta_s2_lbl=tk.Label(step2_hdr,text="Крок 2  —  Знаменник",font=("Segoe UI",16,"bold"),bg=BTN_NUM,fg=MUTED)
-        self.ta_s2_lbl.pack(side="left")
-        s2_inp=tk.Frame(step2_f,bg=BTN_NUM); s2_inp.pack(anchor="w",pady=(6,0))
-        tk.Label(s2_inp,text="Знаменник:",font=("Segoe UI",16),bg=BTN_NUM,fg=MUTED).pack(side="left",padx=(0,12))
-        self.ta_numer_done=tk.Label(s2_inp,text="",font=("Courier New",18),bg=BTN_NUM,fg=MUTED)
-        self.ta_numer_done.pack(side="left")
-        self.ta_d_lbl=tk.Label(s2_inp,text="",font=("Courier New",52,"bold"),bg=BTN_NUM,fg=GREEN,width=7,anchor="w")
-        self.ta_d_lbl.pack(side="left")
-        self.ta_d_cur=tk.Label(s2_inp,text="",font=("Courier New",52,"bold"),bg=BTN_NUM,fg=ACCENT2)
+        # Риска дробу
+        tk.Frame(inp_f,bg=ACCENT,height=4,width=340).pack(pady=5)
+
+        # Знаменник
+        self.ta_d_box=tk.Frame(inp_f,bg=WHITE,highlightthickness=2,highlightbackground=BORDER)
+        self.ta_d_box.pack(pady=(5,0))
+        self.ta_d_lbl=tk.Label(self.ta_d_box,text="",font=("Courier New",52,"bold"),bg=WHITE,fg=GREEN,width=8,anchor="center")
+        self.ta_d_lbl.pack(side="left",padx=10)
+        self.ta_d_cur=tk.Label(self.ta_d_box,text="",font=("Courier New",52,"bold"),bg=WHITE,fg=ACCENT2)
         self.ta_d_cur.pack(side="left")
 
-        self.ta_feed=tk.Label(left,text="",font=("Segoe UI",15),bg=BG,fg=ORANGE,wraplength=620,justify="center")
+        # Focus handlers
+        def set_f_n(e): self._ta_set_focus("n")
+        def set_f_d(e): self._ta_set_focus("d")
+        self.ta_n_box.bind("<Button-1>",set_f_n); self.ta_n_lbl.bind("<Button-1>",set_f_n)
+        self.ta_d_box.bind("<Button-1>",set_f_d); self.ta_d_lbl.bind("<Button-1>",set_f_d)
+
+        self.ta_feed=tk.Label(ws,text="",font=("Segoe UI",15),bg=BG,fg=ORANGE,wraplength=620,justify="center")
         self.ta_feed.pack(pady=4)
 
-        # ── Результат (великий дріб після правильної відповіді)
-        self._ta_result_frame=tk.Frame(left,bg=BG); self._ta_result_frame.pack(pady=4)
+        # ── Результат area
+        self._ta_result_frame=tk.Frame(ws,bg=BG); self._ta_result_frame.pack(pady=4)
 
-        # ── Кнопки + нумпад по центру
-        bot=tk.Frame(left,bg=BG); bot.pack(pady=6)
+        # ── Кнопки + нумпад (Fixed at bottom)
+        bot=tk.Frame(left,bg=BG); bot.pack(side="bottom",pady=6)
         act=tk.Frame(bot,bg=BG); act.pack()
-        self.ta_check=mkbtn(act,"✔  Перевірити",self._ta_check,bg=GREEN,w=13,h=2)
-        self.ta_check.pack(side="left",padx=8)
+        self.ta_check_btn=mkbtn(act,"✔  Перевірити",self._ta_check,bg=GREEN,w=13,h=2)
+        self.ta_check_btn.pack(side="left",padx=8)
         mkbtn(act,"▶  Наступне",self._ta_new,bg=ACCENT,w=11,h=2).pack(side="left",padx=8)
 
         np_center=tk.Frame(bot,bg=BG); np_center.pack(pady=(10,0))
@@ -1056,30 +1141,33 @@ class App(tk.Tk):
 
         self._ta_new()
 
+    def _ta_set_focus(self,mode):
+        self.ta_active=mode
+        if mode=="n":
+            self.ta_n_box.config(highlightbackground=ACCENT)
+            self.ta_d_box.config(highlightbackground=BORDER)
+            self.ta_n_cur.config(text="▮"); self.ta_d_cur.config(text="")
+        else:
+            self.ta_n_box.config(highlightbackground=BORDER)
+            self.ta_d_box.config(highlightbackground=GREEN)
+            self.ta_n_cur.config(text=""); self.ta_d_cur.config(text="▮")
+
     def _ta_st(self): return f"Правильно: {self.ta_score}  /  Завдань: {self.ta_att}"
 
     def _ta_new(self):
-        # Складність від простого до складного залежно від рахунку
-        max_places = 1 + min(3, self.ta_score//3)
+        max_places=1+min(3,self.ta_score//3)
         places=random.randint(1,max_places)
         denom=10**places; numer=random.randint(1,denom-1)
         val=numer/denom; dec=f"{val:.{places}f}".replace(".",",")
         self.ta_dec=dec; self.ta_n=numer; self.ta_d=denom
-        self.ta_inp_n=""; self.ta_inp_d=""; self.ta_active="n"; self.ta_n_done=False; self.ta_att+=1
-        after=places
-
+        self.ta_inp_n=""; self.ta_inp_d=""; self.ta_active="n"; self.ta_att+=1
+        
         self.ta_task_lbl.config(text=dec)
-        self.ta_s1_lbl.config(text="Крок 1  —  Чисельник",fg=ACCENT,bg=CARD_B)
-        self.ta_s1_ok.config(text="",bg=CARD_B)
-        self.ta_n_lbl.config(text="",fg=ACCENT,bg=CARD_B)
-        self.ta_n_cur.config(text="▮",bg=CARD_B)
-        self.ta_step2_f.config(bg=BTN_NUM,highlightbackground=BORDER,highlightthickness=1)
-        self.ta_s2_lbl.config(text="Крок 2  —  Знаменник",fg=MUTED,bg=BTN_NUM)
-        self.ta_numer_done.config(text="",bg=BTN_NUM)
-        self.ta_d_lbl.config(text="",bg=BTN_NUM)
-        self.ta_d_cur.config(text="",bg=BTN_NUM)
+        self.ta_n_lbl.config(text="")
+        self.ta_d_lbl.config(text="")
+        self._ta_set_focus("n")
         self.ta_feed.config(text="")
-        self.ta_check.config(state="normal",bg=GREEN)
+        self.ta_check_btn.config(state="normal",bg=GREEN)
         for w in self._ta_result_frame.winfo_children(): w.destroy()
         self.ta_score_lbl.config(text=self._ta_st())
 
@@ -1093,48 +1181,24 @@ class App(tk.Tk):
             if self.ta_active=="n": self.ta_inp_n=self.ta_inp_n[:-1]; self.ta_n_lbl.config(text=self.ta_inp_n)
             else: self.ta_inp_d=self.ta_inp_d[:-1]; self.ta_d_lbl.config(text=self.ta_inp_d)
         elif ch=="C":
-            if self.ta_active=="n": self.ta_inp_n=""; self.ta_n_lbl.config(text="")
-            else: self.ta_inp_d=""; self.ta_d_lbl.config(text="")
+            self.ta_inp_n=""; self.ta_inp_d=""; self.ta_n_lbl.config(text=""); self.ta_d_lbl.config(text="")
+            self._ta_set_focus("n")
 
     def _ta_check(self):
-        if self.ta_active=="n":
-            if not self.ta_inp_n:
-                self.ta_feed.config(text="⚠️  Введи чисельник!",fg=ORANGE); return
-            val=int(self.ta_inp_n)
-            if val==self.ta_n:
-                # Крок 1 ✓ → переходимо до кроку 2
-                after=len(self.ta_dec.split(",")[1])
-                self.ta_n_cur.config(text="")
-                self.ta_s1_ok.config(text=f"✓ = {val}",fg=GREEN,bg=CARD_B)
-                self.ta_active="d"; self.ta_n_done=True
-                # Активуємо крок 2
-                # Оновлюємо всі sub-frames крок 2 щоб не було сірих смуг
-                for _w in [self.ta_step2_f]+list(self.ta_step2_f.winfo_children()):
-                    try: _w.config(bg=CARD_G)
-                    except: pass
-                for _w in self.ta_step2_f.winfo_descendants() if hasattr(self.ta_step2_f,'winfo_descendants') else []:
-                    try: _w.config(bg=CARD_G)
-                    except: pass
-                self.ta_step2_f.config(highlightbackground=GREEN,highlightthickness=2)
-                self.ta_s2_lbl.config(text="Крок 2  —  Знаменник",fg=GREEN,bg=CARD_G)
-                self.ta_numer_done.config(text=f"чисельник={val}  ",bg=CARD_G,fg=MUTED)
-                self.ta_d_lbl.config(bg=CARD_G); self.ta_d_cur.config(text="▮",bg=CARD_G)
-                self.ta_feed.config(text=f"✅ Чисельник {val}!  Тепер знаменник: 1 і {after} нулів",fg=GREEN)
-            else:
-                self.ta_feed.config(text=f"❌  Чисельник ≠ {val}.  Цифри після коми без змін = чисельник.",fg=RED)
+        if not self.ta_inp_n or not self.ta_inp_d:
+            self.ta_feed.config(text="⚠️  Заповни обидва поля дробу!",fg=ORANGE); return
+        vn=int(self.ta_inp_n); vd=int(self.ta_inp_d)
+        if vn==self.ta_n and vd==self.ta_d:
+            self.ta_score+=1; self.ta_check_btn.config(state="disabled",bg=BTN_NUM)
+            self.ta_n_cur.config(text=""); self.ta_d_cur.config(text="")
+            self.ta_feed.config(text="")
+            self._ta_show_result()
         else:
-            if not self.ta_inp_d:
-                self.ta_feed.config(text="⚠️  Введи знаменник!",fg=ORANGE); return
-            val=int(self.ta_inp_d)
-            if val==self.ta_d:
-                self.ta_score+=1; self.ta_att
-                self.ta_d_cur.config(text="")
-                self.ta_check.config(state="disabled",bg=BTN_NUM)
-                self.ta_feed.config(text="",fg=GREEN)
-                self._ta_show_result()
+            if vn!=self.ta_n:
+                self.ta_feed.config(text=f"❌  Чисельник не вірний.  Чисельник — це цифри після коми.",fg=RED)
             else:
                 places=len(self.ta_dec.split(",")[1])
-                self.ta_feed.config(text=f"❌  Знаменник ≠ {val}.  {places} цифр → знаменник = 1{'0'*places}",fg=RED)
+                self.ta_feed.config(text=f"❌  Знаменник не вірний.  {places} знаки → знаменник 1{'0'*places}",fg=RED)
         self.ta_score_lbl.config(text=self._ta_st())
 
     def _ta_show_result(self):
@@ -1172,10 +1236,12 @@ class App(tk.Tk):
         tk.Label(sbar,text="Нулів у знаменнику = цифр після коми",font=("Segoe UI",12),bg=PANEL,fg=ACCENT2).pack(side="right",padx=18)
 
         body=tk.Frame(cf,bg=BG); body.pack(fill="both",expand=True,padx=20,pady=12)
-        left=tk.Frame(body,bg=BG); left.pack(fill="both",expand=True)
+        left=tk.Frame(body,bg=BG); left.pack(side="left",fill="both",expand=True)
+        
+        ws=tk.Frame(left,bg=BG); ws.pack(fill="both",expand=True)
 
         # ── Завдання: великий дріб canvas
-        tf=tk.Frame(left,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=18)
+        tf=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=18)
         tf.pack(fill="x",pady=(0,10))
         tk.Label(tf,text="Запиши як десятковий дріб:",font=F_SUB,bg=PANEL,fg=TEXT).pack(anchor="w")
         task_row=tk.Frame(tf,bg=PANEL); task_row.pack(anchor="w",pady=8)
@@ -1184,7 +1250,7 @@ class App(tk.Tk):
         self.tb_hint.pack(side="left",anchor="center")
 
         # ── Введення: учень вводить ВСЕ — ціла + кома + дробова
-        inp_f=tk.Frame(left,bg=CARD_V,padx=20,pady=14,highlightbackground=ACCENT2,highlightthickness=2)
+        inp_f=tk.Frame(ws,bg=CARD_V,padx=20,pady=14,highlightbackground=ACCENT2,highlightthickness=2)
         inp_f.pack(fill="x",pady=(0,8))
         tk.Label(inp_f,text="Твоя відповідь:",font=("Segoe UI",14,"bold"),bg=CARD_V,fg=ACCENT2).pack(anchor="w",pady=(0,6))
         inp_row=tk.Frame(inp_f,bg=CARD_V); inp_row.pack(anchor="w")
@@ -1203,11 +1269,11 @@ class App(tk.Tk):
             padx=14,pady=6,command=self._tb_enter_comma)
         self.tb_comma_btn.pack(anchor="w",pady=(8,0))
 
-        self.tb_feed=tk.Label(left,text="",font=("Segoe UI",15),bg=BG,fg=ORANGE,wraplength=640,justify="center")
+        self.tb_feed=tk.Label(ws,text="",font=("Segoe UI",15),bg=BG,fg=ORANGE,wraplength=640,justify="center")
         self.tb_feed.pack(pady=4)
-        self._tb_result_frame=tk.Frame(left,bg=BG); self._tb_result_frame.pack(pady=4)
+        self._tb_result_frame=tk.Frame(ws,bg=BG); self._tb_result_frame.pack(pady=4)
 
-        bot_tb=tk.Frame(left,bg=BG); bot_tb.pack(pady=6)
+        bot_tb=tk.Frame(left,bg=BG); bot_tb.pack(side="bottom",pady=6)
         act=tk.Frame(bot_tb,bg=BG); act.pack()
         self.tb_check=mkbtn(act,"✔  Перевірити",self._tb_check,bg=GREEN,w=13,h=2)
         self.tb_check.pack(side="left",padx=8)
