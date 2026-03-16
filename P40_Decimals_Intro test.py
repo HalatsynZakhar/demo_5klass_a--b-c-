@@ -510,7 +510,7 @@ class App(tk.Tk):
         
         # ── Cake Visualization ──
         tk.Label(nf,text="Візуалізація (тортики):",font=("Segoe UI",15),bg=PANEL,fg=MUTED).pack(pady=(10,2))
-        self._pv_cake_cv=tk.Canvas(nf,bg=PANEL,height=240,highlightthickness=0); self._pv_cake_cv.pack(fill="x",padx=10)
+        self._pv_cake_cv=tk.Canvas(nf,bg=PANEL,height=480,highlightthickness=0); self._pv_cake_cv.pack(fill="x",padx=10)
         
         tk.Label(nf,text="Десятковий дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(15,4))
         self._pv_ncv=tk.Canvas(nf,bg=PANEL,height=110,highlightthickness=0); self._pv_ncv.pack(fill="x",padx=24,pady=4)
@@ -627,30 +627,40 @@ class App(tk.Tk):
         if W<10: 
             self.after(100, self._pv_draw_cake); return
         
-        # 10 тортиків - робимо максимально широкими
-        pad = 6
-        avail_w = W - 20
-        r = (avail_w - 9*pad) // 20
-        # Обмежуємо висотою (враховуючи підписи)
-        r = min(r, (H - 50) // 2)
-        r = max(10, r) 
+        # 10 тортиків - робимо у 2 ряди по 5 шт, щоб були ВЕЛИКІ
+        cols, rows = 5, 2
+        hpad, vpad = 20, 40
+        avail_w = W - 40
+        avail_h = H - 60
         
-        total_w = 10*(2*r+pad)-pad
-        x0=(W-total_w)//2; y0=H//2 - 10 # Трохи вище центру, щоб підписи влізли
+        # Розрахунок радіусу для 5 колонок та 2 рядів
+        r_w = (avail_w - (cols-1)*hpad) // (cols * 2)
+        r_h = (avail_h - (rows-1)*vpad) // (rows * 2)
+        r = min(r_w, r_h)
+        r = max(10, r)
+        
+        total_w = cols*(2*r+hpad)-hpad
+        total_h = rows*(2*r+vpad)-vpad
+        x0 = (W - total_w)//2 + r
+        y0 = (H - total_h)//2 + r
         
         val=float(self.pv_digits[0])
         for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
         val=round(val,self.pv_places)
         
         for i in range(10):
-            cx=x0+i*(2*r+pad)+r; cy=y0
+            row_idx = i // cols
+            col_idx = i % cols
+            cx = x0 + col_idx*(2*r+hpad)
+            cy = y0 + row_idx*(2*r+vpad)
+            
             # контур
-            cv.create_oval(cx-r,cy-r,cx+r,cy+r,outline=BORDER,width=2,fill=WHITE)
+            cv.create_oval(cx-r,cy-r,cx+r,cy+r,outline=BORDER,width=3,fill=WHITE)
             
             # заповнення
             if i < int(val):
                 # Повний тортик
-                cv.create_oval(cx-r+2,cy-r+2,cx+r-2,cy+r-2,fill=self.PVCOLORS[0],outline="")
+                cv.create_oval(cx-r+3,cy-r+3,cx+r-3,cy+r-3,fill=self.PVCOLORS[0],outline="")
             elif i == int(val):
                 # Частковий тортик
                 frac = val - int(val)
@@ -659,17 +669,17 @@ class App(tk.Tk):
                     tenths = self.pv_digits[1]
                     for t in range(tenths):
                         start=90-t*36; extent=-36
-                        cv.create_arc(cx-r+2,cy-r+2,cx+r-2,cy+r-2,start=start,extent=extent,fill=self.PVCOLORS[1],outline=WHITE)
+                        cv.create_arc(cx-r+3,cy-r+3,cx+r-3,cy+r-3,start=start,extent=extent,fill=self.PVCOLORS[1],outline=WHITE,width=1)
                     
                     # Соті та тисячні
                     rem_frac = frac - tenths*0.1
                     if rem_frac > 0:
                         start=90-tenths*36; extent=-rem_frac*360
                         color = self.PVCOLORS[2] if self.pv_places==2 else self.PVCOLORS[3]
-                        cv.create_arc(cx-r+2,cy-r+2,cx+r-2,cy+r-2,start=start,extent=extent,fill=color,outline=WHITE)
+                        cv.create_arc(cx-r+3,cy-r+3,cx+r-3,cy+r-3,start=start,extent=extent,fill=color,outline=WHITE,width=1)
             
             # Тінь/номер
-            cv.create_text(cx,cy+r+18,text=str(i+1),font=("Segoe UI",11,"bold"),fill=MUTED)
+            cv.create_text(cx,cy+r+22,text=str(i+1),font=("Segoe UI",14,"bold"),fill=MUTED)
 
     def _pvset(self,n):
         self.pv_places=n
