@@ -572,11 +572,10 @@ class App(tk.Tk):
         self._pv_nl_fig=fig
         
         # Вікно: 12 кроків навколо точки
-        # Якщо масштаб "Цілі", показуємо фіксований або розширений діапазон
+        # Якщо масштаб "Цілі", показуємо весь діапазон від 0 до 10
         if sc == "ones":
-            # Показуємо діапазон [0, 10] або принаймні широкий
-            lo = 0.0
-            hi = 11.0
+            lo = -0.5
+            hi = 10.5
             label_step = 1.0
         else:
             span=step*12; lo=max(0.0,val-span/2); hi=lo+span
@@ -621,11 +620,18 @@ class App(tk.Tk):
         mpl_cv.draw()
 
     def _pv_draw_cake(self):
-        cv=self._pv_cake_cv; cv.delete("all"); cv.update_idletasks()
-        W=cv.winfo_width() or 600; H=140
-        if W<100: return
-        # 10 тортиків
-        r=40; pad=15; total_w=10*(2*r+pad)-pad
+        cv=self._pv_cake_cv; cv.delete("all")
+        W=cv.winfo_width(); H=cv.winfo_height()
+        if W<10: 
+            self.after(100, self._pv_draw_cake); return
+        
+        # 10 тортиків - робимо адаптивно
+        pad = 8
+        avail_w = W - 40
+        r = (avail_w - 9*pad) // 20
+        r = max(12, min(40, r)) # Затискаємо радіус
+        
+        total_w = 10*(2*r+pad)-pad
         x0=(W-total_w)//2; y0=H//2
         
         val=float(self.pv_digits[0])
@@ -1221,26 +1227,26 @@ class App(tk.Tk):
     def _ta_show_result(self):
         for w in self._ta_result_frame.winfo_children(): w.destroy()
         outer=tk.Frame(self._ta_result_frame,bg=GREEN_LT,
-                       highlightbackground=GREEN,highlightthickness=3,padx=32,pady=18)
+                       highlightbackground=GREEN,highlightthickness=2,padx=20,pady=10)
         outer.pack(anchor="center")
-        tk.Label(outer,text="🎉  Правильно!",font=("Segoe UI",18,"bold"),bg=GREEN_LT,fg=GREEN).pack()
+        tk.Label(outer,text="🎉  Правильно!",font=("Segoe UI",16,"bold"),bg=GREEN_LT,fg=GREEN).pack()
         # Рядок: dec = знак рівності + красивий дріб canvas
-        eq_row=tk.Frame(outer,bg=GREEN_LT); eq_row.pack(pady=10)
-        tk.Label(eq_row,text=f"{self.ta_dec}",font=("Courier New",52,"bold"),bg=GREEN_LT,fg=RED).pack(side="left",padx=(0,14))
-        tk.Label(eq_row,text="=",font=("Courier New",52,"bold"),bg=GREEN_LT,fg=MUTED).pack(side="left",padx=(0,14))
+        eq_row=tk.Frame(outer,bg=GREEN_LT); eq_row.pack(pady=5)
+        tk.Label(eq_row,text=f"{self.ta_dec}",font=("Courier New",44,"bold"),bg=GREEN_LT,fg=RED).pack(side="left",padx=(0,14))
+        tk.Label(eq_row,text="=",font=("Courier New",44,"bold"),bg=GREEN_LT,fg=MUTED).pack(side="left",padx=(0,14))
         whole=self.ta_n//self.ta_d; fn=self.ta_n%self.ta_d
         if whole>0:
-            tk.Label(eq_row,text=str(whole),font=("Courier New",60,"bold"),bg=GREEN_LT,fg=TEXT).pack(side="left",padx=(0,10))
+            tk.Label(eq_row,text=str(whole),font=("Courier New",52,"bold"),bg=GREEN_LT,fg=TEXT).pack(side="left",padx=(0,10))
         ns=str(fn if whole>0 else self.ta_n); ds=str(self.ta_d)
         # Великий красивий дріб
-        char_w=max(len(ns),len(ds)); bw=char_w*48+32; fH=160
+        char_w=max(len(ns),len(ds)); bw=char_w*40+24; fH=130
         cv=tk.Canvas(eq_row,bg=GREEN_LT,width=bw,height=fH,highlightthickness=0); cv.pack(side="left")
-        cv.create_text(bw//2,34,text=ns,font=("Courier New",56,"bold"),fill=ACCENT,anchor="center")
-        cv.create_line(6,72,bw-6,72,fill=ACCENT,width=5)
-        cv.create_text(bw//2,116,text=ds,font=("Courier New",56,"bold"),fill=GREEN,anchor="center")
+        cv.create_text(bw//2,28,text=ns,font=("Courier New",48,"bold"),fill=ACCENT,anchor="center")
+        cv.create_line(6,65,bw-6,65,fill=ACCENT,width=4)
+        cv.create_text(bw//2,102,text=ds,font=("Courier New",48,"bold"),fill=GREEN,anchor="center")
         # Підпис
         tk.Label(outer,text=f"Чисельник: {ns}    Знаменник: {ds}",
-                 font=("Segoe UI",13),bg=GREEN_LT,fg=MUTED).pack(pady=(4,0))
+                 font=("Segoe UI",12),bg=GREEN_LT,fg=MUTED).pack(pady=(2,0))
 
     # ══ TRAINER B: fraction → decimal ═════════════════════════════════════════
     def show_trainer_b(self):
