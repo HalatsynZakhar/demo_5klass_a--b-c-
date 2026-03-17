@@ -1578,19 +1578,20 @@ class App(tk.Tk):
     def _tb_show_result(self):
         for w in self._tb_result_frame.winfo_children(): w.destroy()
         outer=tk.Frame(self._tb_result_frame,bg=GREEN_LT,
-                       highlightbackground=GREEN,highlightthickness=3,padx=24,pady=14)
+                       highlightbackground=GREEN,highlightthickness=2,padx=10,pady=5)
         outer.pack()
-        tk.Label(outer,text="🎉  Правильно!",font=("Segoe UI",18,"bold"),bg=GREEN_LT,fg=GREEN).pack()
-        eq_row=tk.Frame(outer,bg=GREEN_LT); eq_row.pack(pady=8)
+        tk.Label(outer,text="🎉  Правильно!",font=("Segoe UI",14,"bold"),bg=GREEN_LT,fg=GREEN).pack()
+        eq_row=tk.Frame(outer,bg=GREEN_LT); eq_row.pack(pady=4)
         ns=str(self.tb_n); ds=str(self.tb_d)
-        bw=max(len(ns),len(ds))*32+20; fH=120
-        cv=tk.Canvas(eq_row,bg=GREEN_LT,width=bw,height=fH,highlightthickness=0); cv.pack(side="left",padx=(0,12))
-        cv.create_text(bw//2,24,text=ns,font=("Courier New",40,"bold"),fill=C_DIGIT,anchor="center")
-        cv.create_line(4,50,bw-4,50,fill=ACCENT2,width=3)
-        cv.create_text(bw//2,80,text=ds,font=("Courier New",40,"bold"),fill=C_ZERO,anchor="center")
-        tk.Label(eq_row,text="=",font=("Courier New",48,"bold"),bg=GREEN_LT,fg=MUTED).pack(side="left",padx=8)
+        # Більш компактний дріб
+        bw=max(len(ns),len(ds))*24+15; fH=80
+        cv=tk.Canvas(eq_row,bg=GREEN_LT,width=bw,height=fH,highlightthickness=0); cv.pack(side="left",padx=(0,10))
+        cv.create_text(bw//2,18,text=ns,font=("Courier New",30,"bold"),fill=C_DIGIT,anchor="center")
+        cv.create_line(4,40,bw-4,40,fill=ACCENT2,width=2)
+        cv.create_text(bw//2,62,text=ds,font=("Courier New",30,"bold"),fill=C_ZERO,anchor="center")
+        tk.Label(eq_row,text="=",font=("Courier New",32,"bold"),bg=GREEN_LT,fg=MUTED).pack(side="left",padx=5)
         tk.Label(eq_row,text=f"{self.tb_whole},{self.tb_ans}",
-                 font=("Courier New",56,"bold"),bg=GREEN_LT,fg=RED).pack(side="left")
+                 font=("Courier New",44,"bold"),bg=GREEN_LT,fg=RED).pack(side="left")
 
     # ══ TRAINER C: привести до знаменника ═════════════════════════════════════
     def show_trainer_c(self):
