@@ -14,7 +14,10 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import matplotlib.gridspec as gridspec
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.patches import FancyBboxPatch, Rectangle, Circle, Wedge
+from matplotlib.figure import Figure
 
 # ── Palette ──────────────────────────────────────────────────────────────────
 BG="#f0f4f8"; PANEL="#ffffff"; BORDER="#cbd5e1"; TEXT="#0f172a"; MUTED="#475569"
@@ -107,6 +110,12 @@ class App(tk.Tk):
         self._nl_mpl_fig=None; self._nl_mpl_canvas=None
         self.pv_nl_scale="tenths"
 
+        # Zoom state for interactive line
+        self.zoom_range = 1.0
+        self.zoom_center = 0.5
+        self._drag_x0 = None
+        self._drag_c0 = None
+
         self._build_chrome()
         self.show_main_menu()
 
@@ -125,6 +134,7 @@ class App(tk.Tk):
             ("📖 Нулі в кінці",self.show_theory_c),
             ("🟦 Сітка",self.show_grid),
             ("🔢 Розряди+Пряма",self.show_place_value),
+            ("📏 Пряма Інт.",self.show_interactive_line),
             ("🎯 Дес→Дріб",self.show_trainer_a),
             ("🎯 Дріб→Дес",self.show_trainer_b),
             ("🎯 Новий знаменник",self.show_trainer_c),
@@ -506,17 +516,20 @@ class App(tk.Tk):
         self._pv_ctrl=tk.Frame(left,bg=PANEL); self._pv_ctrl.pack(fill="x",padx=14)
         
         right=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=1); right.pack(side="right",fill="both",expand=True,padx=(10,0))
-        nf=tk.Frame(right,bg=PANEL); nf.pack(expand=True)
+        nf=tk.Frame(right,bg=PANEL); nf.pack(expand=True, fill="both")
         
-        # ── Cake Visualization ──
-        tk.Label(nf,text="Візуалізація (тортики):",font=("Segoe UI",15),bg=PANEL,fg=MUTED).pack(pady=(10,2))
-        self._pv_cake_cv=tk.Canvas(nf,bg=PANEL,height=480,highlightthickness=0); self._pv_cake_cv.pack(fill="x",padx=10)
+        # ── Cake Visualization (Matplotlib) - 1/3 height ──
+        tk.Label(nf,text="Візуалізація (тортики):",font=("Segoe UI",16,"bold"),bg=PANEL,fg=MUTED).pack(pady=(10,2))
+        self._pv_cake_fig = Figure(figsize=(12, 3.5), facecolor=PANEL)
+        self._pv_cake_fig.subplots_adjust(left=0.01, right=0.99, top=0.95, bottom=0.05, wspace=0.05, hspace=0.3)
+        self._pv_cake_canvas = FigureCanvasTkAgg(self._pv_cake_fig, master=nf)
+        self._pv_cake_canvas.get_tk_widget().pack(fill="x", padx=5)
         
-        tk.Label(nf,text="Десятковий дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(15,4))
+        tk.Label(nf,text="Десятковий дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(10,4))
         self._pv_ncv=tk.Canvas(nf,bg=PANEL,height=110,highlightthickness=0); self._pv_ncv.pack(fill="x",padx=24,pady=4)
-        tk.Label(nf,text="Як звичайний дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(15,4))
+        tk.Label(nf,text="Як звичайний дріб:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(10,4))
         self._pv_frow=tk.Frame(nf,bg=PANEL); self._pv_frow.pack()
-        tk.Label(nf,text="Читається:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(15,4))
+        tk.Label(nf,text="Читається:",font=("Segoe UI",17),bg=PANEL,fg=MUTED).pack(pady=(10,4))
         self._pv_rlbl=tk.Label(nf,text="",font=("Segoe UI",19,"bold"),bg=PANEL,fg=ACCENT,wraplength=560,justify="center"); self._pv_rlbl.pack(pady=4)
         
         self._pvset(self.pv_places)
@@ -536,7 +549,6 @@ class App(tk.Tk):
              b.pack(side="left",padx=3); self._pv_nl_sc_btns.append((b,sc))
         
         self._pv_nl_set_scale(self.pv_nl_scale)
-        # Малюємо відразу після першої відрисовки
         self.after(200, self._pv_draw_nl)
 
     def _pv_nl_set_scale(self,sc):
@@ -586,7 +598,6 @@ class App(tk.Tk):
         ax.annotate('',xy=(hi,0),xytext=(hi-step*0.4,0),arrowprops=dict(arrowstyle='->',color='#475569',lw=2))
         
         # Малюємо поділки
-        # Починаємо від круглого значення меншого за lo
         v_start = math.floor(lo / step) * step
         v = v_start
         while v <= hi + step*0.01:
@@ -622,64 +633,113 @@ class App(tk.Tk):
         mpl_cv.draw()
 
     def _pv_draw_cake(self):
-        cv=self._pv_cake_cv; cv.delete("all")
-        W=cv.winfo_width(); H=cv.winfo_height()
-        if W<10: 
-            self.after(100, self._pv_draw_cake); return
+        # Максимально великі тортики в 2 ряди по 5
+        self._pv_cake_fig.clear()
+        val=float(self.pv_digits[0])
+        for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
+        val=round(val,self.pv_places)
         
-        # 10 тортиків - робимо у 2 ряди по 5 шт, щоб були ВЕЛИКІ
-        cols, rows = 5, 2
-        hpad, vpad = 20, 40
-        avail_w = W - 40
-        avail_h = H - 60
+        int_part = int(val)
+        frac = val - int_part
+        total_pies = 10 # Завжди показуємо 10 для стабільності масштабу
         
-        # Розрахунок радіусу для 5 колонок та 2 рядів
-        r_w = (avail_w - (cols-1)*hpad) // (cols * 2)
-        r_h = (avail_h - (rows-1)*vpad) // (rows * 2)
-        r = min(r_w, r_h)
-        r = max(10, r)
+        gs = gridspec.GridSpec(2, 5, figure=self._pv_cake_fig, wspace=0.01, hspace=0.1)
+        self._pv_cake_fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
         
-        total_w = cols*(2*r+hpad)-hpad
-        total_h = rows*(2*r+vpad)-vpad
-        x0 = (W - total_w)//2 + r
-        y0 = (H - total_h)//2 + r
+        for i in range(10):
+            ax = self._pv_cake_fig.add_subplot(gs[i])
+            ax.set_aspect("equal"); ax.axis("off")
+            
+            # Фон
+            ax.add_patch(Circle((0,0), 1.0, facecolor="white", edgecolor=BORDER, lw=1.5))
+            
+            if i < int_part:
+                ax.add_patch(Circle((0,0), 1.0, facecolor=self.PVCOLORS[1], edgecolor="white", lw=1))
+            elif i == int_part:
+                if frac > 0:
+                    angle = 360 * frac
+                    w = Wedge((0,0), 1.0, 90 - angle, 90, facecolor=self.PVCOLORS[2], edgecolor="white", lw=1)
+                    ax.add_patch(w)
+            
+            ax.text(0, -1.15, str(i+1), ha="center", va="top", fontsize=12, color=MUTED, fontweight="bold")
+            # Максимально щільні межі для великого радіусу
+            ax.set_xlim(-1.02, 1.02); ax.set_ylim(-1.35, 1.02)
+            
+        self._pv_cake_canvas.draw()
+
+    def show_interactive_line(self):
+        self.clear_main(); cf=self.current_frame
+        hdr = tk.Frame(cf, bg=PANEL, height=60, highlightbackground=BORDER, highlightthickness=1)
+        hdr.pack(fill="x"); hdr.pack_propagate(False)
+        tk.Label(hdr, text="📏 Інтерактивна пряма (0–10)", font=F_HEAD, bg=PANEL).pack(side="left", padx=20)
+        tk.Label(hdr, text="Коліщатко: Зум  |  Мишка: Перетягування", font=F_BODY, bg=PANEL, fg=MUTED).pack(side="right", padx=20)
         
         val=float(self.pv_digits[0])
         for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
         val=round(val,self.pv_places)
         
-        for i in range(10):
-            row_idx = i // cols
-            col_idx = i % cols
-            cx = x0 + col_idx*(2*r+hpad)
-            cy = y0 + row_idx*(2*r+vpad)
+        self.zoom_center, self.zoom_range = val, 1.0
+        self._il_fig = Figure(figsize=(12, 6), facecolor=WHITE)
+        self._il_canvas = FigureCanvasTkAgg(self._il_fig, master=cf)
+        widget = self._il_canvas.get_tk_widget(); widget.pack(fill="both", expand=True)
+        
+        widget.bind("<MouseWheel>", self._il_wheel)
+        widget.bind("<ButtonPress-1>", self._il_drag_start)
+        widget.bind("<B1-Motion>", self._il_drag_move)
+        widget.bind("<ButtonRelease-1>", self._il_drag_end)
+        self._il_redraw()
+
+    def _il_redraw(self):
+        self._il_fig.clear(); ax = self._il_fig.add_subplot(111); ax.set_facecolor(BG); ax.axis("off")
+        val=float(self.pv_digits[0])
+        for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
+        val=round(val,self.pv_places)
+        
+        half = self.zoom_range / 2
+        start = max(-0.05, self.zoom_center - half); end = min(10.05, start + self.zoom_range)
+        if end >= 10.05: start = max(-0.05, 10.05 - self.zoom_range)
+        ax.set_xlim(start, end); ax.set_ylim(-1, 1)
+        
+        if self.zoom_range < 0.005: step = 0.0001
+        elif self.zoom_range < 0.05: step = 0.001
+        elif self.zoom_range < 0.5: step = 0.01
+        elif self.zoom_range < 5: step = 0.1
+        else: step = 1.0
+        
+        t = math.floor(start / step) * step
+        while t <= end + step:
+            tr = round(t, 10)
+            if start <= tr <= end:
+                is_int = abs(tr - round(tr)) < 1e-9
+                hh, col = (0.4, TEXT) if is_int else (0.2, MUTED)
+                ax.plot([tr, tr], [-hh, hh], color=col, lw=2 if is_int else 1)
+                if is_int or (self.zoom_range < step * 12):
+                    lbl = str(int(tr)) if is_int else f"{tr:.4f}".rstrip("0").rstrip(",")
+                    ax.text(tr, -hh - 0.1, lbl, ha="center", va="top", fontsize=12 if is_int else 10)
+            t += step
             
-            # контур
-            cv.create_oval(cx-r,cy-r,cx+r,cy+r,outline=BORDER,width=3,fill=WHITE)
-            
-            # заповнення
-            if i < int(val):
-                # Повний тортик
-                cv.create_oval(cx-r+3,cy-r+3,cx+r-3,cy+r-3,fill=self.PVCOLORS[0],outline="")
-            elif i == int(val):
-                # Частковий тортик
-                frac = val - int(val)
-                if frac > 0:
-                    # Десяті
-                    tenths = self.pv_digits[1]
-                    for t in range(tenths):
-                        start=90-t*36; extent=-36
-                        cv.create_arc(cx-r+3,cy-r+3,cx+r-3,cy+r-3,start=start,extent=extent,fill=self.PVCOLORS[1],outline=WHITE,width=1)
-                    
-                    # Соті та тисячні
-                    rem_frac = frac - tenths*0.1
-                    if rem_frac > 0:
-                        start=90-tenths*36; extent=-rem_frac*360
-                        color = self.PVCOLORS[2] if self.pv_places==2 else self.PVCOLORS[3]
-                        cv.create_arc(cx-r+3,cy-r+3,cx+r-3,cy+r-3,start=start,extent=extent,fill=color,outline=WHITE,width=1)
-            
-            # Тінь/номер
-            cv.create_text(cx,cy+r+22,text=str(i+1),font=("Segoe UI",14,"bold"),fill=MUTED)
+        ax.axhline(0, color=TEXT, lw=2)
+        ax.plot(val, 0, "o", color=ACCENT, markersize=20, markeredgecolor="white", markeredgewidth=3, zorder=10)
+        ax.text(val, 0.5, f"{val:.{self.pv_places}f}".replace(".",","), ha="center", va="bottom", 
+                color=ACCENT, fontsize=24, fontweight="bold", bbox=dict(facecolor="white", edgecolor=ACCENT, boxstyle="round,pad=0.5"))
+        self._il_canvas.draw_idle()
+
+    def _il_wheel(self, event):
+        factor = 1.2
+        if event.delta > 0: self.zoom_range = max(0.001, self.zoom_range / factor)
+        else: self.zoom_range = min(10.1, self.zoom_range * factor)
+        self._il_redraw()
+
+    def _il_drag_start(self, event): self._drag_x0, self._drag_c0 = event.x, self.zoom_center
+
+    def _il_drag_move(self, event):
+        if self._drag_x0 is None: return
+        dx = event.x - self._drag_x0; cw = self._il_canvas.get_tk_widget().winfo_width()
+        shift = -(dx / cw) * self.zoom_range
+        self.zoom_center = max(0, min(10, self._drag_c0 + shift))
+        self._il_redraw()
+
+    def _il_drag_end(self, event): self._drag_x0 = None
 
     def _pvset(self,n):
         self.pv_places=n
