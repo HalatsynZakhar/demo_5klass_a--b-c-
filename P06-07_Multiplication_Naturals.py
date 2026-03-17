@@ -61,20 +61,20 @@ class MultiplicationApp(tk.Tk):
         self.show_intro()
 
     def _build_ui(self):
-        # ── Header
-        hdr = tk.Frame(self, bg=ACCENT, height=80)
+        # ── Header (Reduced height 80 -> 60)
+        hdr = tk.Frame(self, bg=ACCENT, height=60)
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
         
-        tk.Label(hdr, text="Множення натуральних чисел (§ 6-7)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 24, "bold")).pack(side="left", padx=30)
-        tk.Button(hdr, text="❌ Вихід", font=("Arial", 16, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20)
+        tk.Label(hdr, text="Множення натуральних чисел (§ 6-7)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 20, "bold")).pack(side="left", padx=30)
+        tk.Button(hdr, text="❌ Вихід", font=("Arial", 14, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20)
         
-        # ── Navigation Menu
-        nav = tk.Frame(self, bg=WHITE, height=60)
+        # ── Navigation Menu (Reduced height 60 -> 50)
+        nav = tk.Frame(self, bg=WHITE, height=50)
         nav.pack(fill="x")
         nav.pack_propagate(False)
         
-        btn_font = ("Segoe UI", 16, "bold")
+        btn_font = ("Segoe UI", 12, "bold") # Reduced from 16
         tk.Button(nav, text="1. Основні властивості", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_intro).pack(side="left", padx=20)
         tk.Button(nav, text="2. Розподільна властивість", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_distributive).pack(side="left", padx=20)
         tk.Button(nav, text="3. Візуалізація закону", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_distributive_viz).pack(side="left", padx=20)
@@ -99,9 +99,9 @@ class MultiplicationApp(tk.Tk):
         self.clear_main()
         
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=50)
+        f.pack(expand=True, fill="both", padx=30, pady=30) # Reduced from 50
         
-        tk.Label(f, text="Закони множення", font=("Segoe UI", 36, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20))
+        tk.Label(f, text="Закони множення", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20)) # Reduced from 36
         
         props = [
             ("Переставна властивість", "Від перестановки множників добуток не змінюється.", "a ∙ b = b ∙ a", "6 ∙ 5 = 5 ∙ 6 = 30"),
@@ -110,13 +110,13 @@ class MultiplicationApp(tk.Tk):
         ]
 
         for title, rule, formula, example in props:
-            p_frame = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=20, pady=15)
-            p_frame.pack(fill="x", pady=8)
+            p_frame = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=15, pady=10) # Reduced padding
+            p_frame.pack(fill="x", pady=5) # Reduced pady
             
-            tk.Label(p_frame, text=title, font=("Segoe UI", 22, "bold"), bg=WHITE, fg=ACCENT).pack(anchor="w")
-            tk.Label(p_frame, text=rule, font=("Segoe UI", 16), bg=WHITE, fg=TEXT).pack(anchor="w", pady=2)
-            tk.Label(p_frame, text=formula, font=("Consolas", 20, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10).pack(anchor="w", pady=2)
-            tk.Label(p_frame, text=f"Приклад: {example}", font=("Segoe UI", 16, "italic"), bg=WHITE, fg=MUTED).pack(anchor="w")
+            tk.Label(p_frame, text=title, font=("Segoe UI", 20, "bold"), bg=WHITE, fg=ACCENT).pack(anchor="w") # Reduced from 22
+            tk.Label(p_frame, text=rule, font=("Segoe UI", 16), bg=WHITE, fg=TEXT).pack(anchor="w", pady=2) # Reduced from 16, less padding
+            tk.Label(p_frame, text=formula, font=("Consolas", 18, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10).pack(anchor="w", pady=2) # Reduced from 20
+            tk.Label(p_frame, text=f"Приклад: {example}", font=("Segoe UI", 14, "italic"), bg=WHITE, fg=MUTED).pack(anchor="w") # Reduced from 16
 
     # ══════════════════════════════════════════════════════════════════
     #  SCENE 2: DISTRIBUTIVE PROPERTY
@@ -125,9 +125,9 @@ class MultiplicationApp(tk.Tk):
         self.clear_main()
         
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=50)
+        f.pack(expand=True, fill="both", padx=30, pady=30) # Reduced from 50
         
-        tk.Label(f, text="Розподільна властивість множення", font=("Segoe UI", 36, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20))
+        tk.Label(f, text="Розподільна властивість множення", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20)) # Reduced from 36
         
         props = [
             ("Відносно додавання", "Щоб помножити суму на число, можна помножити на це число кожний доданок і отримані добутки додати.", "(a + b) ∙ c = a ∙ c + b ∙ c", "49 ∙ 113 + 51 ∙ 113 = (49 + 51) ∙ 113 = 11 300"),
@@ -135,13 +135,13 @@ class MultiplicationApp(tk.Tk):
         ]
 
         for title, rule, formula, example in props:
-            p_frame = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=20, pady=20)
-            p_frame.pack(fill="x", pady=10)
+            p_frame = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=15, pady=15) # Reduced padding
+            p_frame.pack(fill="x", pady=8) # Reduced pady
             
-            tk.Label(p_frame, text=title, font=("Segoe UI", 24, "bold"), bg=WHITE, fg=ORANGE).pack(anchor="w")
-            tk.Label(p_frame, text=rule, font=("Segoe UI", 18), bg=WHITE, fg=TEXT).pack(anchor="w", pady=5)
-            tk.Label(p_frame, text=formula, font=("Consolas", 22, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10).pack(anchor="w", pady=5)
-            tk.Label(p_frame, text=f"Приклад: {example}", font=("Segoe UI", 18, "italic"), bg=WHITE, fg=MUTED).pack(anchor="w")
+            tk.Label(p_frame, text=title, font=("Segoe UI", 20, "bold"), bg=WHITE, fg=ORANGE).pack(anchor="w") # Reduced from 24
+            tk.Label(p_frame, text=rule, font=("Segoe UI", 16), bg=WHITE, fg=TEXT).pack(anchor="w", pady=4) # Reduced from 18
+            tk.Label(p_frame, text=formula, font=("Consolas", 20, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10).pack(anchor="w", pady=4) # Reduced from 22
+            tk.Label(p_frame, text=f"Приклад: {example}", font=("Segoe UI", 16, "italic"), bg=WHITE, fg=MUTED).pack(anchor="w") # Reduced from 18
 
     # ══════════════════════════════════════════════════════════════════
     #  SCENE 3: DISTRIBUTIVE VIZ (FROM P11)
@@ -155,28 +155,28 @@ class MultiplicationApp(tk.Tk):
         self.dist_c = random.randint(2, 5) # Red cols
         
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=40, pady=20)
+        f.pack(expand=True, fill="both", padx=30, pady=20) # Reduced padding
         
-        tk.Label(f, text="Візуалізація розподільного закону", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack()
-        tk.Label(f, text=f"{self.dist_a} × ({self.dist_b} + {self.dist_c})", font=("Consolas", 36, "bold"), bg=BG, fg=ACCENT).pack(pady=10)
+        tk.Label(f, text="Візуалізація розподільного закону", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack() # Reduced from 28 (same but consistent)
+        tk.Label(f, text=f"{self.dist_a} × ({self.dist_b} + {self.dist_c})", font=("Consolas", 32, "bold"), bg=BG, fg=ACCENT).pack(pady=5) # Reduced from 36
         
-        self.canvas = tk.Canvas(f, bg="white", height=400, bd=2, relief="ridge")
+        self.canvas = tk.Canvas(f, bg="white", height=300, bd=2, relief="ridge") # Reduced height 400->300
         self.canvas.pack(fill="both", expand=True, padx=20)
         
-        self.lbl_expl = tk.Label(f, text=f"{self.dist_a} ряди по {self.dist_b} синіх і {self.dist_c} червоних блоків", font=("Segoe UI", 18), bg=BG, fg=TEXT)
+        self.lbl_expl = tk.Label(f, text=f"{self.dist_a} ряди по {self.dist_b} синіх і {self.dist_c} червоних блоків", font=("Segoe UI", 16), bg=BG, fg=TEXT) # Reduced from 18
         self.lbl_expl.pack(pady=10)
         
         btn_frame = tk.Frame(f, bg=BG)
         btn_frame.pack(pady=10)
         
-        tk.Button(btn_frame, text=f"Спосіб 1: {self.dist_a} × ({self.dist_b} + {self.dist_c})", font=("Segoe UI", 14, "bold"), bg=ACCENT, fg=WHITE, 
-                  command=self.dist_method1, padx=20).pack(side="left", padx=10)
+        tk.Button(btn_frame, text=f"Спосіб 1: {self.dist_a} × ({self.dist_b} + {self.dist_c})", font=("Segoe UI", 12, "bold"), bg=ACCENT, fg=WHITE, 
+                  command=self.dist_method1, padx=15).pack(side="left", padx=5) # Reduced from 14/20/10
         
-        tk.Button(btn_frame, text=f"Спосіб 2: {self.dist_a} × {self.dist_b} + {self.dist_a} × {self.dist_c}", font=("Segoe UI", 14, "bold"), bg=ORANGE, fg=WHITE, 
-                  command=self.dist_method2, padx=20).pack(side="left", padx=10)
+        tk.Button(btn_frame, text=f"Спосіб 2: {self.dist_a} × {self.dist_b} + {self.dist_a} × {self.dist_c}", font=("Segoe UI", 12, "bold"), bg=ORANGE, fg=WHITE, 
+                  command=self.dist_method2, padx=15).pack(side="left", padx=5)
 
-        tk.Button(btn_frame, text="🎲 Нові числа", font=("Segoe UI", 14, "bold"), bg=GREEN, fg=WHITE, 
-                  command=self.show_distributive_viz, padx=20).pack(side="left", padx=10)
+        tk.Button(btn_frame, text="🎲 Нові числа", font=("Segoe UI", 12, "bold"), bg=GREEN, fg=WHITE, 
+                  command=self.show_distributive_viz, padx=15).pack(side="left", padx=5)
 
         self.reset_blocks()
 
@@ -185,11 +185,12 @@ class MultiplicationApp(tk.Tk):
         self.blocks_blue = []
         self.blocks_red = []
         
-        size = 50
-        gap = 8
-        total_w = (self.dist_b + self.dist_c) * (size + gap) + 40
-        start_x = (self.SW - total_w) // 2 - 100 # Adjust for sidebar if needed
-        start_y = 50
+        size = 40 # Reduced from 50
+        gap = 6 # Reduced from 8
+        total_w = (self.dist_b + self.dist_c) * (size + gap) + 30
+        start_x = (self.canvas.winfo_width() - total_w) // 2
+        if start_x < 50: start_x = 50
+        start_y = 30 # Reduced from 50
         
         for r in range(self.dist_a):
             y = start_y + r * (size + gap)
@@ -199,9 +200,13 @@ class MultiplicationApp(tk.Tk):
                 self.blocks_blue.append({'id': rect, 'x': x, 'y': y, 'row': r, 'color': ACCENT})
             
             for c in range(self.dist_c):
-                x = start_x + (self.dist_b * (size + gap)) + 40 + c * (size + gap)
+                x = start_x + (self.dist_b * (size + gap)) + 30 + c * (size + gap)
                 rect = self.canvas.create_rectangle(x, y, x+size, y+size, fill=RED, outline=WHITE, width=2)
                 self.blocks_red.append({'id': rect, 'x': x, 'y': y, 'row': r, 'color': RED})
+        
+        # Initial draw needs update if canvas width is 1 (before pack)
+        if self.canvas.winfo_width() <= 1:
+            self.after(100, self.reset_blocks)
 
     def dist_method1(self):
         self.reset_blocks()
@@ -210,7 +215,7 @@ class MultiplicationApp(tk.Tk):
         self.lbl_expl.config(text=f"Спосіб 1: Спочатку додаємо в дужках: {self.dist_b} + {self.dist_c} = {sum_bc} в ряду.\nПотім множимо на кількість рядів: {self.dist_a} × {sum_bc} = {res}.")
         
         # Animation: Slide red blocks to the left
-        target_dx = -40
+        target_dx = -30 # Adjusted
         steps = 20
         step_dx = target_dx / steps
         def anim(step=0):
@@ -228,7 +233,7 @@ class MultiplicationApp(tk.Tk):
         self.lbl_expl.config(text=f"Спосіб 2: Множимо групи окремо: {self.dist_a} × {self.dist_b} синіх та {self.dist_a} × {self.dist_c} червоних.\n{prod1} + {prod2} = {total}.")
         
         # Animation: Move red blocks further right
-        target_dx = 40
+        target_dx = 30 # Adjusted
         steps = 20
         step_dx = target_dx / steps
         def anim(step=0):
@@ -253,56 +258,56 @@ class MultiplicationApp(tk.Tk):
         left.pack_propagate(False)
 
         # Header
-        tk.Label(left, text="Тренажер: Раціональне множення", font=("Segoe UI", 36, "bold"), bg=BG, fg=TEXT).pack(pady=(40, 0))
-        tk.Label(left, text="Використовуй властивості множення, щоб рахувати зручно!", font=("Segoe UI", 18), bg=BG, fg=MUTED).pack(pady=5)
+        tk.Label(left, text="Тренажер: Раціональне множення", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(20, 0)) # Reduced from 36/40
+        tk.Label(left, text="Використовуй властивості множення, щоб рахувати зручно!", font=("Segoe UI", 14), bg=BG, fg=MUTED).pack(pady=2) # Reduced from 18
 
         # Task Box
-        task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=40, pady=30)
-        task_box.pack(pady=30)
+        task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=20, pady=15) # Reduced padding
+        task_box.pack(pady=15) # Reduced from 30
         
-        self.task_text = tk.Label(task_box, text="", font=("Segoe UI", 42, "bold"), bg=WHITE, fg=TEXT)
+        self.task_text = tk.Label(task_box, text="", font=("Segoe UI", 32, "bold"), bg=WHITE, fg=TEXT) # Reduced from 42
         self.task_text.pack()
 
         # Input display
         self.display_frame = tk.Frame(left, bg=WHITE, highlightbackground=ACCENT, highlightthickness=2)
-        self.display_frame.pack(pady=10, ipadx=24, ipady=10)
+        self.display_frame.pack(pady=5, ipadx=16, ipady=4) # Reduced from 10/24/10
         
-        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 48, "bold"), width=12, anchor="e")
+        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 32, "bold"), width=12, anchor="e") # Reduced from 48
         self.lbl_display.pack()
 
-        self.lbl_feedback = tk.Label(left, text="", bg=BG, font=("Segoe UI", 20, "bold"), justify="center")
-        self.lbl_feedback.pack(pady=10)
+        self.lbl_feedback = tk.Label(left, text="", bg=BG, font=("Segoe UI", 14, "bold"), justify="center") # Reduced from 20
+        self.lbl_feedback.pack(pady=5)
 
         # Numpad
         kbd = tk.Frame(left, bg=BG)
-        kbd.pack(pady=20)
+        kbd.pack(pady=5) # Reduced from 20
 
         self.kbd_buttons = []
-        BTN_W, BTN_H = 6, 2
-        FONT_KBD = ("Segoe UI", 22, "bold")
+        BTN_W, BTN_H = 6, 1 # Reduced height from 2
+        FONT_KBD = ("Segoe UI", 16, "bold") # Reduced from 22
         
         rows = [["7","8","9"], ["4","5","6"], ["1","2","3"], ["C","0","⌫"]]
         for row in rows:
             r = tk.Frame(kbd, bg=BG)
-            r.pack(pady=5)
+            r.pack(pady=2)
             for ch in row:
                 is_del = ch in ("⌫", "C")
                 btn = tk.Button(r, text=ch, bg="#fee2e2" if is_del else BTN_NUM, fg=RED if is_del else TEXT,
                                 font=FONT_KBD, width=BTN_W, height=BTN_H, relief="flat", bd=0, cursor="hand2",
                                 command=lambda c=ch: self._key_press(c))
-                btn.pack(side="left", padx=6)
+                btn.pack(side="left", padx=4)
                 self.kbd_buttons.append(btn)
 
         # Bottom buttons
         btn_f = tk.Frame(left, bg=BG)
-        btn_f.pack(pady=20)
+        btn_f.pack(pady=10)
 
-        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 18, "bold"),
-                                relief="flat", bd=0, cursor="hand2", padx=40, pady=15, command=self.check_answer)
-        self.btn_ok.pack(side="left", padx=20)
+        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 14, "bold"),
+                                relief="flat", bd=0, cursor="hand2", padx=30, pady=10, command=self.check_answer) # Reduced from 18/40/15
+        self.btn_ok.pack(side="left", padx=10)
 
-        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 18, "bold"),
-                                  relief="flat", bd=0, cursor="hand2", padx=40, pady=15, command=self.next_task)
+        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 14, "bold"),
+                                  relief="flat", bd=0, cursor="hand2", padx=30, pady=10, command=self.next_task)
 
         # ── права частина (правила та рахунок)
         right = tk.Frame(self.main_area, bg=PANEL, width=RW, highlightbackground=BORDER, highlightthickness=1)
@@ -310,10 +315,10 @@ class MultiplicationApp(tk.Tk):
         right.pack_propagate(False)
 
         rpad = tk.Frame(right, bg=PANEL)
-        rpad.pack(fill="both", expand=True, padx=30, pady=40)
+        rpad.pack(fill="both", expand=True, padx=15, pady=20) # Reduced from 30/40
 
-        tk.Label(rpad, text="Зручні способи", bg=PANEL, fg=MUTED, font=("Segoe UI", 18, "bold")).pack(anchor="w", pady=(0,10))
-        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=15, pady=15)
+        tk.Label(rpad, text="Зручні способи", bg=PANEL, fg=MUTED, font=("Segoe UI", 14, "bold")).pack(anchor="w", pady=(0,5)) # Reduced from 18
+        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=10, pady=10)
         hint_box.pack(fill="x")
         
         hint_text = (
@@ -327,11 +332,11 @@ class MultiplicationApp(tk.Tk):
             "3. Множення на 10, 100...\n"
             "   Дописуй нулі праворуч!"
         )
-        tk.Label(hint_box, text=hint_text, bg="#eff6ff", fg=TEXT, font=("Segoe UI", 14), justify="left", anchor="w").pack(fill="x")
+        tk.Label(hint_box, text=hint_text, bg="#eff6ff", fg=TEXT, font=("Segoe UI", 12), justify="left", anchor="w").pack(fill="x") # Reduced from 14
 
         # Score
-        self.lbl_score = tk.Label(rpad, text="Рахунок: 0 / 0", font=("Segoe UI", 24, "bold"), bg=PANEL, fg=ACCENT)
-        self.lbl_score.pack(side="bottom", pady=40)
+        self.lbl_score = tk.Label(rpad, text="Рахунок: 0 / 0", font=("Segoe UI", 18, "bold"), bg=PANEL, fg=ACCENT) # Reduced from 24
+        self.lbl_score.pack(side="bottom", pady=20)
 
         self.next_task()
 
