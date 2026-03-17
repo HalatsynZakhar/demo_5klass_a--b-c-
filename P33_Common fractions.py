@@ -25,6 +25,7 @@ CARD_B    = "#dbeafe"
 CARD_V    = "#ede9fe"
 CARD_G    = "#dcfce7"
 CARD_Y    = "#fef9c3"
+CARD_R = "#fee2e2"
 TEAL      = "#0f766e"
 TEAL_LT   = "#ccfbf1"
 
