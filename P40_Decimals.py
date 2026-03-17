@@ -11,7 +11,7 @@
   - Фікс 'Інтерактивна пряма': додано розряди тисячних та десятитисячних (5 рівнів)
   - Фікс 'Дес→Дріб', 'Новий знаменник', 'З тексту': клавіатура справа (дві колонки)
   - Фікс 'Інтерактивна пряма': галочка "Скорочений вигляд (без кінцевих нулів)"
-  - Фікс 'AttributeError': повернуто втрачену вкладку "Нулі↔знаки"
+  - Фікс 'Дріб→Дес': клавіатура справа, щоб результат перевірки вміщався
 """
 import tkinter as tk
 import random, math
@@ -910,6 +910,248 @@ class App(tk.Tk):
 
     def _il_drag_end(self, event): self._drag_x0 = None
 
+    # ══ NUMBER LINE (matplotlib) ═══════════════════════════════════════════════
+    def show_number_line(self):
+        self.clear_main(); cf=self.current_frame
+
+        tb=tk.Frame(cf,bg=PANEL,height=52,highlightbackground=BORDER,highlightthickness=1)
+        tb.pack(fill="x"); tb.pack_propagate(False)
+        tk.Label(tb,text="📏  Числова пряма",font=("Segoe UI",16,"bold"),bg=PANEL,fg=TEXT).pack(side="left",padx=18)
+        self._nl_task_btn=tk.Button(tb,text="🎯  Завдання",font=("Segoe UI",13,"bold"),
+            bg=CARD_Y,fg=ORANGE,relief="flat",cursor="hand2",padx=12,pady=5,command=self._nl_toggle_task)
+        self._nl_task_btn.pack(side="left",padx=12)
+        self._nl_task_score_lbl=tk.Label(tb,text="",font=("Segoe UI",13,"bold"),bg=PANEL,fg=GREEN)
+        self._nl_task_score_lbl.pack(side="left",padx=6)
+
+        self._nl_task_frame=tk.Frame(cf,bg=CARD_Y,padx=16,pady=8,highlightbackground=ORANGE,highlightthickness=2)
+        self._nl_task_target_lbl=tk.Label(self._nl_task_frame,text="",font=("Segoe UI",18,"bold"),bg=CARD_Y,fg=ORANGE)
+        self._nl_task_target_lbl.pack(side="left",padx=(0,16))
+        self._nl_task_feed_lbl=tk.Label(self._nl_task_frame,text="",font=("Segoe UI",15,"bold"),bg=CARD_Y,fg=GREEN)
+        self._nl_task_feed_lbl.pack(side="left")
+        self._nl_task_next_btn=tk.Button(self._nl_task_frame,text="▶  Наступне",
+            font=("Segoe UI",12,"bold"),bg=ACCENT,fg=WHITE,relief="flat",cursor="hand2",
+            padx=10,pady=4,state="disabled",command=self._nl_next_task)
+        self._nl_task_next_btn.pack(side="right",padx=6)
+        self._nl_task_frame.pack_forget()
+
+        self._nl_fig, self._nl_ax = plt.subplots(figsize=(12,2.6), facecolor="#f0f4f8")
+        self._nl_mpl_fig = self._nl_fig
+        self._nl_fig.subplots_adjust(left=0.04,right=0.98,top=0.82,bottom=0.25)
+        self._nl_mpl_canvas=FigureCanvasTkAgg(self._nl_fig, master=cf)
+        self._nl_mpl_canvas.get_tk_widget().pack(fill="x",padx=16,pady=(6,0))
+
+        self._nl_ones=0; self._nl_tenths=0; self._nl_hunds=0; self._nl_thous=0
+
+        ctrl_outer=tk.Frame(cf,bg=BG); ctrl_outer.pack(pady=(4,2))
+        scale_row=tk.Frame(ctrl_outer,bg=BG); scale_row.pack(pady=(0,4))
+        tk.Label(scale_row,text="Масштаб осі:",font=("Segoe UI",12,"bold"),bg=BG,fg=MUTED).pack(side="left",padx=(0,8))
+        self._nl_scale="tenths"
+        self._nl_scale_btns=[]
+        for sc,lbl2,stv in[("ones","Цілі","1"),("tenths","Десяті","0,1"),
+                             ("hundredths","Соті","0,01"),("thousandths","Тисячні","0,001")]:
+            b=tk.Button(scale_row,text=f"{lbl2} ({stv})",font=("Segoe UI",11,"bold"),
+                       bg=BTN_NUM,fg=TEXT,relief="flat",cursor="hand2",padx=10,pady=4,
+                       command=lambda s=sc:_nlscale(s))
+            b.pack(side="left",padx=3)
+            self._nl_scale_btns.append((b,sc))
+
+        cnt_row=tk.Frame(ctrl_outer,bg=BG); cnt_row.pack(pady=2)
+        _attr_chain =["_nl_thous","_nl_hunds","_nl_tenths","_nl_ones"]
+
+        def _nl_inc_cascade(attr):
+            v=getattr(self,attr)
+            if v<9:
+                setattr(self,attr,v+1)
+            else:
+                setattr(self,attr,0)
+                idx2=_attr_chain.index(attr)
+                if idx2+1 < len(_attr_chain):
+                    parent_attr=_attr_chain[idx2+1]
+                    if parent_attr=="_nl_ones":
+                        pv=getattr(self,parent_attr)
+                        if pv<9: setattr(self,parent_attr,pv+1)
+                        else: setattr(self,attr,9)
+                    else:
+                        _nl_inc_cascade(parent_attr)
+
+        def _do_redraw():
+            if hasattr(self,'_nlredraw_fn'): self._nlredraw_fn()
+
+        def make_counter(parent, label, attr, color):
+            f=tk.Frame(parent,bg=CARD_B,padx=8,pady=5,highlightbackground=BORDER,highlightthickness=1)
+            f.pack(side="left",padx=5)
+            tk.Label(f,text=label,font=("Segoe UI",11,"bold"),bg=CARD_B,fg=color).pack()
+            inner=tk.Frame(f,bg=CARD_B); inner.pack()
+            def do_dec():
+                v=getattr(self,attr)
+                if v>0:
+                    setattr(self,attr,v-1)
+                    _do_redraw()
+            def do_inc():
+                _nl_inc_cascade(attr)
+                _do_redraw()
+            tk.Button(inner,text="−",font=("Segoe UI",18,"bold"),width=2,bg=BTN_NUM,fg=TEXT,
+                     relief="flat",cursor="hand2",command=do_dec).pack(side="left",padx=2)
+            lbl_w=tk.Label(inner,text="0",font=("Courier New",28,"bold"),bg=CARD_B,fg=color,width=2)
+            lbl_w.pack(side="left")
+            tk.Button(inner,text="+",font=("Segoe UI",18,"bold"),width=2,bg=BTN_NUM,fg=TEXT,
+                     relief="flat",cursor="hand2",command=do_inc).pack(side="left",padx=2)
+            return lbl_w
+
+        self._nl_ones_lbl  =make_counter(cnt_row,"Цілі",   "_nl_ones",  TEXT)
+        self._nl_tenth_lbl =make_counter(cnt_row,"Десяті",  "_nl_tenths",ACCENT)
+        self._nl_hund_lbl  =make_counter(cnt_row,"Соті",    "_nl_hunds", ACCENT2)
+        self._nl_thous_lbl =make_counter(cnt_row,"Тисячні", "_nl_thous", GREEN)
+
+        disp=tk.Frame(cf,bg=BG); disp.pack(pady=4)
+        self._nl_num_lbl=tk.Label(disp,text="",font=("Courier New",50,"bold"),bg=BG,fg=RED)
+        self._nl_num_lbl.pack(side="left",padx=(0,16))
+        self._nl_frac_f=tk.Frame(disp,bg=BG); self._nl_frac_f.pack(side="left")
+
+        def _nlscale(sc):
+            self._nl_scale=sc
+            for b,s in self._nl_scale_btns:
+                b.config(bg=ACCENT if s==sc else BTN_NUM,fg=WHITE if s==sc else TEXT)
+            _nlredraw()
+
+        def _nlredraw():
+            self._nl_ones_lbl.config(text=str(self._nl_ones))
+            self._nl_tenth_lbl.config(text=str(self._nl_tenths))
+            self._nl_hund_lbl.config(text=str(self._nl_hunds))
+            self._nl_thous_lbl.config(text=str(self._nl_thous))
+
+            v=round(self._nl_ones + self._nl_tenths*0.1 + self._nl_hunds*0.01 + self._nl_thous*0.001, 3)
+
+            sc=self._nl_scale
+            if sc=="ones":        step=1.0;   axis_places=0
+            elif sc=="tenths":    step=0.1;   axis_places=1
+            elif sc=="hundredths":step=0.01;  axis_places=2
+            else:                 step=0.001; axis_places=3
+
+            actual_places=3
+            for p in[0,1,2,3]:
+                if abs(round(v,p)-v)<1e-9: actual_places=p; break
+            s=f"{v:.{actual_places}f}".replace(".",",") if actual_places>0 else str(int(round(v)))
+            self._nl_num_lbl.config(text=s)
+
+            for w in self._nl_frac_f.winfo_children(): w.destroy()
+            mul=10**actual_places; nd=int(round(v*mul)); dd=mul
+            wp=nd//dd; rp=nd%dd
+            tk.Label(self._nl_frac_f,text="=  ",font=F_HEAD,bg=BG,fg=MUTED).pack(side="left")
+            if dd==1:
+                tk.Label(self._nl_frac_f,text=str(wp),font=F_FRAC,bg=BG,fg=TEXT).pack(side="left")
+            elif wp>0 and rp>0:
+                tk.Label(self._nl_frac_f,text=str(wp),font=F_FRAC,bg=BG,fg=TEXT).pack(side="left",padx=(0,4))
+                frac_w(self._nl_frac_f,rp,dd,BG,"big",ACCENT).pack(side="left")
+            elif wp>0:
+                tk.Label(self._nl_frac_f,text=str(wp),font=F_FRAC,bg=BG,fg=TEXT).pack(side="left")
+            else:
+                frac_w(self._nl_frac_f,rp,dd,BG,"big",ACCENT).pack(side="left")
+
+            self._nl_draw_axis(v, step)
+
+            if self.nl_task_mode and not self.nl_task_locked:
+                tol=step*0.5
+                if abs(v-self.nl_task_target)<tol:
+                    self.nl_task_locked=True
+                    self.nl_task_score+=1; self.nl_task_total+=1
+                    self._nl_task_feed_lbl.config(text=f"✅  Правильно! ({s})",fg=GREEN)
+                    self._nl_task_score_lbl.config(text=f"Рахунок: {self.nl_task_score}/{self.nl_task_total}")
+                    self._nl_task_next_btn.config(state="normal")
+
+        self._nlredraw_fn=_nlredraw
+        _nlscale("tenths")
+
+    def _nl_draw_axis(self, point_val, step):
+        ax=self._nl_ax; ax.clear()
+        span=step*12
+        lo=max(0.0, point_val-span/2)
+        hi=lo+span
+        label_step=step*5
+
+        ax.set_xlim(lo, hi)
+        ax.set_ylim(-0.5, 0.7)
+        ax.set_yticks([])
+        ax.axhline(0, color='#475569', linewidth=2.5, zorder=1)
+        ax.spines['left'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+
+        ax.annotate('', xy=(hi, 0), xytext=(hi-step*0.5, 0),
+                    arrowprops=dict(arrowstyle='->', color='#475569', lw=2))
+
+        v=lo
+        while v<=hi+step*0.01:
+            vr=round(v,6)
+            is_int=abs(vr-round(vr))<1e-9
+            is_label=abs(round(vr/label_step)*label_step - vr)<step*0.01 if label_step>0 else False
+            tick_h=0.18 if is_int else (0.12 if is_label else 0.07)
+            lw=2.2 if is_int else (1.4 if is_label else 0.7)
+            col='#0f172a' if is_int else ('#1d4ed8' if is_label else '#94a3b8')
+            ax.plot([vr,vr],[-th,th],color=col,linewidth=lw,solid_capstyle='round',zorder=2)
+            if is_int:
+                ax.text(vr,-0.30,str(int(round(vr))),ha='center',va='top',
+                       fontsize=12,fontweight='bold',color='#0f172a')
+            elif is_label:
+                places=2 if step<0.05 else 1
+                lbl=f"{vr:.{places}f}".replace('.',',')
+                ax.text(vr,-0.30,lbl,ha='center',va='top',fontsize=9,color='#1d4ed8')
+            v=round(v+step,10)
+
+        places=2 if step<0.05 else 1
+        s=f"{point_val:.{places}f}".replace('.',',')
+        ax.plot([point_val,point_val],[0,0.42],color='#15803d',linewidth=1.5,linestyle='--',zorder=3)
+        ax.plot(point_val, 0, 'o', color='#15803d', markersize=11, zorder=5,
+               markeredgecolor='white', markeredgewidth=2)
+        ax.text(point_val, 0.46, f"P ({s})", ha='center', va='bottom',
+               fontsize=12, fontweight='bold', color='#15803d')
+
+        if self.nl_task_mode and not self.nl_task_locked:
+            t=self.nl_task_target
+            if lo<=t<=hi:
+                ts=f"{t:.{places}f}".replace('.',',')
+                ax.plot([t,t],[0,0.42],color='#b91c1c',linewidth=1.5,linestyle=':',zorder=3)
+                ax.plot(t, 0, '*', color='#b91c1c', markersize=16, zorder=4,
+                       markeredgecolor='white', markeredgewidth=1)
+                ax.text(t, 0.46, f"? ({ts})", ha='center', va='bottom',
+                       fontsize=11, color='#b91c1c')
+
+        ax.set_facecolor('#f0f4f8')
+        self._nl_fig.patch.set_facecolor('#f0f4f8')
+        try: self._nl_mpl_canvas.draw()
+        except: pass
+
+    def _nl_toggle_task(self):
+        self.nl_task_mode=not self.nl_task_mode
+        if self.nl_task_mode:
+            self._nl_task_btn.config(bg=RED,fg=WHITE,text="⏹  Зупинити")
+            self.nl_task_score=0; self.nl_task_total=0
+            self._nl_task_frame.pack(fill="x",padx=16,pady=(0,4))
+            self._nl_task_score_lbl.config(text="Рахунок: 0/0")
+            self._nl_next_task()
+        else:
+            self._nl_task_btn.config(bg=CARD_Y,fg=ORANGE,text="🎯  Завдання")
+            self._nl_task_frame.pack_forget()
+            self._nl_task_score_lbl.config(text="")
+            self.nl_task_locked=False
+            if hasattr(self,"_nlredraw_fn"): self._nlredraw_fn()
+
+    def _nl_next_task(self):
+        self.nl_task_locked=False
+        sc=self._nl_scale
+        if sc=="ones":         target=float(random.randint(1,9))
+        elif sc=="tenths":     target=round(random.randint(1,19)/10,1)
+        elif sc=="hundredths": target=round(random.randint(1,99)/100,2)
+        else:                  target=round(random.randint(1,999)/1000,3)
+        self.nl_task_target=target
+        places={"ones":0,"tenths":1,"hundredths":2,"thousandths":3}[sc]
+        ts=f"{target:.{places}f}".replace(".",",")
+        self._nl_task_target_lbl.config(text=f"📋  Постав точку на:  {ts}")
+        self._nl_task_feed_lbl.config(text="")
+        self._nl_task_next_btn.config(state="disabled")
+        if hasattr(self,"_nlredraw_fn"): self._nlredraw_fn()
+
 
     # ══ ZEROS DEMO ════════════════════════════════════════════════════════════
     def show_zeros_demo(self):
@@ -1100,7 +1342,6 @@ class App(tk.Tk):
         tk.Label(outer,text="🎉  Правильно!",font=("Segoe UI",12,"bold"),bg=GREEN_LT,fg=GREEN).pack()
         row=tk.Frame(outer,bg=GREEN_LT); row.pack()
         
-        # Зменшено шрифти для відповіді, щоб вона влазила у екран з лівого боку
         tk.Label(row,text=f"{self.ta_dec} =",font=("Courier New",22,"bold"),bg=GREEN_LT,fg=RED).pack(side="left",padx=10)
         ns, ds = str(self.ta_n), str(self.ta_d)
         bw=max(len(ns),len(ds))*18+15; cv=tk.Canvas(row,bg=GREEN_LT,width=bw,height=60,highlightthickness=0); cv.pack(side="left")
@@ -1118,12 +1359,15 @@ class App(tk.Tk):
         tk.Label(sbar,text="Звичайний → Десятковий дріб",font=("Segoe UI",14,"bold"),bg=PANEL,fg=MUTED).pack(side="left",padx=8)
 
         body=tk.Frame(cf,bg=BG); body.pack(fill="both",expand=True,padx=20,pady=5)
-        left=tk.Frame(body,bg=BG); left.pack(side="left",fill="both",expand=True)
         
-        bot_tb=tk.Frame(left,bg=BG); bot_tb.pack(side="bottom",pady=5)
-        ws=tk.Frame(left,bg=BG); ws.pack(side="top",fill="both",expand=True)
+        # Дві колонки, як у решті
+        left_col=tk.Frame(body,bg=BG)
+        left_col.pack(side="left",fill="both",expand=True, padx=(0, 20))
+        
+        right_col=tk.Frame(body,bg=BG)
+        right_col.pack(side="right",fill="y")
 
-        tf=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=15)
+        tf=tk.Frame(left_col,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=15)
         tf.pack(fill="x",pady=(0,8))
         tk.Label(tf,text="Запиши як десятковий дріб:",font=("Segoe UI",24,"bold"),bg=PANEL,fg=TEXT).pack(anchor="w")
         task_row=tk.Frame(tf,bg=PANEL); task_row.pack(anchor="w",pady=5)
@@ -1131,9 +1375,9 @@ class App(tk.Tk):
         self.tb_hint=tk.Label(task_row,text="",font=("Segoe UI",16),bg=PANEL,fg=MUTED,justify="left")
         self.tb_hint.pack(side="left",anchor="center")
 
-        inp_f=tk.Frame(ws,bg=CARD_V,padx=20,pady=12,highlightbackground=ACCENT2,highlightthickness=2)
+        inp_f=tk.Frame(left_col,bg=CARD_V,padx=20,pady=12,highlightbackground=ACCENT2,highlightthickness=2)
         inp_f.pack(fill="x",pady=(0,6))
-        tk.Label(inp_f,text="Твоя відповідь:",font=("Segoe UI",10,"bold"),bg=CARD_V,fg=ACCENT2).pack(anchor="w",pady=(0,4))
+        tk.Label(inp_f,text="Твоя відповідь:",font=("Segoe UI",16,"bold"),bg=CARD_V,fg=ACCENT2).pack(anchor="w",pady=(0,4))
         inp_row=tk.Frame(inp_f,bg=CARD_V); inp_row.pack(anchor="w")
         self.tb_whole_lbl=tk.Label(inp_row,text="",font=("Courier New",64,"bold"),bg=CARD_V,fg=TEXT,width=3,anchor="e")
         self.tb_whole_lbl.pack(side="left")
@@ -1150,16 +1394,12 @@ class App(tk.Tk):
             padx=15,pady=6,command=self._tb_enter_comma)
         self.tb_comma_btn.pack(anchor="w",pady=(8,0))
 
-        self.tb_feed=tk.Label(ws,text="",font=("Segoe UI",16),bg=BG,fg=ORANGE,wraplength=700,justify="center")
+        self.tb_feed=tk.Label(left_col,text="",font=("Segoe UI",16),bg=BG,fg=ORANGE,wraplength=700,justify="center")
         self.tb_feed.pack(pady=4)
-        self._tb_result_frame=tk.Frame(ws,bg=BG); self._tb_result_frame.pack(pady=4)
+        self._tb_result_frame=tk.Frame(left_col,bg=BG); self._tb_result_frame.pack(pady=4)
 
-        act=tk.Frame(bot_tb,bg=BG); act.pack()
-        self.tb_check=mkbtn(act,"✔  Перевірити",self._tb_check,bg=GREEN,w=15,h=2,font=("Segoe UI",22,"bold"))
-        self.tb_check.pack(side="left",padx=10)
-        mkbtn(act,"▶  Наступне",self._tb_new,bg=ACCENT2,w=13,h=2,font=("Segoe UI",22,"bold")).pack(side="left",padx=10)
-
-        np_tb=tk.Frame(bot_tb,bg=BG); np_tb.pack(pady=(10,0))
+        # Права колонка
+        np_tb=tk.Frame(right_col,bg=BG); np_tb.pack(pady=(0,10))
         tk.Label(np_tb,text="Клавіатура",font=("Segoe UI",12,"bold"),bg=BG,fg=MUTED).pack()
         def _tb_numpad(ch):
             if ch==",": self._tb_enter_comma()
@@ -1175,7 +1415,13 @@ class App(tk.Tk):
                 b.pack(side="left",padx=6)
         tk.Button(np_tb,text="C  очистити",font=("Segoe UI",14,"bold"),bg=RED_LT,fg=RED,
                  relief="flat",cursor="hand2",padx=12,pady=5,
-                 command=lambda:_tb_numpad("C")).pack(pady=(5,0))
+                 command=lambda:_tb_numpad("C")).pack(pady=(5,10))
+                 
+        act=tk.Frame(right_col,bg=BG); act.pack()
+        self.tb_check=mkbtn(act,"✔  Перевірити",self._tb_check,bg=GREEN,w=14,h=2,font=("Segoe UI",18,"bold"))
+        self.tb_check.pack(pady=5)
+        mkbtn(act,"▶  Наступне",self._tb_new,bg=ACCENT2,w=14,h=2,font=("Segoe UI",18,"bold")).pack(pady=5)
+
         self._tb_new()
 
     def _tb_st(self): return f"Правильно: {self.tb_score}  /  Завдань: {self.tb_att}"
@@ -1280,14 +1526,14 @@ class App(tk.Tk):
         tk.Label(outer,text="🎉  Правильно!",font=("Segoe UI",14,"bold"),bg=GREEN_LT,fg=GREEN).pack()
         eq_row=tk.Frame(outer,bg=GREEN_LT); eq_row.pack(pady=4)
         ns=str(self.tb_n); ds=str(self.tb_d)
-        bw=max(len(ns),len(ds))*24+15; fH=80
+        bw=max(len(ns),len(ds))*20+15; fH=70
         cv=tk.Canvas(eq_row,bg=GREEN_LT,width=bw,height=fH,highlightthickness=0); cv.pack(side="left",padx=(0,10))
-        cv.create_text(bw//2,18,text=ns,font=("Courier New",30,"bold"),fill=C_DIGIT,anchor="center")
-        cv.create_line(4,40,bw-4,40,fill=ACCENT2,width=2)
-        cv.create_text(bw//2,62,text=ds,font=("Courier New",30,"bold"),fill=C_ZERO,anchor="center")
-        tk.Label(eq_row,text="=",font=("Courier New",32,"bold"),bg=GREEN_LT,fg=MUTED).pack(side="left",padx=5)
+        cv.create_text(bw//2,16,text=ns,font=("Courier New",26,"bold"),fill=C_DIGIT,anchor="center")
+        cv.create_line(4,35,bw-4,35,fill=ACCENT2,width=2)
+        cv.create_text(bw//2,54,text=ds,font=("Courier New",26,"bold"),fill=C_ZERO,anchor="center")
+        tk.Label(eq_row,text="=",font=("Courier New",28,"bold"),bg=GREEN_LT,fg=MUTED).pack(side="left",padx=5)
         tk.Label(eq_row,text=f"{self.tb_whole},{self.tb_ans}",
-                 font=("Courier New",44,"bold"),bg=GREEN_LT,fg=RED).pack(side="left")
+                 font=("Courier New",36,"bold"),bg=GREEN_LT,fg=RED).pack(side="left")
 
     # ══ TRAINER C: привести до знаменника ═════════════════════════════════════
     def show_trainer_c(self):
@@ -1473,8 +1719,6 @@ class App(tk.Tk):
         else:
             if self.tc_feed: self.tc_feed.config(text=f"❌  Не вірно.  Правильно: «{self._tc_whole},{self._tc_ans}»",fg=RED)
         if self.tc_score_lbl: self.tc_score_lbl.config(text=self._tc_st())
-
-
 
     # ══ TRAINER D: читання числа з тексту ═════════════════════════════════════
     _WORD_TASKS=[
