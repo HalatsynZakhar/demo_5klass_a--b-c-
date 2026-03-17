@@ -733,37 +733,59 @@ class App(tk.Tk):
 
     def _il_rebuild_ctrl(self):
         for w in self._il_ctrl_f.winfo_children(): w.destroy()
+        # Поточне значення в цілих одиницях
+        cur_val_int = 0
+        for i in range(self.il_places + 1):
+            cur_val_int += self.il_digits[i] * (10**(self.il_places - i))
+        
+        max_val_int = 0
+        for i in range(self.il_places + 1):
+            max_val_int += 9 * (10**(self.il_places - i))
+
         for i in range(self.il_places + 1):
             color = self.PVCOLORS[i]
             row = tk.Frame(self._il_ctrl_f, bg=BTN_NUM, pady=6, padx=8); row.pack(fill="x", pady=3)
-            # Use self.PVNAMES if PLACE_NAMES global fails (but it shouldn't)
             pname = PLACE_NAMES[i] if i < len(PLACE_NAMES) else self.PVNAMES[i]
             tk.Label(row, text=pname, font=("Segoe UI", 13, "bold"), bg=BTN_NUM, fg=color, width=10, anchor="w").pack(side="left")
             
+            unit_change = 10**(self.il_places - i)
+            can_dec = (cur_val_int - unit_change >= 0)
+            can_inc = (cur_val_int + unit_change <= max_val_int)
+            
+            dec_st = "normal" if can_dec else "disabled"
+            inc_st = "normal" if can_inc else "disabled"
+            dec_col = TEXT if can_dec else MUTED
+            inc_col = TEXT if can_inc else MUTED
+
             def make_cmd(idx, delta): return lambda: self._il_change(idx, delta)
             
-            tk.Button(row, text="−", font=("Segoe UI", 16, "bold"), width=2, bg=PANEL, command=make_cmd(i, -1), relief="flat").pack(side="left", padx=4)
+            tk.Button(row, text="−", font=("Segoe UI", 16, "bold"), width=2, bg=PANEL, fg=dec_col, 
+                      command=make_cmd(i, -1), relief="flat", state=dec_st).pack(side="left", padx=4)
             tk.Label(row, text=str(self.il_digits[i]), font=("Courier New", 24, "bold"), bg=BTN_NUM, fg=color, width=2).pack(side="left", padx=4)
-            tk.Button(row, text="+", font=("Segoe UI", 16, "bold"), width=2, bg=PANEL, command=make_cmd(i, 1), relief="flat").pack(side="left", padx=4)
+            tk.Button(row, text="+", font=("Segoe UI", 16, "bold"), width=2, bg=PANEL, fg=inc_col,
+                      command=make_cmd(i, 1), relief="flat", state=inc_st).pack(side="left", padx=4)
 
     def _il_change(self, idx, delta):
-        val = self.il_digits[idx] + delta
-        if idx == 0: self.il_digits[0] = max(0, min(9, val))
-        elif val > 9: self.il_digits[idx] = 0; self._il_carry(idx - 1, 1)
-        elif val < 0:
-            if idx > 0 and self.il_digits[idx-1] > 0: self.il_digits[idx] = 9; self._il_carry(idx - 1, -1)
-            else: self.il_digits[idx] = 0
-        else: self.il_digits[idx] = val
-        self._il_rebuild_ctrl(); self._il_redraw()
+        cur_val_int = 0
+        for i in range(self.il_places + 1):
+            cur_val_int += self.il_digits[i] * (10**(self.il_places - i))
+        
+        change_int = delta * (10**(self.il_places - idx))
+        new_val_int = cur_val_int + change_int
+        
+        max_val_int = 0
+        for i in range(self.il_places + 1):
+            max_val_int += 9 * (10**(self.il_places - i))
+            
+        if 0 <= new_val_int <= max_val_int:
+            temp_val = new_val_int
+            for i in range(self.il_places, -1, -1):
+                self.il_digits[i] = temp_val % 10
+                temp_val //= 10
+            self._il_rebuild_ctrl(); self._il_redraw()
 
     def _il_carry(self, idx, delta):
-        new = self.il_digits[idx] + delta
-        if idx == 0: self.il_digits[0] = max(0, min(9, new))
-        elif new > 9: self.il_digits[idx] = 0; (self._il_carry(idx - 1, 1) if idx > 0 else None)
-        elif new < 0:
-            if idx > 0 and self.il_digits[idx-1] > 0: self.il_digits[idx] = 9; self._il_carry(idx - 1, -1)
-            else: self.il_digits[idx] = 0
-        else: self.il_digits[idx] = new
+        pass
 
     def _il_redraw(self):
         self._il_fig.clear(); ax = self._il_fig.add_subplot(111); ax.set_facecolor(BG); ax.axis("off")
@@ -823,56 +845,60 @@ class App(tk.Tk):
 
     def _pvrebuild(self):
         for w in self._pv_ctrl.winfo_children(): w.destroy()
+        # Поточне значення в цілих одиницях найменшого розряду
+        cur_val_int = 0
+        for i in range(self.pv_places + 1):
+            cur_val_int += self.pv_digits[i] * (10**(self.pv_places - i))
+        
+        max_val_int = 0
+        for i in range(self.pv_places + 1):
+            max_val_int += 9 * (10**(self.pv_places - i))
+
         for i in range(self.pv_places+1):
             color=self.PVCOLORS[i]
             row=tk.Frame(self._pv_ctrl,bg=BTN_NUM,pady=7,padx=10); row.pack(fill="x",pady=4)
             tk.Label(row,text=self.PVNAMES[i],font=("Segoe UI",15,"bold"),bg=BTN_NUM,fg=color,width=12,anchor="w").pack(side="left")
-            def dec(idx=i): self._pvchange(idx,-1)
-            def inc(idx=i): self._pvchange(idx,1)
-            # Глобальне блокування за повним значенням
-            _cur=float(self.pv_digits[0])
-            for _j in range(1,self.pv_places+1): _cur+=self.pv_digits[_j]*(10**-_j)
-            _cur=round(_cur,self.pv_places)
-            _mx=round(9+sum(9*(10**-k) for k in range(1,self.pv_places+1)),self.pv_places)
-            at_min = (_cur<=0.0)
-            at_max = (_cur>=_mx)
-            dec_col=MUTED if at_min else TEXT
-            inc_col=MUTED if at_max else TEXT
-            dec_st="disabled" if at_min else "normal"
-            inc_st="disabled" if at_max else "normal"
+            
+            unit_change = 10**(self.pv_places - i)
+            can_dec = (cur_val_int - unit_change >= 0)
+            can_inc = (cur_val_int + unit_change <= max_val_int)
+            
+            dec_st = "normal" if can_dec else "disabled"
+            inc_st = "normal" if can_inc else "disabled"
+            dec_col = TEXT if can_dec else MUTED
+            inc_col = TEXT if can_inc else MUTED
+
+            def dec_cmd(idx=i): self._pvchange(idx, -1)
+            def inc_cmd(idx=i): self._pvchange(idx, 1)
+
             tk.Button(row,text="−",font=F_CTRL,width=3,bg=PANEL,fg=dec_col,
-                     relief="flat",cursor="hand2",command=dec,state=dec_st).pack(side="left",padx=6)
+                     relief="flat",cursor="hand2",command=dec_cmd,state=dec_st).pack(side="left",padx=6)
             tk.Label(row,text=str(self.pv_digits[i]),font=("Courier New",32,"bold"),
                      bg=BTN_NUM,fg=color,width=2).pack(side="left",padx=8)
             tk.Button(row,text="+",font=F_CTRL,width=3,bg=PANEL,fg=inc_col,
-                     relief="flat",cursor="hand2",command=inc,state=inc_st).pack(side="left",padx=6)
+                     relief="flat",cursor="hand2",command=inc_cmd,state=inc_st).pack(side="left",padx=6)
 
-    def _pvchange(self,idx,delta):
-        new=self.pv_digits[idx]+delta
-        if idx==0:
-            self.pv_digits[0]=max(0,min(9,new))
-        elif new>9:
-            self.pv_digits[idx]=0; self._pvcarry(idx-1,+1)
-        elif new<0:
-            if idx>0 and self.pv_digits[idx-1]>0:
-                self.pv_digits[idx]=9; self._pvcarry(idx-1,-1)
-            else:
-                self.pv_digits[idx]=0
-        else:
-            self.pv_digits[idx]=new
-        self._pvrebuild(); self._pvrefresh()
+    def _pvchange(self, idx, delta):
+        cur_val_int = 0
+        for i in range(self.pv_places + 1):
+            cur_val_int += self.pv_digits[i] * (10**(self.pv_places - i))
+        
+        change_int = delta * (10**(self.pv_places - idx))
+        new_val_int = cur_val_int + change_int
+        
+        max_val_int = 0
+        for i in range(self.pv_places + 1):
+            max_val_int += 9 * (10**(self.pv_places - i))
+            
+        if 0 <= new_val_int <= max_val_int:
+            temp_val = new_val_int
+            for i in range(self.pv_places, -1, -1):
+                self.pv_digits[i] = temp_val % 10
+                temp_val //= 10
+            self._pvrebuild(); self._pvrefresh()
 
-    def _pvcarry(self,idx,delta):
-        new=self.pv_digits[idx]+delta
-        if idx==0:
-            self.pv_digits[0]=max(0,min(9,new))
-        elif new>9:
-            self.pv_digits[idx]=0; (self._pvcarry(idx-1,+1) if idx>0 else None)
-        elif new<0:
-            if idx>0 and self.pv_digits[idx-1]>0: self.pv_digits[idx]=9; self._pvcarry(idx-1,-1)
-            else: self.pv_digits[idx]=0
-        else:
-            self.pv_digits[idx]=new
+    def _pvcarry(self, idx, delta):
+        pass
 
     def _pvrefresh(self):
         val=float(self.pv_digits[0])
