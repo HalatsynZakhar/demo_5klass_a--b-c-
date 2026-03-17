@@ -61,20 +61,20 @@ class AdditionApp(tk.Tk):
         self.show_intro()
 
     def _build_ui(self):
-        # ── Header
-        hdr = tk.Frame(self, bg=ACCENT, height=80)
+        # ── Header (Reduced height 80 -> 60)
+        hdr = tk.Frame(self, bg=ACCENT, height=60)
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
         
-        tk.Label(hdr, text="Додавання натуральних чисел (§ 4)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 24, "bold")).pack(side="left", padx=30)
-        tk.Button(hdr, text="❌ Вихід", font=("Arial", 16, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20)
+        tk.Label(hdr, text="Додавання натуральних чисел (§ 4)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 20, "bold")).pack(side="left", padx=30)
+        tk.Button(hdr, text="❌ Вихід", font=("Arial", 14, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20)
         
-        # ── Navigation Menu
-        nav = tk.Frame(self, bg=WHITE, height=60)
+        # ── Navigation Menu (Reduced height 60 -> 50)
+        nav = tk.Frame(self, bg=WHITE, height=50)
         nav.pack(fill="x")
         nav.pack_propagate(False)
         
-        btn_font = ("Segoe UI", 16, "bold")
+        btn_font = ("Segoe UI", 12, "bold") # Reduced from 16
         tk.Button(nav, text="1. Властивості додавання", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_intro).pack(side="left", padx=20)
         tk.Button(nav, text="2. Переставна та Сполучна", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_properties).pack(side="left", padx=20)
         tk.Button(nav, text="3. Раціональне додавання (Тренажер)", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_rational_trainer).pack(side="left", padx=20)
@@ -98,9 +98,9 @@ class AdditionApp(tk.Tk):
         self.clear_main()
         
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=50)
+        f.pack(expand=True, fill="both", padx=30, pady=30) # Reduced from 50
         
-        tk.Label(f, text="Додавання та властивість нуля", font=("Segoe UI", 36, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 30))
+        tk.Label(f, text="Додавання та властивість нуля", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20)) # Reduced from 36
         
         desc = (
             "Додавання — це математична дія, за допомогою якої ми знаходимо суму чисел.\n\n"
@@ -114,7 +114,7 @@ class AdditionApp(tk.Tk):
             "Тому додавання 0 не має практичного сенсу, адже результат відомий заздалегідь."
         )
         
-        tk.Label(f, text=desc, font=("Segoe UI", 24), bg=BG, fg=TEXT, justify="left", wraplength=self.SW-200).pack(anchor="w")
+        tk.Label(f, text=desc, font=("Segoe UI", 18), bg=BG, fg=TEXT, justify="left", wraplength=self.SW-100).pack(anchor="w") # Reduced from 24
 
     # ══════════════════════════════════════════════════════════════════
     #  SCENE 2: PROPERTIES (COMMUTATIVE & ASSOCIATIVE)
@@ -123,9 +123,9 @@ class AdditionApp(tk.Tk):
         self.clear_main()
         
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=50)
+        f.pack(expand=True, fill="both", padx=30, pady=30) # Reduced from 50
         
-        tk.Label(f, text="Основні закони додавання", font=("Segoe UI", 36, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 30))
+        tk.Label(f, text="Основні закони додавання", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20)) # Reduced from 36
         
         props = [
             ("Переставний закон", "Від перестановки доданків сума не змінюється.", "a + b = b + a", "14 + 23 = 23 + 14 = 37"),
@@ -133,13 +133,13 @@ class AdditionApp(tk.Tk):
         ]
 
         for title, rule, formula, example in props:
-            p_frame = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=20, pady=20)
-            p_frame.pack(fill="x", pady=10)
+            p_frame = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=15, pady=15) # Reduced padding
+            p_frame.pack(fill="x", pady=5) # Reduced pady
             
-            tk.Label(p_frame, text=title, font=("Segoe UI", 24, "bold"), bg=WHITE, fg=ACCENT).pack(anchor="w")
-            tk.Label(p_frame, text=rule, font=("Segoe UI", 18), bg=WHITE, fg=TEXT).pack(anchor="w", pady=5)
-            tk.Label(p_frame, text=formula, font=("Consolas", 22, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10).pack(anchor="w", pady=5)
-            tk.Label(p_frame, text=f"Приклад: {example}", font=("Segoe UI", 18, "italic"), bg=WHITE, fg=MUTED).pack(anchor="w")
+            tk.Label(p_frame, text=title, font=("Segoe UI", 20, "bold"), bg=WHITE, fg=ACCENT).pack(anchor="w") # Reduced from 24
+            tk.Label(p_frame, text=rule, font=("Segoe UI", 16), bg=WHITE, fg=TEXT).pack(anchor="w", pady=2) # Reduced from 18
+            tk.Label(p_frame, text=formula, font=("Consolas", 20, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10).pack(anchor="w", pady=2) # Reduced from 22
+            tk.Label(p_frame, text=f"Приклад: {example}", font=("Segoe UI", 16, "italic"), bg=WHITE, fg=MUTED).pack(anchor="w") # Reduced from 18
 
     # ══════════════════════════════════════════════════════════════════
     #  SCENE 3: RATIONAL ADDITION TRAINER
@@ -156,56 +156,56 @@ class AdditionApp(tk.Tk):
         left.pack_propagate(False)
 
         # Header
-        tk.Label(left, text="Тренажер: Раціональне додавання", font=("Segoe UI", 36, "bold"), bg=BG, fg=TEXT).pack(pady=(40, 0))
-        tk.Label(left, text="Шукай пари чисел, які в сумі дають кругле число!", font=("Segoe UI", 18), bg=BG, fg=MUTED).pack(pady=5)
+        tk.Label(left, text="Тренажер: Раціональне додавання", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(20, 0)) # Reduced from 36
+        tk.Label(left, text="Шукай пари чисел, які в сумі дають кругле число!", font=("Segoe UI", 14), bg=BG, fg=MUTED).pack(pady=2) # Reduced from 18
 
         # Task Box
-        task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=40, pady=30)
-        task_box.pack(pady=30)
+        task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=20, pady=15) # Reduced padding
+        task_box.pack(pady=15) # Reduced from 30
         
-        self.task_text = tk.Label(task_box, text="", font=("Segoe UI", 48, "bold"), bg=WHITE, fg=TEXT)
+        self.task_text = tk.Label(task_box, text="", font=("Segoe UI", 32, "bold"), bg=WHITE, fg=TEXT) # Reduced from 48
         self.task_text.pack()
 
         # Input display
         self.display_frame = tk.Frame(left, bg=WHITE, highlightbackground=ACCENT, highlightthickness=2)
-        self.display_frame.pack(pady=10, ipadx=24, ipady=10)
+        self.display_frame.pack(pady=5, ipadx=16, ipady=4) # Reduced padding/margin
         
-        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 48, "bold"), width=12, anchor="e")
+        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 32, "bold"), width=12, anchor="e") # Reduced from 48
         self.lbl_display.pack()
 
-        self.lbl_feedback = tk.Label(left, text="", bg=BG, font=("Segoe UI", 20, "bold"), justify="center")
-        self.lbl_feedback.pack(pady=10)
+        self.lbl_feedback = tk.Label(left, text="", bg=BG, font=("Segoe UI", 14, "bold"), justify="center") # Reduced from 20
+        self.lbl_feedback.pack(pady=5)
 
         # Numpad
         kbd = tk.Frame(left, bg=BG)
-        kbd.pack(pady=20)
+        kbd.pack(pady=5) # Reduced from 20
 
         self.kbd_buttons = []
-        BTN_W, BTN_H = 6, 2
-        FONT_KBD = ("Segoe UI", 22, "bold")
+        BTN_W, BTN_H = 6, 1 # Reduced height from 2
+        FONT_KBD = ("Segoe UI", 16, "bold") # Reduced from 22
         
         rows = [["7","8","9"], ["4","5","6"], ["1","2","3"], ["C","0","⌫"]]
         for row in rows:
             r = tk.Frame(kbd, bg=BG)
-            r.pack(pady=5)
+            r.pack(pady=2)
             for ch in row:
                 is_del = ch in ("⌫", "C")
                 btn = tk.Button(r, text=ch, bg="#fee2e2" if is_del else BTN_NUM, fg=RED if is_del else TEXT,
                                 font=FONT_KBD, width=BTN_W, height=BTN_H, relief="flat", bd=0, cursor="hand2",
                                 command=lambda c=ch: self._key_press(c))
-                btn.pack(side="left", padx=6)
+                btn.pack(side="left", padx=4)
                 self.kbd_buttons.append(btn)
 
         # Bottom buttons
         btn_f = tk.Frame(left, bg=BG)
-        btn_f.pack(pady=20)
+        btn_f.pack(pady=10)
 
-        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 18, "bold"),
-                                relief="flat", bd=0, cursor="hand2", padx=40, pady=15, command=self.check_answer)
-        self.btn_ok.pack(side="left", padx=20)
+        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 14, "bold"),
+                                relief="flat", bd=0, cursor="hand2", padx=30, pady=10, command=self.check_answer) # Reduced font & padding
+        self.btn_ok.pack(side="left", padx=10)
 
-        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 18, "bold"),
-                                  relief="flat", bd=0, cursor="hand2", padx=40, pady=15, command=self.next_task)
+        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 14, "bold"),
+                                  relief="flat", bd=0, cursor="hand2", padx=30, pady=10, command=self.next_task)
         # Packed later when needed
 
         # ── права частина (правила та рахунок)
@@ -214,10 +214,10 @@ class AdditionApp(tk.Tk):
         right.pack_propagate(False)
 
         rpad = tk.Frame(right, bg=PANEL)
-        rpad.pack(fill="both", expand=True, padx=30, pady=40)
+        rpad.pack(fill="both", expand=True, padx=15, pady=20) # Reduced from 30/40
 
-        tk.Label(rpad, text="Порада", bg=PANEL, fg=MUTED, font=("Segoe UI", 18, "bold")).pack(anchor="w", pady=(0,10))
-        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=15, pady=15)
+        tk.Label(rpad, text="Порада", bg=PANEL, fg=MUTED, font=("Segoe UI", 14, "bold")).pack(anchor="w", pady=(0,5)) # Reduced from 18
+        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=10, pady=10)
         hint_box.pack(fill="x")
         
         hint_text = (
@@ -229,11 +229,11 @@ class AdditionApp(tk.Tk):
             "• 5 та 5 (5+5=10)\n\n"
             "Додавай їх спочатку, а потім решту!"
         )
-        tk.Label(hint_box, text=hint_text, bg="#eff6ff", fg=TEXT, font=("Segoe UI", 14), justify="left", anchor="w").pack(fill="x")
+        tk.Label(hint_box, text=hint_text, bg="#eff6ff", fg=TEXT, font=("Segoe UI", 12), justify="left", anchor="w").pack(fill="x") # Reduced from 14
 
         # Score
-        self.lbl_score = tk.Label(rpad, text="Рахунок: 0 / 0", font=("Segoe UI", 24, "bold"), bg=PANEL, fg=ACCENT)
-        self.lbl_score.pack(side="bottom", pady=40)
+        self.lbl_score = tk.Label(rpad, text="Рахунок: 0 / 0", font=("Segoe UI", 18, "bold"), bg=PANEL, fg=ACCENT) # Reduced from 24
+        self.lbl_score.pack(side="bottom", pady=20)
 
         self.next_task()
 
