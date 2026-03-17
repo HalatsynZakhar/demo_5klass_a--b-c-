@@ -1271,33 +1271,33 @@ class App(tk.Tk):
         bot=tk.Frame(left,bg=BG); bot.grid(row=1, column=0, sticky="ew", pady=10)
 
         # ── Завдання
-        tf=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=5)
-        tf.pack(fill="x",pady=(0,4))
-        tk.Label(tf,text="Запиши як звичайний дріб:",font=("Segoe UI",16,"bold"),bg=PANEL,fg=TEXT).pack(anchor="w")
-        self.ta_task_lbl=tk.Label(tf,text="",font=("Courier New",52,"bold"),bg=PANEL,fg=RED)
-        self.ta_task_lbl.pack(pady=2)
+        tf=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=10)
+        tf.pack(fill="x",pady=(0,6))
+        tk.Label(tf,text="Запиши як звичайний дріб:",font=("Segoe UI",24,"bold"),bg=PANEL,fg=TEXT).pack(anchor="w")
+        self.ta_task_lbl=tk.Label(tf,text="",font=("Courier New",84,"bold"),bg=PANEL,fg=RED)
+        self.ta_task_lbl.pack(pady=5)
 
         # ── Введення (дріб)
-        inp_f=tk.Frame(ws,bg=CARD_B,padx=20,pady=5,highlightbackground=ACCENT,highlightthickness=2)
-        inp_f.pack(pady=4)
+        inp_f=tk.Frame(ws,bg=CARD_B,padx=40,pady=15,highlightbackground=ACCENT,highlightthickness=2)
+        inp_f.pack(pady=10)
         
         # Чисельник
         self.ta_n_box=tk.Frame(inp_f,bg=WHITE,highlightthickness=2,highlightbackground=ACCENT)
-        self.ta_n_box.pack(pady=(0,2))
-        self.ta_n_lbl=tk.Label(self.ta_n_box,text="",font=("Courier New",44,"bold"),bg=WHITE,fg=ACCENT,width=8,anchor="center")
-        self.ta_n_lbl.pack(side="left",padx=10)
-        self.ta_n_cur=tk.Label(self.ta_n_box,text="▮",font=("Courier New",44,"bold"),bg=WHITE,fg=ACCENT2)
+        self.ta_n_box.pack(pady=(0,4))
+        self.ta_n_lbl=tk.Label(self.ta_n_box,text="",font=("Courier New",64,"bold"),bg=WHITE,fg=ACCENT,width=8,anchor="center")
+        self.ta_n_lbl.pack(side="left",padx=15)
+        self.ta_n_cur=tk.Label(self.ta_n_box,text="▮",font=("Courier New",64,"bold"),bg=WHITE,fg=ACCENT2)
         self.ta_n_cur.pack(side="left")
 
         # Риска дробу
-        tk.Frame(inp_f,bg=ACCENT,height=4,width=260).pack(pady=4)
+        tk.Frame(inp_f,bg=ACCENT,height=6,width=340).pack(pady=6)
 
         # Знаменник
         self.ta_d_box=tk.Frame(inp_f,bg=WHITE,highlightthickness=2,highlightbackground=BORDER)
-        self.ta_d_box.pack(pady=(2,0))
-        self.ta_d_lbl=tk.Label(self.ta_d_box,text="",font=("Courier New",44,"bold"),bg=WHITE,fg=GREEN,width=8,anchor="center")
-        self.ta_d_lbl.pack(side="left",padx=10)
-        self.ta_d_cur=tk.Label(self.ta_d_box,text="",font=("Courier New",44,"bold"),bg=WHITE,fg=ACCENT2)
+        self.ta_d_box.pack(pady=(4,0))
+        self.ta_d_lbl=tk.Label(self.ta_d_box,text="",font=("Courier New",64,"bold"),bg=WHITE,fg=GREEN,width=8,anchor="center")
+        self.ta_d_lbl.pack(side="left",padx=15)
+        self.ta_d_cur=tk.Label(self.ta_d_box,text="",font=("Courier New",64,"bold"),bg=WHITE,fg=ACCENT2)
         self.ta_d_cur.pack(side="left")
 
         # Focus handlers
@@ -1306,29 +1306,29 @@ class App(tk.Tk):
         self.ta_n_box.bind("<Button-1>",set_f_n); self.ta_n_lbl.bind("<Button-1>",set_f_n)
         self.ta_d_box.bind("<Button-1>",set_f_d); self.ta_d_lbl.bind("<Button-1>",set_f_d)
 
-        self.ta_feed=tk.Label(ws,text="",font=("Segoe UI",13),bg=BG,fg=ORANGE,wraplength=620,justify="center")
-        self.ta_feed.pack(pady=2)
+        self.ta_feed=tk.Label(ws,text="",font=("Segoe UI",16),bg=BG,fg=ORANGE,wraplength=700,justify="center")
+        self.ta_feed.pack(pady=4)
 
         # ── Результат area
-        self._ta_result_frame=tk.Frame(ws,bg=BG); self._ta_result_frame.pack(pady=2)
+        self._ta_result_frame=tk.Frame(ws,bg=BG); self._ta_result_frame.pack(pady=4)
 
         # ── Кнопки дії
         act=tk.Frame(bot,bg=BG); act.pack()
-        self.ta_check_btn=mkbtn(act,"✔  Перевірити",self._ta_check,bg=GREEN,w=13,h=2)
-        self.ta_check_btn.pack(side="left",padx=8)
-        mkbtn(act,"▶  Наступне",self._ta_new,bg=ACCENT,w=11,h=2).pack(side="left",padx=8)
+        self.ta_check_btn=mkbtn(act,"✔  Перевірити",self._ta_check,bg=GREEN,w=15,h=2,font=("Segoe UI",22,"bold"))
+        self.ta_check_btn.pack(side="left",padx=10)
+        mkbtn(act,"▶  Наступне",self._ta_new,bg=ACCENT,w=13,h=2,font=("Segoe UI",22,"bold")).pack(side="left",padx=10)
 
         # ── Numpad
-        np_f=tk.Frame(bot,bg=BG); np_f.pack(pady=(5,0))
+        np_f=tk.Frame(bot,bg=BG); np_f.pack(pady=(10,0))
         for row in [("7","8","9"),("4","5","6"),("1","2","3"),("C","0","⌫")]:
-            rf=tk.Frame(np_f,bg=BG); rf.pack(pady=2)
+            rf=tk.Frame(np_f,bg=BG); rf.pack(pady=3)
             for ch in row:
                 bc,fc=(BTN_NUM,TEXT) if ch.isdigit() else ((RED_LT,RED) if ch=="C" else (CARD_V,ACCENT2))
-                tk.Button(rf,text=ch,font=("Segoe UI",18,"bold"),width=3,height=1,bg=bc,fg=fc,relief="flat",
-                          cursor="hand2",command=lambda c=ch:self._ta_key(c)).pack(side="left",padx=4)
+                tk.Button(rf,text=ch,font=("Segoe UI",24,"bold"),width=4,height=1,bg=bc,fg=fc,relief="flat",
+                          cursor="hand2",command=lambda c=ch:self._ta_key(c)).pack(side="left",padx=6)
         
         # Перемикач прямо під цифрами
-        mkbtn(np_f,"⇅  Змінити поле (Чисельник/Знаменник)",self._ta_switch_focus,bg=BTN_NUM,fg=ACCENT,font=("Segoe UI",12,"bold"),w=32,h=1).pack(pady=(5,0))
+        mkbtn(np_f,"⇅  Змінити поле (Чисельник/Знаменник)",self._ta_switch_focus,bg=BTN_NUM,fg=ACCENT,font=("Segoe UI",16,"bold"),w=36,h=1).pack(pady=(8,0))
 
         self._ta_new()
 
@@ -1421,60 +1421,60 @@ class App(tk.Tk):
         ws=tk.Frame(left,bg=BG); ws.pack(side="top",fill="both",expand=True)
 
         # ── Завдання: великий дріб canvas
-        tf=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=8)
-        tf.pack(fill="x",pady=(0,4))
-        tk.Label(tf,text="Запиши як десятковий дріб:",font=("Segoe UI",18,"bold"),bg=PANEL,fg=TEXT).pack(anchor="w")
-        task_row=tk.Frame(tf,bg=PANEL); task_row.pack(anchor="w",pady=2)
-        self.tb_task_f=tk.Frame(task_row,bg=PANEL); self.tb_task_f.pack(side="left",padx=(0,32))
-        self.tb_hint=tk.Label(task_row,text="",font=("Segoe UI",13),bg=PANEL,fg=MUTED,justify="left")
+        tf=tk.Frame(ws,bg=PANEL,highlightbackground=BORDER,highlightthickness=2,padx=28,pady=15)
+        tf.pack(fill="x",pady=(0,8))
+        tk.Label(tf,text="Запиши як десятковий дріб:",font=("Segoe UI",24,"bold"),bg=PANEL,fg=TEXT).pack(anchor="w")
+        task_row=tk.Frame(tf,bg=PANEL); task_row.pack(anchor="w",pady=5)
+        self.tb_task_f=tk.Frame(task_row,bg=PANEL); self.tb_task_f.pack(side="left",padx=(0,40))
+        self.tb_hint=tk.Label(task_row,text="",font=("Segoe UI",16),bg=PANEL,fg=MUTED,justify="left")
         self.tb_hint.pack(side="left",anchor="center")
 
         # ── Введення: учень вводить ВСЕ — ціла + кома + дробова
-        inp_f=tk.Frame(ws,bg=CARD_V,padx=20,pady=8,highlightbackground=ACCENT2,highlightthickness=2)
-        inp_f.pack(fill="x",pady=(0,4))
-        tk.Label(inp_f,text="Твоя відповідь:",font=("Segoe UI",13,"bold"),bg=CARD_V,fg=ACCENT2).pack(anchor="w",pady=(0,2))
+        inp_f=tk.Frame(ws,bg=CARD_V,padx=20,pady=12,highlightbackground=ACCENT2,highlightthickness=2)
+        inp_f.pack(fill="x",pady=(0,6))
+        tk.Label(inp_f,text="Твоя відповідь:",font=("Segoe UI",16,"bold"),bg=CARD_V,fg=ACCENT2).pack(anchor="w",pady=(0,4))
         inp_row=tk.Frame(inp_f,bg=CARD_V); inp_row.pack(anchor="w")
-        self.tb_whole_lbl=tk.Label(inp_row,text="",font=("Courier New",48,"bold"),bg=CARD_V,fg=TEXT,width=3,anchor="e")
+        self.tb_whole_lbl=tk.Label(inp_row,text="",font=("Courier New",64,"bold"),bg=CARD_V,fg=TEXT,width=3,anchor="e")
         self.tb_whole_lbl.pack(side="left")
-        self.tb_comma_lbl=tk.Label(inp_row,text="",font=("Courier New",48,"bold"),bg=CARD_V,fg=MUTED)
+        self.tb_comma_lbl=tk.Label(inp_row,text="",font=("Courier New",64,"bold"),bg=CARD_V,fg=MUTED)
         self.tb_comma_lbl.pack(side="left")
-        self.tb_frac_lbl=tk.Label(inp_row,text="",font=("Courier New",48,"bold"),bg=CARD_V,fg=RED,width=5,anchor="w")
+        self.tb_frac_lbl=tk.Label(inp_row,text="",font=("Courier New",64,"bold"),bg=CARD_V,fg=RED,width=5,anchor="w")
         self.tb_frac_lbl.pack(side="left")
-        self.tb_cursor_lbl=tk.Label(inp_row,text="▮",font=("Courier New",48,"bold"),bg=CARD_V,fg=ACCENT2)
+        self.tb_cursor_lbl=tk.Label(inp_row,text="▮",font=("Courier New",64,"bold"),bg=CARD_V,fg=ACCENT2)
         self.tb_cursor_lbl.pack(side="left")
-        self.tb_slots_lbl=tk.Label(inp_f,text="",font=("Segoe UI",11),bg=CARD_V,fg=MUTED)
-        self.tb_slots_lbl.pack(anchor="w",pady=(2,0))
+        self.tb_slots_lbl=tk.Label(inp_f,text="",font=("Segoe UI",14),bg=CARD_V,fg=MUTED)
+        self.tb_slots_lbl.pack(anchor="w",pady=(4,0))
         self.tb_comma_btn=tk.Button(inp_f,text=",  Поставити кому →",
-            font=("Segoe UI",11,"bold"),bg=ACCENT2,fg=WHITE,relief="flat",cursor="hand2",
-            padx=10,pady=3,command=self._tb_enter_comma)
-        self.tb_comma_btn.pack(anchor="w",pady=(4,0))
+            font=("Segoe UI",14,"bold"),bg=ACCENT2,fg=WHITE,relief="flat",cursor="hand2",
+            padx=15,pady=6,command=self._tb_enter_comma)
+        self.tb_comma_btn.pack(anchor="w",pady=(8,0))
 
-        self.tb_feed=tk.Label(ws,text="",font=("Segoe UI",13),bg=BG,fg=ORANGE,wraplength=640,justify="center")
-        self.tb_feed.pack(pady=2)
-        self._tb_result_frame=tk.Frame(ws,bg=BG); self._tb_result_frame.pack(pady=2)
+        self.tb_feed=tk.Label(ws,text="",font=("Segoe UI",16),bg=BG,fg=ORANGE,wraplength=700,justify="center")
+        self.tb_feed.pack(pady=4)
+        self._tb_result_frame=tk.Frame(ws,bg=BG); self._tb_result_frame.pack(pady=4)
 
         act=tk.Frame(bot_tb,bg=BG); act.pack()
-        self.tb_check=mkbtn(act,"✔  Перевірити",self._tb_check,bg=GREEN,w=13,h=2)
-        self.tb_check.pack(side="left",padx=8)
-        mkbtn(act,"▶  Наступне",self._tb_new,bg=ACCENT2,w=11,h=2).pack(side="left",padx=8)
+        self.tb_check=mkbtn(act,"✔  Перевірити",self._tb_check,bg=GREEN,w=15,h=2,font=("Segoe UI",22,"bold"))
+        self.tb_check.pack(side="left",padx=10)
+        mkbtn(act,"▶  Наступне",self._tb_new,bg=ACCENT2,w=13,h=2,font=("Segoe UI",22,"bold")).pack(side="left",padx=10)
 
-        np_tb=tk.Frame(bot_tb,bg=BG); np_tb.pack(pady=(5,0))
-        tk.Label(np_tb,text="Клавіатура",font=("Segoe UI",11,"bold"),bg=BG,fg=MUTED).pack()
+        np_tb=tk.Frame(bot_tb,bg=BG); np_tb.pack(pady=(10,0))
+        tk.Label(np_tb,text="Клавіатура",font=("Segoe UI",12,"bold"),bg=BG,fg=MUTED).pack()
         def _tb_numpad(ch):
             if ch==",": self._tb_enter_comma()
             else: self._tb_key(ch)
         np=tk.Frame(np_tb,bg=BG); np.pack()
         for row_keys in [("7","8","9"),("4","5","6"),("1","2","3"),(",","0","⌫")]:
-            rf=tk.Frame(np,bg=BG); rf.pack(pady=2)
+            rf=tk.Frame(np,bg=BG); rf.pack(pady=3)
             for ch in row_keys:
                 bc=CARD_V if ch=="," else (BTN_NUM if ch.isdigit() else CARD_V)
                 fc=ACCENT2 if ch=="," else (TEXT if ch.isdigit() else ACCENT2)
-                b=tk.Button(rf,text=ch,font=("Segoe UI",18,"bold"),width=3,height=1,bg=bc,fg=fc,
+                b=tk.Button(rf,text=ch,font=("Segoe UI",24,"bold"),width=4,height=1,bg=bc,fg=fc,
                            relief="flat",cursor="hand2",command=lambda c=ch:_tb_numpad(c))
-                b.pack(side="left",padx=4)
-        tk.Button(np_tb,text="C  очистити",font=("Segoe UI",11,"bold"),bg=RED_LT,fg=RED,
-                 relief="flat",cursor="hand2",padx=10,pady=3,
-                 command=lambda:_tb_numpad("C")).pack(pady=(3,0))
+                b.pack(side="left",padx=6)
+        tk.Button(np_tb,text="C  очистити",font=("Segoe UI",14,"bold"),bg=RED_LT,fg=RED,
+                 relief="flat",cursor="hand2",padx=12,pady=5,
+                 command=lambda:_tb_numpad("C")).pack(pady=(5,0))
         self._tb_new()
 
     def _tb_st(self): return f"Правильно: {self.tb_score}  /  Завдань: {self.tb_att}"
