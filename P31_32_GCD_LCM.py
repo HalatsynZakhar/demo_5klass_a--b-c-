@@ -38,21 +38,21 @@ FACTOR_COLORS = [
 ]
 
 # ── Fonts ─────────────────────────────────────────────────────────────────────
-F_TITLE  = ("Segoe UI", 34, "bold")
-F_HEAD   = ("Segoe UI", 26, "bold")
-F_SUB    = ("Segoe UI", 20, "bold")
-F_BODY   = ("Segoe UI", 17)
-F_BODYB  = ("Segoe UI", 17, "bold")
-F_BIG    = ("Segoe UI", 72, "bold")
-F_BTN    = ("Segoe UI", 19, "bold")
-F_NAV    = ("Segoe UI", 14, "bold")
-F_SCORE  = ("Segoe UI", 20, "bold")
-F_FEED   = ("Segoe UI", 16)
-F_NUM    = ("Segoe UI", 26, "bold")
-F_SMALL  = ("Segoe UI", 13)
-F_COL    = ("Courier New", 32, "bold")
-F_EXPR   = ("Segoe UI", 28, "bold")
-F_PRIME  = ("Segoe UI", 22, "bold")
+F_TITLE  = ("Segoe UI", 28, "bold") # Reduced from 34
+F_HEAD   = ("Segoe UI", 22, "bold") # Reduced from 26
+F_SUB    = ("Segoe UI", 16, "bold") # Reduced from 20
+F_BODY   = ("Segoe UI", 14) # Reduced from 17
+F_BODYB  = ("Segoe UI", 14, "bold") # Reduced from 17
+F_BIG    = ("Segoe UI", 56, "bold") # Reduced from 72
+F_BTN    = ("Segoe UI", 16, "bold") # Reduced from 19
+F_NAV    = ("Segoe UI", 12, "bold") # Reduced from 14
+F_SCORE  = ("Segoe UI", 16, "bold") # Reduced from 20
+F_FEED   = ("Segoe UI", 14) # Reduced from 16
+F_NUM    = ("Segoe UI", 20, "bold") # Reduced from 26
+F_SMALL  = ("Segoe UI", 11) # Reduced from 13
+F_COL    = ("Courier New", 24, "bold") # Reduced from 32
+F_EXPR   = ("Segoe UI", 22, "bold") # Reduced from 28
+F_PRIME  = ("Segoe UI", 18, "bold") # Reduced from 22
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -64,7 +64,7 @@ def _darken(h, a=30):
 
 
 def mkbtn(parent, text, cmd, bg=ACCENT, fg=WHITE, font=F_BTN,
-          w=12, h=2, px=6, py=6):
+          w=12, h=1, px=4, py=4): # Reduced height/pad
     b = tk.Button(parent, text=text, command=cmd, bg=bg, fg=fg,
                   font=font, width=w, height=h,
                   relief="flat", bd=0, cursor="hand2",
@@ -77,18 +77,18 @@ def mkbtn(parent, text, cmd, bg=ACCENT, fg=WHITE, font=F_BTN,
 
 
 def hline(parent, color=BORDER):
-    tk.Frame(parent, bg=color, height=2).pack(fill="x", pady=(4, 12))
+    tk.Frame(parent, bg=color, height=2).pack(fill="x", pady=(4, 8)) # Reduced pad
 
 
 def theory_card(parent, title, body, bg_c, fg_title=TEXT):
-    f = tk.Frame(parent, bg=bg_c, padx=22, pady=14,
+    f = tk.Frame(parent, bg=bg_c, padx=18, pady=10, # Reduced pad
                  highlightbackground=BORDER, highlightthickness=1)
-    f.pack(fill="x", pady=7)
+    f.pack(fill="x", pady=5) # Reduced pad
     tk.Label(f, text=title, font=F_SUB, bg=bg_c, fg=fg_title,
              anchor="w").pack(fill="x")
     tk.Label(f, text=body, font=F_BODY, bg=bg_c, fg=TEXT,
-             justify="left", wraplength=1300, anchor="w").pack(
-        fill="x", pady=(6, 0))
+             justify="left", wraplength=1100, anchor="w").pack( # Reduced wrap
+        fill="x", pady=(4, 0)) # Reduced pad
     return f
 
 
@@ -176,17 +176,17 @@ class App(tk.Tk):
 
     # ── Chrome ────────────────────────────────────────────────────────────────
     def _build_chrome(self):
-        hdr = tk.Frame(self, bg=HDR_BG, height=70)
+        hdr = tk.Frame(self, bg=HDR_BG, height=60) # Reduced from 70
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
         tk.Label(hdr, text="§ 31-32.   НСД та НСК натуральних чисел",
                  bg=HDR_BG, fg=WHITE,
-                 font=("Segoe UI", 21, "bold")).pack(side="left", padx=30)
+                 font=("Segoe UI", 18, "bold")).pack(side="left", padx=30) # Reduced font
         mkbtn(hdr, "✕  Вийти", self.destroy, bg="#b91c1c",
-              font=("Segoe UI", 13, "bold"), w=9, h=1).pack(
-            side="right", padx=18, pady=16)
+              font=("Segoe UI", 12, "bold"), w=8, h=1).pack(
+            side="right", padx=18, pady=12) # Reduced
 
-        nav = tk.Frame(self, bg=NAV_BG, height=52)
+        nav = tk.Frame(self, bg=NAV_BG, height=45) # Reduced from 52
         nav.pack(fill="x")
         nav.pack_propagate(False)
         for label, cmd in [
@@ -201,7 +201,7 @@ class App(tk.Tk):
                           bg=NAV_BG, fg=NAV_FG, font=F_NAV,
                           relief="flat", bd=0, cursor="hand2",
                           activebackground=ACCENT, activeforeground=WHITE,
-                          padx=14, pady=14)
+                          padx=12, pady=10) # Reduced pad
             b.pack(side="left")
             b.bind("<Enter>", lambda e, x=b: x.config(bg=ACCENT))
             b.bind("<Leave>", lambda e, x=b: x.config(bg=NAV_BG))
@@ -225,9 +225,9 @@ class App(tk.Tk):
         center.place(relx=.5, rely=.5, anchor="center")
 
         tk.Label(center, text="НСД та НСК",
-                 font=("Segoe UI", 50, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 4))
+                 font=("Segoe UI", 42, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 4)) # Reduced font
         tk.Label(center, text="натуральних чисел",
-                 font=("Segoe UI", 28), bg=BG, fg=ACCENT).pack(pady=(0, 30))
+                 font=("Segoe UI", 24), bg=BG, fg=ACCENT).pack(pady=(0, 24)) # Reduced font
 
         cards = [
             ("📖", "Теорія\nНСД",       CARD_B, ACCENT,  self.show_gcd_theory),
@@ -239,13 +239,13 @@ class App(tk.Tk):
         row = tk.Frame(center, bg=BG)
         row.pack()
         for icon, title, bg_c, fg_c, cmd in cards:
-            c = tk.Frame(row, bg=bg_c, width=210, height=200,
+            c = tk.Frame(row, bg=bg_c, width=170, height=160, # Reduced size
                          highlightbackground=BORDER, highlightthickness=2)
-            c.pack(side="left", padx=12)
+            c.pack(side="left", padx=10) # Reduced pad
             c.pack_propagate(False)
-            tk.Label(c, text=icon, font=("Segoe UI", 36),
-                     bg=bg_c, fg=fg_c).pack(pady=(20, 4))
-            tk.Label(c, text=title, font=("Segoe UI", 14, "bold"),
+            tk.Label(c, text=icon, font=("Segoe UI", 32), # Reduced font
+                     bg=bg_c, fg=fg_c).pack(pady=(16, 4))
+            tk.Label(c, text=title, font=("Segoe UI", 13, "bold"), # Reduced font
                      bg=bg_c, fg=fg_c, justify="center").pack()
             orig = bg_c
             for w in [c] + list(c.winfo_children()):
@@ -254,7 +254,7 @@ class App(tk.Tk):
             c.bind("<Leave>", lambda e, x=c, col=orig: x.config(bg=col))
 
         tk.Label(center, text="Натисніть на картку або скористайтесь меню зверху",
-                 font=F_SMALL, bg=BG, fg=MUTED).pack(pady=18)
+                 font=F_SMALL, bg=BG, fg=MUTED).pack(pady=16)
 
     # ══════════════════════════════════════════════════════════════════════════
     # SCROLLABLE THEORY WRAPPER
@@ -272,7 +272,7 @@ class App(tk.Tk):
         sc.bind("<Configure>",
                 lambda e: sc.itemconfig(win, width=e.width))
         p = tk.Frame(outer, bg=BG)
-        p.pack(fill="both", expand=True, padx=60, pady=28)
+        p.pack(fill="both", expand=True, padx=40, pady=20) # Reduced pad
         return p
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -302,21 +302,21 @@ class App(tk.Tk):
                     CARD_G, GREEN)
 
         # ── Visual example 12 and 18 ──────────────────────────────────────
-        ex = tk.Frame(p, bg=PANEL, padx=24, pady=16,
+        ex = tk.Frame(p, bg=PANEL, padx=18, pady=12, # Reduced pad
                       highlightbackground=BORDER, highlightthickness=1)
-        ex.pack(fill="x", pady=8)
+        ex.pack(fill="x", pady=6)
         tk.Label(ex, text="📊  Приклад:  НСД(12, 18)",
                  font=F_BODYB, bg=PANEL, fg=TEXT).pack(anchor="w")
 
         cols = tk.Frame(ex, bg=PANEL)
-        cols.pack(anchor="w", padx=20, pady=10)
+        cols.pack(anchor="w", padx=16, pady=8)
 
         def factor_row(parent, label, factors, highlight, bg_c):
-            rf = tk.Frame(parent, bg=bg_c, padx=14, pady=8,
+            rf = tk.Frame(parent, bg=bg_c, padx=12, pady=6, # Reduced pad
                           highlightbackground=BORDER, highlightthickness=1)
-            rf.pack(fill="x", pady=4)
+            rf.pack(fill="x", pady=3)
             tk.Label(rf, text=label, font=F_BODYB, bg=bg_c,
-                     fg=TEXT, width=14, anchor="w").pack(side="left")
+                     fg=TEXT, width=12, anchor="w").pack(side="left") # Reduced width
             for i, f in enumerate(factors):
                 is_common = f in highlight and highlight[f] > 0
                 if is_common:
@@ -325,7 +325,7 @@ class App(tk.Tk):
                 fc = GREEN    if is_common else MUTED
                 tk.Label(rf, text=str(f), font=F_PRIME,
                          bg=bc, fg=fc, width=3, relief="flat",
-                         padx=6, pady=4).pack(side="left", padx=3)
+                         padx=4, pady=3).pack(side="left", padx=2) # Reduced pad
 
         from collections import Counter as Ctr
         fA12 = [2, 2, 3];  fB18 = [2, 3, 3]
@@ -335,7 +335,7 @@ class App(tk.Tk):
         factor_row(cols, "18  =", fB18, hl18, CARD_V)
         tk.Label(ex,
                  text="Спільні (зелені):  2  і  3   →   НСД(12, 18)  =  2 × 3  =  6",
-                 font=F_HEAD, bg=PANEL, fg=GREEN).pack(anchor="w", padx=20, pady=(6, 2))
+                 font=F_HEAD, bg=PANEL, fg=GREEN).pack(anchor="w", padx=16, pady=(4, 2))
 
         theory_card(p, "⚡  Особливі випадки",
                     "• Якщо числа не мають спільних простих множників — НСД = 1.\n"
@@ -371,19 +371,19 @@ class App(tk.Tk):
                     "1. Розкласти обидва числа на прості множники.\n"
                     "2. Виписати ВСІ прості множники, що зустрічаються хоча б в одному числі.\n"
                     "3. Якщо множник зустрічається в обох — беремо його стільки разів,\n"
-                    "   скільки він є в ТОМУ числі, де його БІЛЬШЕ (максимум).\n"
+                    "   стільки він є в ТОМУ числі, де його БІЛЬШЕ (максимум).\n"
                     "4. НСК = добуток усіх відібраних множників.",
                     CARD_G, GREEN)
 
         # ── Visual example 12 and 18 ──────────────────────────────────────
-        ex = tk.Frame(p, bg=PANEL, padx=24, pady=16,
+        ex = tk.Frame(p, bg=PANEL, padx=18, pady=12, # Reduced pad
                       highlightbackground=BORDER, highlightthickness=1)
-        ex.pack(fill="x", pady=8)
+        ex.pack(fill="x", pady=6)
         tk.Label(ex, text="📊  Приклад:  НСК(12, 18)",
                  font=F_BODYB, bg=PANEL, fg=TEXT).pack(anchor="w")
 
-        inner = tk.Frame(ex, bg=PANEL, padx=12)
-        inner.pack(anchor="w", pady=10)
+        inner = tk.Frame(ex, bg=PANEL, padx=10) # Reduced pad
+        inner.pack(anchor="w", pady=8)
 
         rows_data = [
             ("12  =", [2, 2, 3], CARD_B),
@@ -392,23 +392,23 @@ class App(tk.Tk):
         ]
         lcm_colors = {2: ACCENT, 3: ACCENT2}
         for label, factors, bg_c in rows_data:
-            rf = tk.Frame(inner, bg=bg_c, padx=14, pady=8,
+            rf = tk.Frame(inner, bg=bg_c, padx=12, pady=6, # Reduced pad
                           highlightbackground=BORDER, highlightthickness=1)
-            rf.pack(fill="x", pady=4)
+            rf.pack(fill="x", pady=3)
             tk.Label(rf, text=label, font=F_BODYB, bg=bg_c,
                      fg=TEXT, width=10, anchor="w").pack(side="left")
             for f in factors:
                 fc = lcm_colors.get(f, MUTED)
                 tk.Label(rf, text=str(f), font=F_PRIME,
                          bg=BTN_NUM, fg=fc, width=3,
-                         padx=6, pady=4).pack(side="left", padx=3)
+                         padx=4, pady=3).pack(side="left", padx=2) # Reduced pad
 
         tk.Label(ex,
                  text="НСК(12, 18)  =  2 × 2 × 3 × 3  =  36",
-                 font=F_HEAD, bg=PANEL, fg=GREEN).pack(anchor="w", padx=20, pady=(6, 2))
+                 font=F_HEAD, bg=PANEL, fg=GREEN).pack(anchor="w", padx=16, pady=(4, 2))
         tk.Label(ex,
                  text="Перевірка:  36 ÷ 12 = 3 ✅     36 ÷ 18 = 2 ✅",
-                 font=F_BODY, bg=PANEL, fg=MUTED).pack(anchor="w", padx=20)
+                 font=F_BODY, bg=PANEL, fg=MUTED).pack(anchor="w", padx=16)
 
         theory_card(p, "⚡  Зв'язок НСД і НСК",
                     "Для будь-яких двох чисел A і B:\n\n"
@@ -430,15 +430,15 @@ class App(tk.Tk):
         np = tk.Frame(parent, bg=BG)
         for row_chars in [("7","8","9"),("4","5","6"),("1","2","3"),("C","0","⌫")]:
             rf = tk.Frame(np, bg=BG)
-            rf.pack(pady=4)
+            rf.pack(pady=3) # Reduced pad
             for ch in row_chars:
                 if ch.isdigit():   bc, fc = BTN_NUM, TEXT
                 elif ch == "C":    bc, fc = RED_LT,  RED
                 else:              bc, fc = CARD_V,  ACCENT2
-                b = tk.Button(rf, text=ch, font=F_NUM, width=4, height=1,
+                b = tk.Button(rf, text=ch, font=F_NUM, width=4, height=1, # Reduced height
                               bg=bc, fg=fc, relief="flat", cursor="hand2",
                               command=lambda c=ch: key_fn(c))
-                b.pack(side="left", padx=5)
+                b.pack(side="left", padx=4) # Reduced pad
                 orig = bc
                 b.bind("<Enter>", lambda e, x=b, o=orig: x.config(bg=_darken(o, 18)))
                 b.bind("<Leave>", lambda e, x=b, o=orig: x.config(bg=o))
@@ -446,7 +446,7 @@ class App(tk.Tk):
 
     # ── shared score bar ──────────────────────────────────────────────────────
     def _score_bar(self, parent, text_lbl, score_var_fn):
-        sbar = tk.Frame(parent, bg=PANEL, height=56,
+        sbar = tk.Frame(parent, bg=PANEL, height=50, # Reduced height
                         highlightbackground=BORDER, highlightthickness=1)
         sbar.pack(fill="x")
         sbar.pack_propagate(False)
@@ -454,7 +454,7 @@ class App(tk.Tk):
                        font=F_SCORE, bg=PANEL, fg=GREEN)
         lbl.pack(side="left", padx=30)
         tk.Label(sbar, text=text_lbl,
-                 font=("Segoe UI", 15, "bold"), bg=PANEL, fg=MUTED).pack(
+                 font=("Segoe UI", 14, "bold"), bg=PANEL, fg=MUTED).pack( # Reduced font
             side="left", padx=10)
         return lbl
 
@@ -477,13 +477,13 @@ class App(tk.Tk):
         # Task display
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=28, pady=12)
-        task_f.pack(pady=(14, 6))
+                          padx=24, pady=8) # Reduced pad
+        task_f.pack(pady=(10, 4))
         tk.Label(task_f, text="Знайди  НСД ( A, B )",
                  font=F_SUB, bg=PANEL, fg=TEXT).pack()
 
         nums_row = tk.Frame(task_f, bg=PANEL)
-        nums_row.pack(pady=6)
+        nums_row.pack(pady=4)
         self.gcd_num_lbl = tk.Label(nums_row, text="",
                                      font=F_BIG, bg=PANEL, fg=ACCENT)
         self.gcd_num_lbl.pack()
@@ -497,12 +497,12 @@ class App(tk.Tk):
         # Input display
         inp_f = tk.Frame(center, bg=BTN_NUM,
                          highlightbackground=ACCENT, highlightthickness=2,
-                         padx=14, pady=6)
+                         padx=12, pady=6) # Reduced pad
         inp_f.pack(pady=6)
         tk.Label(inp_f, text="НСД =", font=F_BODYB,
                  bg=BTN_NUM, fg=MUTED).pack(side="left")
         self.gcd_inp_lbl = tk.Label(inp_f, text="",
-                                     font=("Segoe UI", 44, "bold"),
+                                     font=("Segoe UI", 36, "bold"), # Reduced font
                                      bg=BTN_NUM, fg=ACCENT, width=5)
         self.gcd_inp_lbl.pack(side="left", padx=10)
 
@@ -510,7 +510,7 @@ class App(tk.Tk):
         self.gcd_feed_lbl = tk.Label(center, text="", font=F_FEED,
                                       bg=BG, fg=ORANGE,
                                       wraplength=680, justify="center")
-        self.gcd_feed_lbl.pack(pady=4)
+        self.gcd_feed_lbl.pack(pady=3)
 
         # Numpad
         self._build_numpad(center, self._gcd_key).pack(pady=6)
@@ -518,10 +518,10 @@ class App(tk.Tk):
         act = tk.Frame(center, bg=BG)
         act.pack(pady=8)
         self.gcd_check_btn = mkbtn(act, "✔  Перевірити", self._gcd_check,
-                                    bg=GREEN, w=14, h=2)
+                                    bg=GREEN, w=14, h=1) # Reduced height
         self.gcd_check_btn.pack(side="left", padx=10)
         mkbtn(act, "▶  Наступне", self._gcd_new,
-              bg=ACCENT, w=12, h=2).pack(side="left", padx=10)
+              bg=ACCENT, w=12, h=1).pack(side="left", padx=10) # Reduced height
 
         self._gcd_new()
 
@@ -608,13 +608,13 @@ class App(tk.Tk):
 
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=28, pady=12)
-        task_f.pack(pady=(14, 6))
+                          padx=24, pady=8) # Reduced pad
+        task_f.pack(pady=(10, 4))
         tk.Label(task_f, text="Знайди  НСК ( A, B )",
                  font=F_SUB, bg=PANEL, fg=TEXT).pack()
         self.lcm_num_lbl = tk.Label(task_f, text="",
                                      font=F_BIG, bg=PANEL, fg=ACCENT2)
-        self.lcm_num_lbl.pack(pady=6)
+        self.lcm_num_lbl.pack(pady=4)
 
         self.lcm_hint_lbl = tk.Label(center, text="",
                                       font=F_BODY, bg=BG, fg=MUTED,
@@ -623,29 +623,29 @@ class App(tk.Tk):
 
         inp_f = tk.Frame(center, bg=BTN_NUM,
                          highlightbackground=ACCENT2, highlightthickness=2,
-                         padx=14, pady=6)
+                         padx=12, pady=6) # Reduced pad
         inp_f.pack(pady=6)
         tk.Label(inp_f, text="НСК =", font=F_BODYB,
                  bg=BTN_NUM, fg=MUTED).pack(side="left")
         self.lcm_inp_lbl = tk.Label(inp_f, text="",
-                                     font=("Segoe UI", 44, "bold"),
+                                     font=("Segoe UI", 36, "bold"), # Reduced font
                                      bg=BTN_NUM, fg=ACCENT2, width=5)
         self.lcm_inp_lbl.pack(side="left", padx=10)
 
         self.lcm_feed_lbl = tk.Label(center, text="", font=F_FEED,
                                       bg=BG, fg=ORANGE,
                                       wraplength=680, justify="center")
-        self.lcm_feed_lbl.pack(pady=4)
+        self.lcm_feed_lbl.pack(pady=3)
 
         self._build_numpad(center, self._lcm_key).pack(pady=6)
 
         act = tk.Frame(center, bg=BG)
         act.pack(pady=8)
         self.lcm_check_btn = mkbtn(act, "✔  Перевірити", self._lcm_check,
-                                    bg=GREEN, w=14, h=2)
+                                    bg=GREEN, w=14, h=1) # Reduced height
         self.lcm_check_btn.pack(side="left", padx=10)
         mkbtn(act, "▶  Наступне", self._lcm_new,
-              bg=ACCENT2, w=12, h=2).pack(side="left", padx=10)
+              bg=ACCENT2, w=12, h=1).pack(side="left", padx=10) # Reduced height
 
         self._lcm_new()
 
@@ -723,7 +723,7 @@ class App(tk.Tk):
         cf = self.current_frame
 
         # Score bar
-        sbar = tk.Frame(cf, bg=PANEL, height=56,
+        sbar = tk.Frame(cf, bg=PANEL, height=50, # Reduced height
                         highlightbackground=BORDER, highlightthickness=1)
         sbar.pack(fill="x")
         sbar.pack_propagate(False)
@@ -732,25 +732,25 @@ class App(tk.Tk):
             font=F_SCORE, bg=PANEL, fg=GREEN)
         self.con_score_lbl.pack(side="left", padx=30)
         tk.Label(sbar, text="Конструктор НСД та НСК — вибирай множники!",
-                 font=("Segoe UI", 15, "bold"), bg=PANEL, fg=MUTED).pack(
+                 font=("Segoe UI", 14, "bold"), bg=PANEL, fg=MUTED).pack( # Reduced font
             side="left", padx=10)
 
         # Two-column layout
         ws = tk.Frame(cf, bg=BG)
-        ws.pack(fill="both", expand=True, padx=24, pady=14)
+        ws.pack(fill="both", expand=True, padx=20, pady=10) # Reduced pad
 
         # LEFT — given numbers
         left = tk.Frame(ws, bg=PANEL,
                         highlightbackground=BORDER, highlightthickness=1)
-        left.pack(side="left", fill="both", expand=True, padx=(0, 12))
+        left.pack(side="left", fill="both", expand=True, padx=(0, 10)) # Reduced pad
 
         tk.Label(left, text="📋  Розкладені числа",
-                 font=F_SUB, bg=PANEL, fg=MUTED).pack(anchor="w", padx=20, pady=(10, 4))
+                 font=F_SUB, bg=PANEL, fg=MUTED).pack(anchor="w", padx=16, pady=(8, 4)) # Reduced pad
         tk.Frame(left, bg=BORDER, height=1).pack(fill="x")
 
         # Number display rows with visual factor chips
         self.con_chips_frame = tk.Frame(left, bg=PANEL)
-        self.con_chips_frame.pack(fill="both", expand=True, padx=20, pady=12)
+        self.con_chips_frame.pack(fill="both", expand=True, padx=16, pady=10) # Reduced pad
 
         # RIGHT — constructor panel
         right = tk.Frame(ws, bg=PANEL,
@@ -760,21 +760,21 @@ class App(tk.Tk):
         right.pack_propagate(False)
 
         tk.Label(right, text="🧩  Збирай відповідь",
-                 font=F_SUB, bg=PANEL, fg=MUTED).pack(anchor="w", padx=20, pady=(10, 4))
+                 font=F_SUB, bg=PANEL, fg=MUTED).pack(anchor="w", padx=16, pady=(8, 4)) # Reduced pad
         tk.Frame(right, bg=BORDER, height=1).pack(fill="x")
 
         ctrl = tk.Frame(right, bg=PANEL)
-        ctrl.pack(fill="both", expand=True, padx=16, pady=10)
+        ctrl.pack(fill="both", expand=True, padx=14, pady=8) # Reduced pad
 
         # Phase label
         self.con_phase_lbl = tk.Label(ctrl, text="",
                                        font=F_SUB, bg=PANEL, fg=ACCENT,
                                        wraplength=int(self.SW * 0.42) - 40,
                                        justify="center")
-        self.con_phase_lbl.pack(pady=(4, 8))
+        self.con_phase_lbl.pack(pady=(4, 6))
 
         # User expression display
-        expr_wrap = tk.Frame(ctrl, bg=BTN_NUM, padx=12, pady=8,
+        expr_wrap = tk.Frame(ctrl, bg=BTN_NUM, padx=10, pady=6, # Reduced pad
                              highlightbackground=ACCENT, highlightthickness=2)
         expr_wrap.pack(fill="x", pady=4)
         self.con_expr_lbl = tk.Label(expr_wrap, text="?",
@@ -784,7 +784,7 @@ class App(tk.Tk):
 
         # Factor pick buttons
         self.con_fbtn_frame = tk.Frame(ctrl, bg=PANEL)
-        self.con_fbtn_frame.pack(pady=8)
+        self.con_fbtn_frame.pack(pady=6)
 
         # Feedback
         self.con_feed_lbl = tk.Label(ctrl, text="", font=F_FEED,
@@ -795,13 +795,13 @@ class App(tk.Tk):
 
         # Action buttons
         act = tk.Frame(ctrl, bg=PANEL)
-        act.pack(pady=8)
-        mkbtn(act, "⌫  Стерти", self._con_undo, bg=ACCENT2, w=10, h=2).pack(
+        act.pack(pady=6)
+        mkbtn(act, "⌫  Стерти", self._con_undo, bg=ACCENT2, w=10, h=1).pack( # Reduced height
             side="left", padx=6)
         self.con_check_btn = mkbtn(act, "✔  Перевірити", self._con_check,
-                                    bg=GREEN, w=12, h=2)
+                                    bg=GREEN, w=12, h=1) # Reduced height
         self.con_check_btn.pack(side="left", padx=6)
-        mkbtn(act, "▶  Далі", self._con_next, bg=ACCENT, w=10, h=2).pack(
+        mkbtn(act, "▶  Далі", self._con_next, bg=ACCENT, w=10, h=1).pack( # Reduced height
             side="left", padx=6)
 
         self._con_new_task()
@@ -820,11 +820,11 @@ class App(tk.Tk):
             (f"A  =  {self.con_a}", self.con_a, self.con_fA, CARD_B),
             (f"B  =  {self.con_b}", self.con_b, self.con_fB, CARD_V),
         ]:
-            rf = tk.Frame(self.con_chips_frame, bg=bg_row, padx=14, pady=10,
+            rf = tk.Frame(self.con_chips_frame, bg=bg_row, padx=12, pady=8, # Reduced pad
                           highlightbackground=BORDER, highlightthickness=1)
-            rf.pack(fill="x", pady=6)
+            rf.pack(fill="x", pady=4)
             tk.Label(rf, text=label, font=F_BODYB, bg=bg_row,
-                     fg=TEXT, anchor="w").pack(anchor="w", pady=(0, 6))
+                     fg=TEXT, anchor="w").pack(anchor="w", pady=(0, 4))
             chips = tk.Frame(rf, bg=bg_row)
             chips.pack(anchor="w")
             # Track how many common factors shown to highlight correctly
@@ -835,9 +835,9 @@ class App(tk.Tk):
                     common_remaining[f] -= 1
                 bc = GREEN_LT if is_c else BTN_NUM
                 fc = GREEN    if is_c else MUTED
-                chip = tk.Frame(chips, bg=bc, padx=8, pady=4,
+                chip = tk.Frame(chips, bg=bc, padx=6, pady=3, # Reduced pad
                                 highlightbackground=BORDER, highlightthickness=1)
-                chip.pack(side="left", padx=3)
+                chip.pack(side="left", padx=2)
                 tk.Label(chip, text=str(f), font=F_PRIME, bg=bc, fg=fc).pack()
 
         # Equation hint
@@ -845,9 +845,9 @@ class App(tk.Tk):
         gcd_f = sorted(list((cA2 & cB2).elements()))
         lcm_f = sorted(list((cA2 | cB2).elements()))
 
-        hint_f = tk.Frame(self.con_chips_frame, bg=PANEL, padx=14, pady=8,
+        hint_f = tk.Frame(self.con_chips_frame, bg=PANEL, padx=12, pady=6, # Reduced pad
                           highlightbackground=BORDER, highlightthickness=1)
-        hint_f.pack(fill="x", pady=6)
+        hint_f.pack(fill="x", pady=4)
         tk.Label(hint_f, text="🔵  Спільні (зелені) → НСД",
                  font=F_SMALL, bg=PANEL, fg=ACCENT).pack(anchor="w")
         tk.Label(hint_f, text="🔴  Усі разом (максимум з кожного) → НСК",
@@ -861,10 +861,10 @@ class App(tk.Tk):
         for idx, p in enumerate(available):
             fg_c, bg_c = FACTOR_COLORS[idx % len(FACTOR_COLORS)]
             b = tk.Button(self.con_fbtn_frame, text=str(p),
-                          font=F_PRIME, width=5, height=2,
+                          font=F_PRIME, width=4, height=1, # Reduced size
                           bg=bg_c, fg=fg_c, relief="flat", cursor="hand2",
                           command=lambda x=p: self._con_add(x))
-            b.pack(side="left", padx=8)
+            b.pack(side="left", padx=6)
             orig = bg_c
             b.bind("<Enter>", lambda e, x=b, o=orig: x.config(bg=_darken(o, 15)))
             b.bind("<Leave>", lambda e, x=b, o=orig: x.config(bg=o))
