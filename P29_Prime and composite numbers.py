@@ -30,19 +30,19 @@ TEAL      = "#0f766e"
 TEAL_LT   = "#ccfbf1"
 
 # ── Fonts ─────────────────────────────────────────────────────────────────────
-F_TITLE  = ("Segoe UI", 34, "bold")
-F_HEAD   = ("Segoe UI", 26, "bold")
-F_SUB    = ("Segoe UI", 20, "bold")
-F_BODY   = ("Segoe UI", 17)
-F_BODYB  = ("Segoe UI", 17, "bold")
-F_BIG    = ("Segoe UI", 72, "bold")
-F_BTN    = ("Segoe UI", 19, "bold")
-F_NAV    = ("Segoe UI", 14, "bold")
-F_SCORE  = ("Segoe UI", 20, "bold")
-F_FEED   = ("Segoe UI", 16)
-F_NUM    = ("Segoe UI", 26, "bold")
-F_SMALL  = ("Segoe UI", 13)
-F_GRID   = ("Segoe UI", 15, "bold")
+F_TITLE  = ("Segoe UI", 28, "bold") # Reduced from 34
+F_HEAD   = ("Segoe UI", 22, "bold") # Reduced from 26
+F_SUB    = ("Segoe UI", 16, "bold") # Reduced from 20
+F_BODY   = ("Segoe UI", 14) # Reduced from 17
+F_BODYB  = ("Segoe UI", 14, "bold") # Reduced from 17
+F_BIG    = ("Segoe UI", 56, "bold") # Reduced from 72
+F_BTN    = ("Segoe UI", 16, "bold") # Reduced from 19
+F_NAV    = ("Segoe UI", 12, "bold") # Reduced from 14
+F_SCORE  = ("Segoe UI", 16, "bold") # Reduced from 20
+F_FEED   = ("Segoe UI", 14) # Reduced from 16
+F_NUM    = ("Segoe UI", 20, "bold") # Reduced from 26
+F_SMALL  = ("Segoe UI", 11) # Reduced from 13
+F_GRID   = ("Segoe UI", 12, "bold") # Reduced from 15
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ def _darken(h, a=30):
 
 
 def mkbtn(parent, text, cmd, bg=ACCENT, fg=WHITE, font=F_BTN,
-          w=12, h=2, px=6, py=6):
+          w=12, h=1, px=4, py=4): # Reduced height/pad
     b = tk.Button(parent, text=text, command=cmd, bg=bg, fg=fg,
                   font=font, width=w, height=h,
                   relief="flat", bd=0, cursor="hand2",
@@ -67,18 +67,18 @@ def mkbtn(parent, text, cmd, bg=ACCENT, fg=WHITE, font=F_BTN,
 
 
 def hline(parent, color=BORDER):
-    tk.Frame(parent, bg=color, height=2).pack(fill="x", pady=(4, 12))
+    tk.Frame(parent, bg=color, height=2).pack(fill="x", pady=(4, 8)) # Reduced pad
 
 
 def theory_card(parent, title, body, bg_c, fg_title=TEXT):
-    f = tk.Frame(parent, bg=bg_c, padx=22, pady=14,
+    f = tk.Frame(parent, bg=bg_c, padx=18, pady=10, # Reduced pad
                  highlightbackground=BORDER, highlightthickness=1)
-    f.pack(fill="x", pady=7)
+    f.pack(fill="x", pady=5) # Reduced pad
     tk.Label(f, text=title, font=F_SUB, bg=bg_c, fg=fg_title,
              anchor="w").pack(fill="x")
     tk.Label(f, text=body, font=F_BODY, bg=bg_c, fg=TEXT,
-             justify="left", wraplength=1300, anchor="w").pack(
-        fill="x", pady=(6, 0))
+             justify="left", wraplength=1100, anchor="w").pack( # Reduced wrap
+        fill="x", pady=(4, 0)) # Reduced pad
     return f
 
 
@@ -171,17 +171,17 @@ class App(tk.Tk):
 
     # ── Chrome ────────────────────────────────────────────────────────────────
     def _build_chrome(self):
-        hdr = tk.Frame(self, bg=HDR_BG, height=70)
+        hdr = tk.Frame(self, bg=HDR_BG, height=60) # Reduced from 70
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
         tk.Label(hdr, text="§ 29.   Прості і складені числа",
                  bg=HDR_BG, fg=WHITE,
-                 font=("Segoe UI", 21, "bold")).pack(side="left", padx=30)
+                 font=("Segoe UI", 18, "bold")).pack(side="left", padx=30) # Reduced font
         mkbtn(hdr, "✕  Вийти", self.destroy, bg="#b91c1c",
-              font=("Segoe UI", 13, "bold"), w=9, h=1).pack(
-            side="right", padx=18, pady=16)
+              font=("Segoe UI", 12, "bold"), w=8, h=1).pack(
+            side="right", padx=18, pady=12) # Reduced
 
-        nav = tk.Frame(self, bg=NAV_BG, height=52)
+        nav = tk.Frame(self, bg=NAV_BG, height=45) # Reduced from 52
         nav.pack(fill="x")
         nav.pack_propagate(False)
         for label, cmd in [
@@ -195,7 +195,7 @@ class App(tk.Tk):
                           bg=NAV_BG, fg=NAV_FG, font=F_NAV,
                           relief="flat", bd=0, cursor="hand2",
                           activebackground=ACCENT, activeforeground=WHITE,
-                          padx=14, pady=14)
+                          padx=14, pady=10) # Reduced pad
             b.pack(side="left")
             b.bind("<Enter>", lambda e, x=b: x.config(bg=ACCENT))
             b.bind("<Leave>", lambda e, x=b: x.config(bg=NAV_BG))
@@ -220,9 +220,9 @@ class App(tk.Tk):
         center.place(relx=.5, rely=.5, anchor="center")
 
         tk.Label(center, text="Прості і складені числа",
-                 font=("Segoe UI", 48, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 4))
+                 font=("Segoe UI", 42, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 4)) # Reduced font
         tk.Label(center, text="§ 29",
-                 font=("Segoe UI", 26), bg=BG, fg=ACCENT).pack(pady=(0, 30))
+                 font=("Segoe UI", 24), bg=BG, fg=ACCENT).pack(pady=(0, 24)) # Reduced
 
         cards = [
             ("📖", "Теорія",              CARD_B, ACCENT,  self.show_theory),
@@ -233,13 +233,13 @@ class App(tk.Tk):
         row = tk.Frame(center, bg=BG)
         row.pack()
         for icon, title, bg_c, fg_c, cmd in cards:
-            c = tk.Frame(row, bg=bg_c, width=210, height=200,
+            c = tk.Frame(row, bg=bg_c, width=180, height=170, # Reduced size
                          highlightbackground=BORDER, highlightthickness=2)
-            c.pack(side="left", padx=14)
+            c.pack(side="left", padx=10) # Reduced pad
             c.pack_propagate(False)
-            tk.Label(c, text=icon, font=("Segoe UI", 38),
-                     bg=bg_c, fg=fg_c).pack(pady=(20, 4))
-            tk.Label(c, text=title, font=("Segoe UI", 14, "bold"),
+            tk.Label(c, text=icon, font=("Segoe UI", 32), # Reduced font
+                     bg=bg_c, fg=fg_c).pack(pady=(16, 4))
+            tk.Label(c, text=title, font=("Segoe UI", 13, "bold"), # Reduced font
                      bg=bg_c, fg=fg_c, justify="center").pack()
             orig = bg_c
             for w in [c] + list(c.winfo_children()):
@@ -248,7 +248,7 @@ class App(tk.Tk):
             c.bind("<Leave>", lambda e, x=c, col=orig: x.config(bg=col))
 
         tk.Label(center, text="Натисніть на картку або скористайтесь меню зверху",
-                 font=F_SMALL, bg=BG, fg=MUTED).pack(pady=18)
+                 font=F_SMALL, bg=BG, fg=MUTED).pack(pady=16)
 
     # ══════════════════════════════════════════════════════════════════════════
     # THEORY
@@ -270,7 +270,7 @@ class App(tk.Tk):
                 lambda e: sc.itemconfig(win, width=e.width))
 
         p = tk.Frame(outer, bg=BG)
-        p.pack(fill="both", expand=True, padx=60, pady=28)
+        p.pack(fill="both", expand=True, padx=40, pady=20) # Reduced pad
 
         tk.Label(p, text="Прості і складені числа",
                  font=F_TITLE, bg=BG, fg=TEXT).pack(anchor="w")
@@ -307,24 +307,24 @@ class App(tk.Tk):
                     CARD_G, GREEN)
 
         # ── Visual: numbers 1–30 coloured by type ────────────────────────
-        vis_f = tk.Frame(p, bg=PANEL, padx=22, pady=16,
+        vis_f = tk.Frame(p, bg=PANEL, padx=18, pady=12, # Reduced pad
                          highlightbackground=BORDER, highlightthickness=1)
-        vis_f.pack(fill="x", pady=8)
+        vis_f.pack(fill="x", pady=6)
         tk.Label(vis_f, text="🔢  Числа від 1 до 50: класифікація",
-                 font=F_BODYB, bg=PANEL, fg=TEXT).pack(anchor="w", pady=(0, 10))
+                 font=F_BODYB, bg=PANEL, fg=TEXT).pack(anchor="w", pady=(0, 8))
 
         legend = tk.Frame(vis_f, bg=PANEL)
-        legend.pack(anchor="w", pady=(0, 8))
+        legend.pack(anchor="w", pady=(0, 6))
         for color, label in [
             (CARD_B,  "Просте число"),
             (CARD_R,  "Складене число"),
             (CARD_Y,  "Число 1 (особливе)"),
         ]:
-            box = tk.Frame(legend, bg=color, width=22, height=22,
+            box = tk.Frame(legend, bg=color, width=18, height=18, # Reduced size
                            highlightbackground=BORDER, highlightthickness=1)
             box.pack(side="left", padx=(0, 4))
             tk.Label(legend, text=label, font=F_SMALL, bg=PANEL, fg=MUTED).pack(
-                side="left", padx=(0, 18))
+                side="left", padx=(0, 16))
 
         grid_f = tk.Frame(vis_f, bg=PANEL)
         grid_f.pack(anchor="w")
@@ -335,9 +335,9 @@ class App(tk.Tk):
                 bg_c, fg_c = CARD_B, ACCENT
             else:
                 bg_c, fg_c = CARD_R, RED
-            cell = tk.Frame(grid_f, bg=bg_c, width=70, height=56,
+            cell = tk.Frame(grid_f, bg=bg_c, width=60, height=48, # Reduced size
                             highlightbackground=BORDER, highlightthickness=1)
-            cell.grid(row=i // 10, column=i % 10, padx=3, pady=3)
+            cell.grid(row=i // 10, column=i % 10, padx=2, pady=2)
             cell.pack_propagate(False)
             tk.Label(cell, text=str(n), font=F_GRID,
                      bg=bg_c, fg=fg_c).pack(expand=True)
@@ -361,7 +361,7 @@ class App(tk.Tk):
 
         cf = self.current_frame
 
-        sbar = tk.Frame(cf, bg=PANEL, height=56,
+        sbar = tk.Frame(cf, bg=PANEL, height=50, # Reduced height
                         highlightbackground=BORDER, highlightthickness=1)
         sbar.pack(fill="x")
         sbar.pack_propagate(False)
@@ -369,7 +369,7 @@ class App(tk.Tk):
             text=self._t1_score_text(), font=F_SCORE, bg=PANEL, fg=GREEN)
         self.t1_score_lbl.pack(side="left", padx=30)
         tk.Label(sbar, text="Просте чи складене число?",
-                 font=("Segoe UI", 15, "bold"), bg=PANEL, fg=MUTED).pack(
+                 font=("Segoe UI", 14, "bold"), bg=PANEL, fg=MUTED).pack( # Reduced font
             side="left", padx=10)
 
         center = tk.Frame(cf, bg=BG)
@@ -377,8 +377,8 @@ class App(tk.Tk):
 
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=30, pady=12)
-        task_f.pack(pady=(16, 6))
+                          padx=24, pady=10) # Reduced pad
+        task_f.pack(pady=(12, 4))
         tk.Label(task_f, text="Визнач тип числа:",
                  font=F_SUB, bg=PANEL, fg=TEXT).pack()
         tk.Label(task_f, text="(Натисни правильну кнопку)",
@@ -387,7 +387,7 @@ class App(tk.Tk):
         # Big number display
         num_f = tk.Frame(center, bg=PANEL,
                          highlightbackground=BORDER, highlightthickness=2,
-                         padx=30, pady=4)
+                         padx=24, pady=4)
         num_f.pack(pady=6)
         self.t1_num_lbl = tk.Label(num_f, text="", font=F_BIG,
                                     bg=PANEL, fg=ACCENT)
@@ -395,34 +395,34 @@ class App(tk.Tk):
 
         # Two big answer buttons
         btns_f = tk.Frame(center, bg=BG)
-        btns_f.pack(pady=16)
+        btns_f.pack(pady=12)
 
         self.t1_prime_btn = tk.Button(
             btns_f, text="🔵  ПРОСТЕ",
-            font=("Segoe UI", 28, "bold"),
+            font=("Segoe UI", 24, "bold"), # Reduced font
             width=12, height=2,
             bg=CARD_B, fg=ACCENT,
             relief="flat", cursor="hand2",
             command=lambda: self._t1_answer("prime"))
-        self.t1_prime_btn.pack(side="left", padx=20)
+        self.t1_prime_btn.pack(side="left", padx=16)
 
         self.t1_comp_btn = tk.Button(
             btns_f, text="🔴  СКЛАДЕНЕ",
-            font=("Segoe UI", 28, "bold"),
+            font=("Segoe UI", 24, "bold"), # Reduced font
             width=12, height=2,
             bg=CARD_R, fg=RED,
             relief="flat", cursor="hand2",
             command=lambda: self._t1_answer("composite"))
-        self.t1_comp_btn.pack(side="left", padx=20)
+        self.t1_comp_btn.pack(side="left", padx=16)
 
         # Feedback
         self.t1_feed_lbl = tk.Label(center, text="",
                                      font=F_FEED, bg=BG, fg=ORANGE,
                                      wraplength=700, justify="center")
-        self.t1_feed_lbl.pack(pady=8)
+        self.t1_feed_lbl.pack(pady=6)
 
         mkbtn(center, "▶  Наступне число", self._t1_new,
-              bg=ACCENT, w=18, h=2).pack(pady=6)
+              bg=ACCENT, w=18, h=1).pack(pady=6) # Reduced height
 
         self._t1_new()
 
@@ -529,7 +529,7 @@ class App(tk.Tk):
 
         cf = self.current_frame
 
-        sbar = tk.Frame(cf, bg=PANEL, height=56,
+        sbar = tk.Frame(cf, bg=PANEL, height=50, # Reduced height
                         highlightbackground=BORDER, highlightthickness=1)
         sbar.pack(fill="x")
         sbar.pack_propagate(False)
@@ -537,7 +537,7 @@ class App(tk.Tk):
             text=self._t2_score_text(), font=F_SCORE, bg=PANEL, fg=GREEN)
         self.t2_score_lbl.pack(side="left", padx=30)
         tk.Label(sbar, text="Знайди всі дільники — визнач тип числа",
-                 font=("Segoe UI", 15, "bold"), bg=PANEL, fg=MUTED).pack(
+                 font=("Segoe UI", 14, "bold"), bg=PANEL, fg=MUTED).pack( # Reduced font
             side="left", padx=10)
 
         center = tk.Frame(cf, bg=BG)
@@ -546,22 +546,22 @@ class App(tk.Tk):
         # Task
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=28, pady=10)
-        task_f.pack(pady=(14, 4))
+                          padx=24, pady=8) # Reduced pad
+        task_f.pack(pady=(10, 4))
         tk.Label(task_f, text="Знайди ВСІ дільники числа — вводь по ОДНОМУ:",
                  font=F_SUB, bg=PANEL, fg=TEXT).pack()
         self.t2_num_lbl = tk.Label(task_f, text="",
-                                    font=("Segoe UI", 64, "bold"),
+                                    font=("Segoe UI", 56, "bold"), # Reduced font
                                     bg=PANEL, fg=ACCENT)
         self.t2_num_lbl.pack()
 
         # Progress
         prog_f = tk.Frame(center, bg=BG)
-        prog_f.pack(pady=4)
+        prog_f.pack(pady=3)
         tk.Label(prog_f, text="Знайдені:", font=F_BODYB, bg=BG, fg=GREEN).pack(side="left")
         self.t2_found_lbl = tk.Label(prog_f, text="—",
                                       font=F_BODYB, bg=BG, fg=GREEN)
-        self.t2_found_lbl.pack(side="left", padx=(6, 24))
+        self.t2_found_lbl.pack(side="left", padx=(6, 20))
         self.t2_rem_lbl = tk.Label(prog_f, text="",
                                     font=F_SMALL, bg=BG, fg=MUTED)
         self.t2_rem_lbl.pack(side="left")
@@ -569,12 +569,12 @@ class App(tk.Tk):
         # Input display
         inp_f = tk.Frame(center, bg=BTN_NUM,
                          highlightbackground=ACCENT, highlightthickness=2,
-                         padx=14, pady=6)
+                         padx=12, pady=6) # Reduced pad
         inp_f.pack(pady=6)
         tk.Label(inp_f, text="Ваше число:", font=F_BODY,
                  bg=BTN_NUM, fg=MUTED).pack(side="left")
         self.t2_inp_lbl = tk.Label(inp_f, text="",
-                                    font=("Segoe UI", 44, "bold"),
+                                    font=("Segoe UI", 36, "bold"), # Reduced font
                                     bg=BTN_NUM, fg=ACCENT, width=5)
         self.t2_inp_lbl.pack(side="left", padx=10)
 
@@ -582,14 +582,14 @@ class App(tk.Tk):
         self.t2_feed_lbl = tk.Label(center, text="", font=F_FEED,
                                      bg=BG, fg=ORANGE,
                                      wraplength=680, justify="center")
-        self.t2_feed_lbl.pack(pady=4)
+        self.t2_feed_lbl.pack(pady=3)
 
         # Numpad centred
         np_outer = tk.Frame(center, bg=BG)
-        np_outer.pack(pady=8)
+        np_outer.pack(pady=6)
         for row_chars in [("7","8","9"),("4","5","6"),("1","2","3"),("C","0","⌫")]:
             rf = tk.Frame(np_outer, bg=BG)
-            rf.pack(pady=4)
+            rf.pack(pady=3) # Reduced pad
             for ch in row_chars:
                 if ch.isdigit():
                     bc, fc = BTN_NUM, TEXT
@@ -597,21 +597,21 @@ class App(tk.Tk):
                     bc, fc = RED_LT, RED
                 else:
                     bc, fc = CARD_V, ACCENT2
-                b = tk.Button(rf, text=ch, font=F_NUM, width=4, height=1,
+                b = tk.Button(rf, text=ch, font=F_NUM, width=4, height=1, # Reduced height
                               bg=bc, fg=fc, relief="flat", cursor="hand2",
                               command=lambda c=ch: self._t2_key(c))
-                b.pack(side="left", padx=5)
+                b.pack(side="left", padx=4) # Reduced pad
                 orig = bc
                 b.bind("<Enter>", lambda e, x=b, o=orig: x.config(bg=_darken(o, 18)))
                 b.bind("<Leave>", lambda e, x=b, o=orig: x.config(bg=o))
 
         act = tk.Frame(center, bg=BG)
-        act.pack(pady=10)
+        act.pack(pady=8)
         self.t2_check_btn = mkbtn(act, "✔  Перевірити", self._t2_check,
-                                   bg=GREEN, w=14, h=2)
+                                   bg=GREEN, w=14, h=1) # Reduced height
         self.t2_check_btn.pack(side="left", padx=10)
         self.t2_next_btn = mkbtn(act, "▶  Наступне", self._t2_new,
-                                  bg=ACCENT, w=12, h=2)
+                                  bg=ACCENT, w=12, h=1) # Reduced height
         self.t2_next_btn.pack(side="left", padx=10)
 
         self._t2_new()
@@ -737,7 +737,7 @@ class App(tk.Tk):
         cf = self.current_frame
 
         # ── Score bar ─────────────────────────────────────────────────────
-        sbar = tk.Frame(cf, bg=PANEL, height=56,
+        sbar = tk.Frame(cf, bg=PANEL, height=50, # Reduced height
                         highlightbackground=BORDER, highlightthickness=1)
         sbar.pack(fill="x")
         sbar.pack_propagate(False)
@@ -750,7 +750,7 @@ class App(tk.Tk):
         # Selected-count label (live counter)
         self.t3_count_lbl = tk.Label(
             sbar, text="Вибрано: 0",
-            font=("Segoe UI", 15, "bold"), bg=PANEL, fg=ACCENT)
+            font=("Segoe UI", 14, "bold"), bg=PANEL, fg=ACCENT) # Reduced font
         self.t3_count_lbl.pack(side="right", padx=30)
 
         # ── Instruction panel ─────────────────────────────────────────────
@@ -759,8 +759,8 @@ class App(tk.Tk):
 
         instr_f = tk.Frame(center, bg=PANEL,
                            highlightbackground=BORDER, highlightthickness=1,
-                           padx=24, pady=10)
-        instr_f.pack(pady=(10, 6), fill="x", padx=30)
+                           padx=20, pady=8) # Reduced pad
+        instr_f.pack(pady=(8, 4), fill="x", padx=30)
         tk.Label(instr_f,
                  text="🏺  Решето Ератосфена  —  вибери ВСІ прості числа від 1 до 100",
                  font=F_SUB, bg=PANEL, fg=TEXT).pack(anchor="w")
@@ -775,31 +775,31 @@ class App(tk.Tk):
         self.t3_btns = {}
 
         grid_wrap = tk.Frame(center, bg=BG)
-        grid_wrap.pack(pady=6, padx=30, anchor="w")
+        grid_wrap.pack(pady=4, padx=30, anchor="w")
 
         for i, n in enumerate(range(1, 101)):
             b = tk.Button(grid_wrap, text=str(n),
                           font=F_GRID,
-                          width=4, height=2,
+                          width=4, height=1, # Reduced height
                           bg=BTN_NUM, fg=TEXT,          # all neutral at start
                           relief="flat", cursor="hand2",
                           command=lambda x=n: self._t3_toggle(x))
-            b.grid(row=i // 10, column=i % 10, padx=3, pady=3)
+            b.grid(row=i // 10, column=i % 10, padx=2, pady=2) # Reduced pad
             self.t3_btns[n] = b
 
         # ── Legend ────────────────────────────────────────────────────────
         leg = tk.Frame(center, bg=BG)
-        leg.pack(pady=4, padx=30, anchor="w")
+        leg.pack(pady=2, padx=30, anchor="w")
         for bg_c, fg_c, txt in [
             (BTN_NUM,   TEXT,   "Не вибрано"),
-            (CARD_B,    ACCENT, "Вибрано як просте"),
-            (GREEN_LT,  GREEN,  "✅ Правильно"),
-            (RED_LT,    RED,    "❌ Помилка"),
-            (ORANGE_LT, ORANGE, "🟡 Пропущено"),
+            (CARD_B,    ACCENT, "Вибрано"),
+            (GREEN_LT,  GREEN,  "Правильно"),
+            (RED_LT,    RED,    "Помилка"),
+            (ORANGE_LT, ORANGE, "Пропущено"),
         ]:
-            f = tk.Frame(leg, bg=bg_c, padx=8, pady=3,
+            f = tk.Frame(leg, bg=bg_c, padx=6, pady=2, # Reduced pad
                          highlightbackground=BORDER, highlightthickness=1)
-            f.pack(side="left", padx=5)
+            f.pack(side="left", padx=4)
             tk.Label(f, text=txt, font=F_SMALL, bg=bg_c, fg=fg_c).pack()
 
         # ── Feedback ──────────────────────────────────────────────────────
@@ -807,17 +807,17 @@ class App(tk.Tk):
             center, text="", font=F_FEED,
             bg=BG, fg=ORANGE,
             wraplength=self.SW - 80, justify="center")
-        self.t3_feed_lbl.pack(pady=4)
+        self.t3_feed_lbl.pack(pady=2)
 
         # ── Action buttons ────────────────────────────────────────────────
         act = tk.Frame(center, bg=BG)
-        act.pack(pady=6)
+        act.pack(pady=4)
         self.t3_check_btn = mkbtn(
             act, "✔  Перевірити", self._t3_check,
-            bg=GREEN, w=14, h=2)
+            bg=GREEN, w=14, h=1) # Reduced height
         self.t3_check_btn.pack(side="left", padx=10)
         mkbtn(act, "🔄  Скинути", self._t3_reset,
-              bg=ORANGE, w=10, h=2).pack(side="left", padx=10)
+              bg=ORANGE, w=10, h=1).pack(side="left", padx=10) # Reduced height
 
     # ── Toggle a cell ──────────────────────────────────────────────────────
     def _t3_toggle(self, n):
