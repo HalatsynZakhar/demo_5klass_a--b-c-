@@ -348,7 +348,7 @@ class RoundingTrainer(tk.Tk):
         BTN_W = max(5, int(SW * 0.032 // 10))   # адаптивна ширина
         BTN_H = 2
         FONT_KBD = ("Segoe UI", 22, "bold")
-        PAD_Y = 6
+        PAD_Y = 2
 
         rows = [["7","8","9"], ["4","5","6"], ["1","2","3"], [",","0","⌫"]]
         for row in rows:
@@ -367,7 +367,7 @@ class RoundingTrainer(tk.Tk):
                     highlightbackground=BORDER, highlightthickness=1,
                     command=lambda c=ch: self._key_press(c)
                 )
-                btn.pack(side="left", padx=6)
+                btn.pack(side="left", padx=2)
                 btn.bind("<Enter>", lambda e, b=btn, d=is_del:
                          b.config(bg="#fca5a5" if d else BTN_HOV)
                          if b["state"] == "normal" else None)
