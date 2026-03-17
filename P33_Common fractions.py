@@ -29,22 +29,22 @@ TEAL      = "#0f766e"
 TEAL_LT   = "#ccfbf1"
 
 # ── Fonts ─────────────────────────────────────────────────────────────────────
-F_TITLE  = ("Segoe UI", 34, "bold")
-F_HEAD   = ("Segoe UI", 26, "bold")
-F_SUB    = ("Segoe UI", 20, "bold")
+F_TITLE  = ("Segoe UI", 30, "bold")
+F_HEAD   = ("Segoe UI", 22, "bold")
+F_SUB    = ("Segoe UI", 18, "bold")
 F_BODY   = ("Segoe UI", 17)
 F_BODYB  = ("Segoe UI", 17, "bold")
 F_BIG    = ("Segoe UI", 72, "bold")
 F_BTN    = ("Segoe UI", 19, "bold")
 F_NAV    = ("Segoe UI", 14, "bold")
-F_SCORE  = ("Segoe UI", 20, "bold")
+F_SCORE  = ("Segoe UI", 18, "bold")
 F_FEED   = ("Segoe UI", 16)
-F_NUM    = ("Segoe UI", 26, "bold")
+F_NUM    = ("Segoe UI", 22, "bold")
 F_SMALL  = ("Segoe UI", 13)
-F_FRAC   = ("Segoe UI", 40, "bold")
-F_FRAC_S = ("Segoe UI", 24, "bold")
-F_STEP   = ("Segoe UI", 18, "bold")
-F_STEP_V = ("Segoe UI", 18)
+F_FRAC   = ("Segoe UI", 32, "bold")
+F_FRAC_S = ("Segoe UI", 20, "bold")
+F_STEP   = ("Segoe UI", 16, "bold")
+F_STEP_V = ("Segoe UI", 16)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -225,7 +225,7 @@ class App(tk.Tk):
         self.current_frame = tk.Frame(self.main_area, bg=BG)
         self.current_frame.pack(expand=True, fill="both")
 
-    def _scroll_page(self):
+    def _scroll_page(self, px=60, py=28):
         sc = tk.Canvas(self.current_frame, bg=BG, highlightthickness=0)
         vsb = tk.Scrollbar(self.current_frame, orient="vertical", command=sc.yview)
         sc.configure(yscrollcommand=vsb.set)
@@ -238,7 +238,7 @@ class App(tk.Tk):
         sc.bind("<Configure>",
                 lambda e: sc.itemconfig(win, width=e.width))
         p = tk.Frame(outer, bg=BG)
-        p.pack(fill="both", expand=True, padx=60, pady=28)
+        p.pack(fill="both", expand=True, padx=px, pady=py)
         return p
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -643,7 +643,7 @@ class App(tk.Tk):
         np = tk.Frame(parent, bg=BG)
         for row_chars in [("7","8","9"),("4","5","6"),("1","2","3"),("C","0","⌫")]:
             rf = tk.Frame(np, bg=BG)
-            rf.pack(pady=4)
+            rf.pack(pady=2)
             for ch in row_chars:
                 if ch.isdigit():  bc, fc = BTN_NUM, TEXT
                 elif ch == "C":   bc, fc = RED_LT,  RED
@@ -682,25 +682,26 @@ class App(tk.Tk):
         tk.Label(frm, text="Формула:  N : b × a",
                  font=("Segoe UI", 14, "bold"), bg=PANEL, fg=GREEN).pack()
 
-        center = tk.Frame(cf, bg=BG)
-        center.pack(expand=True)
+        p = self._scroll_page(py=10)
+        center = tk.Frame(p, bg=BG)
+        center.pack(expand=True, fill="both")
 
         # ── 2-step banner ─────────────────────────────────────────────────
-        banner = tk.Frame(center, bg=CARD_G, padx=20, pady=10,
+        banner = tk.Frame(center, bg=CARD_G, padx=20, pady=8,
                           highlightbackground=GREEN, highlightthickness=2)
-        banner.pack(fill="x", padx=40, pady=(10, 4))
+        banner.pack(fill="x", padx=40, pady=(4, 2))
         tk.Label(banner,
                  text="📋  Відповідай У ДВА КРОКИ:   "
                       "Крок 1 → введи  N : b  і натисни «Перевірити»   "
                       "Крок 2 → введи  результат × a  і натисни «Перевірити»",
-                 font=("Segoe UI", 15, "bold"), bg=CARD_G, fg=GREEN,
+                 font=("Segoe UI", 14, "bold"), bg=CARD_G, fg=GREEN,
                  justify="center").pack()
 
         # ── Task header ───────────────────────────────────────────────────
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=28, pady=14)
-        task_f.pack(pady=(14, 8))
+                          padx=28, pady=10)
+        task_f.pack(pady=(8, 4))
 
         task_row = tk.Frame(task_f, bg=PANEL)
         task_row.pack()
@@ -711,20 +712,20 @@ class App(tk.Tk):
         tk.Label(task_row, text="  від числа  ",
                  font=F_SUB, bg=PANEL, fg=TEXT).pack(side="left")
         self.t1_num_lbl = tk.Label(task_row, text="",
-                                    font=("Segoe UI", 48, "bold"),
+                                    font=("Segoe UI", 36, "bold"),
                                     bg=PANEL, fg=ACCENT)
         self.t1_num_lbl.pack(side="left")
 
         # ── Step indicator ────────────────────────────────────────────────
         steps_row = tk.Frame(center, bg=BG)
-        steps_row.pack(pady=6)
+        steps_row.pack(pady=4)
 
         self.t1_step_boxes = []
         for i, (label, desc) in enumerate([
             ("Крок 1", "N  :  b  = ?"),
             ("Крок 2", "результат  ×  a  = ?"),
         ]):
-            box = tk.Frame(steps_row, bg=BTN_NUM, padx=18, pady=10,
+            box = tk.Frame(steps_row, bg=BTN_NUM, padx=18, pady=8,
                            highlightbackground=BORDER, highlightthickness=1,
                            width=280)
             box.pack(side="left", padx=10)
@@ -738,41 +739,41 @@ class App(tk.Tk):
 
         # Step 1 result display (shown after step 1 done)
         self.t1_step1_result_lbl = tk.Label(center, text="",
-                                             font=("Segoe UI", 18, "bold"),
+                                             font=("Segoe UI", 16, "bold"),
                                              bg=BG, fg=ACCENT)
         self.t1_step1_result_lbl.pack(pady=2)
 
         # ── Input ─────────────────────────────────────────────────────────
         self.t1_step_lbl = tk.Label(center, text="", font=F_SUB,
                                      bg=BG, fg=ACCENT)
-        self.t1_step_lbl.pack(pady=4)
+        self.t1_step_lbl.pack(pady=2)
 
         inp_f = tk.Frame(center, bg=BTN_NUM,
                          highlightbackground=ACCENT, highlightthickness=2,
-                         padx=14, pady=6)
-        inp_f.pack(pady=4)
+                         padx=14, pady=4)
+        inp_f.pack(pady=2)
         tk.Label(inp_f, text="Відповідь:", font=F_BODYB,
                  bg=BTN_NUM, fg=MUTED).pack(side="left")
         self.t1_inp_lbl = tk.Label(inp_f, text="",
-                                    font=("Segoe UI", 44, "bold"),
+                                    font=("Segoe UI", 36, "bold"),
                                     bg=BTN_NUM, fg=ACCENT, width=5)
         self.t1_inp_lbl.pack(side="left", padx=10)
 
         self.t1_feed_lbl = tk.Label(center, text="", font=F_FEED,
                                      bg=BG, fg=ORANGE,
                                      wraplength=700, justify="center")
-        self.t1_feed_lbl.pack(pady=4)
+        self.t1_feed_lbl.pack(pady=2)
 
         # Numpad
-        self._build_numpad(center, self._t1_key).pack(pady=6)
+        self._build_numpad(center, self._t1_key).pack(pady=4)
 
         act = tk.Frame(center, bg=BG)
-        act.pack(pady=8)
+        act.pack(pady=4)
         self.t1_check_btn = mkbtn(act, "✔  Перевірити", self._t1_check,
-                                   bg=GREEN, w=14, h=2)
+                                   bg=GREEN, w=14, h=1)
         self.t1_check_btn.pack(side="left", padx=10)
         mkbtn(act, "▶  Наступне", self._t1_new,
-              bg=ACCENT, w=12, h=2).pack(side="left", padx=10)
+              bg=ACCENT, w=12, h=1).pack(side="left", padx=10)
 
         self._t1_new()
 
@@ -908,25 +909,26 @@ class App(tk.Tk):
         tk.Label(frm, text="Формула:  P : a × b",
                  font=("Segoe UI", 14, "bold"), bg=PANEL, fg=ACCENT2).pack()
 
-        center = tk.Frame(cf, bg=BG)
-        center.pack(expand=True)
+        p = self._scroll_page(py=10)
+        center = tk.Frame(p, bg=BG)
+        center.pack(expand=True, fill="both")
 
         # ── 2-step banner ─────────────────────────────────────────────────
-        banner2 = tk.Frame(center, bg=CARD_V, padx=20, pady=10,
+        banner2 = tk.Frame(center, bg=CARD_V, padx=20, pady=8,
                            highlightbackground=ACCENT2, highlightthickness=2)
-        banner2.pack(fill="x", padx=40, pady=(10, 4))
+        banner2.pack(fill="x", padx=40, pady=(4, 2))
         tk.Label(banner2,
                  text="📋  Відповідай У ДВА КРОКИ:   "
                       "Крок 1 → введи  P : a  і натисни «Перевірити»   "
                       "Крок 2 → введи  результат × b  і натисни «Перевірити»",
-                 font=("Segoe UI", 15, "bold"), bg=CARD_V, fg=ACCENT2,
+                 font=("Segoe UI", 14, "bold"), bg=CARD_V, fg=ACCENT2,
                  justify="center").pack()
 
         # Task header
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=28, pady=14)
-        task_f.pack(pady=(14, 8))
+                          padx=28, pady=10)
+        task_f.pack(pady=(8, 4))
 
         self.t2_task_lbl = tk.Label(task_f, text="",
                                      font=F_SUB, bg=PANEL, fg=TEXT,
@@ -936,17 +938,17 @@ class App(tk.Tk):
                  font=F_SMALL, bg=PANEL, fg=MUTED).pack()
 
         self.t2_frac_row = tk.Frame(task_f, bg=PANEL)
-        self.t2_frac_row.pack(pady=8)
+        self.t2_frac_row.pack(pady=4)
 
         # Step boxes
         steps_row = tk.Frame(center, bg=BG)
-        steps_row.pack(pady=6)
+        steps_row.pack(pady=4)
         self.t2_step_boxes = []
         for label, desc in [
             ("Крок 1", "P  :  a  = ?"),
             ("Крок 2", "результат  ×  b  = ?"),
         ]:
-            box = tk.Frame(steps_row, bg=BTN_NUM, padx=18, pady=10,
+            box = tk.Frame(steps_row, bg=BTN_NUM, padx=18, pady=8,
                            highlightbackground=BORDER, highlightthickness=1,
                            width=300)
             box.pack(side="left", padx=10)
@@ -957,39 +959,39 @@ class App(tk.Tk):
             self.t2_step_boxes.append((box, lbl))
 
         self.t2_step1_result_lbl = tk.Label(center, text="",
-                                             font=("Segoe UI", 18, "bold"),
+                                             font=("Segoe UI", 16, "bold"),
                                              bg=BG, fg=ACCENT2)
         self.t2_step1_result_lbl.pack(pady=2)
 
         self.t2_step_lbl = tk.Label(center, text="", font=F_SUB,
                                      bg=BG, fg=ACCENT2)
-        self.t2_step_lbl.pack(pady=4)
+        self.t2_step_lbl.pack(pady=2)
 
         inp_f = tk.Frame(center, bg=BTN_NUM,
                          highlightbackground=ACCENT2, highlightthickness=2,
-                         padx=14, pady=6)
-        inp_f.pack(pady=4)
+                         padx=14, pady=4)
+        inp_f.pack(pady=2)
         tk.Label(inp_f, text="Число  =", font=F_BODYB,
                  bg=BTN_NUM, fg=MUTED).pack(side="left")
         self.t2_inp_lbl = tk.Label(inp_f, text="",
-                                    font=("Segoe UI", 44, "bold"),
+                                    font=("Segoe UI", 36, "bold"),
                                     bg=BTN_NUM, fg=ACCENT2, width=5)
         self.t2_inp_lbl.pack(side="left", padx=10)
 
         self.t2_feed_lbl = tk.Label(center, text="", font=F_FEED,
                                      bg=BG, fg=ORANGE,
                                      wraplength=700, justify="center")
-        self.t2_feed_lbl.pack(pady=4)
+        self.t2_feed_lbl.pack(pady=2)
 
-        self._build_numpad(center, self._t2_key).pack(pady=6)
+        self._build_numpad(center, self._t2_key).pack(pady=4)
 
         act = tk.Frame(center, bg=BG)
-        act.pack(pady=8)
+        act.pack(pady=4)
         self.t2_check_btn = mkbtn(act, "✔  Перевірити", self._t2_check,
-                                   bg=GREEN, w=14, h=2)
+                                   bg=GREEN, w=14, h=1)
         self.t2_check_btn.pack(side="left", padx=10)
         mkbtn(act, "▶  Наступне", self._t2_new,
-              bg=ACCENT2, w=12, h=2).pack(side="left", padx=10)
+              bg=ACCENT2, w=12, h=1).pack(side="left", padx=10)
 
         self._t2_new()
 
@@ -1129,17 +1131,18 @@ class App(tk.Tk):
         self.t3_score_lbl.pack(side="left", padx=30)
         tk.Label(sbar,
                  text="🏆  Вільна практика — завдання змішані, вводь відповідь одразу",
-                 font=("Segoe UI", 15, "bold"), bg=PANEL, fg=PINK).pack(
+                 font=("Segoe UI", 14, "bold"), bg=PANEL, fg=PINK).pack(
             side="left", padx=10)
 
-        center = tk.Frame(cf, bg=BG)
-        center.pack(expand=True)
+        p = self._scroll_page(py=10)
+        center = tk.Frame(p, bg=BG)
+        center.pack(expand=True, fill="both")
 
         # Task card
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=32, pady=18)
-        task_f.pack(pady=(16, 8))
+                          padx=32, pady=12)
+        task_f.pack(pady=(10, 4))
 
         self.t3_task_lbl = tk.Label(task_f, text="",
                                      font=F_SUB, bg=PANEL, fg=TEXT,
@@ -1147,7 +1150,7 @@ class App(tk.Tk):
         self.t3_task_lbl.pack()
 
         self.t3_frac_row = tk.Frame(task_f, bg=PANEL)
-        self.t3_frac_row.pack(pady=8)
+        self.t3_frac_row.pack(pady=4)
 
         # Badge: shown after correct answer revealing task type
         self.t3_type_badge = tk.Label(center, text="", font=F_SMALL,
@@ -1157,25 +1160,25 @@ class App(tk.Tk):
         # Input display
         inp_f = tk.Frame(center, bg=BTN_NUM,
                          highlightbackground=PINK, highlightthickness=2,
-                         padx=14, pady=6)
-        inp_f.pack(pady=8)
+                         padx=14, pady=4)
+        inp_f.pack(pady=4)
         tk.Label(inp_f, text="Відповідь:", font=F_BODYB,
                  bg=BTN_NUM, fg=MUTED).pack(side="left")
         self.t3_inp_lbl = tk.Label(inp_f, text="",
-                                    font=("Segoe UI", 44, "bold"),
+                                    font=("Segoe UI", 36, "bold"),
                                     bg=BTN_NUM, fg=PINK, width=5)
         self.t3_inp_lbl.pack(side="left", padx=10)
 
         self.t3_feed_lbl = tk.Label(center, text="", font=F_FEED,
                                      bg=BG, fg=ORANGE,
                                      wraplength=700, justify="center")
-        self.t3_feed_lbl.pack(pady=4)
+        self.t3_feed_lbl.pack(pady=2)
 
         # Numpad with pink accent
         np = tk.Frame(center, bg=BG)
         for row_chars in [("7","8","9"),("4","5","6"),("1","2","3"),("C","0","⌫")]:
             rf = tk.Frame(np, bg=BG)
-            rf.pack(pady=4)
+            rf.pack(pady=2)
             for ch in row_chars:
                 if ch.isdigit():  bc, fc = BTN_NUM, TEXT
                 elif ch == "C":   bc, fc = RED_LT,  RED
@@ -1187,15 +1190,15 @@ class App(tk.Tk):
                 orig = bc
                 b.bind("<Enter>", lambda e, x=b, o=orig: x.config(bg=_darken(o, 18)))
                 b.bind("<Leave>", lambda e, x=b, o=orig: x.config(bg=o))
-        np.pack(pady=6)
+        np.pack(pady=4)
 
         act = tk.Frame(center, bg=BG)
-        act.pack(pady=8)
+        act.pack(pady=4)
         self.t3_check_btn = mkbtn(act, "✔  Перевірити", self._t3_check,
-                                   bg=GREEN, w=14, h=2)
+                                   bg=GREEN, w=14, h=1)
         self.t3_check_btn.pack(side="left", padx=10)
         mkbtn(act, "▶  Наступне", self._t3_new,
-              bg=PINK, w=12, h=2).pack(side="left", padx=10)
+              bg=PINK, w=12, h=1).pack(side="left", padx=10)
 
         self._t3_new()
 
