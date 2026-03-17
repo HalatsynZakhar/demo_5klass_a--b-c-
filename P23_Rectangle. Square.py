@@ -85,7 +85,7 @@ class RectSquareApp(tk.Tk):
             cv.create_line(x + size, y + size, x, y + size, fill=SKY, width=4)
 
     def _build_ui(self):
-        hdr = tk.Frame(self, bg=ACCENT, height=80)
+        hdr = tk.Frame(self, bg=ACCENT, height=60) # Reduced from 80
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
 
@@ -94,24 +94,24 @@ class RectSquareApp(tk.Tk):
             text="Прямокутник. Квадрат (§ 23)",
             bg=ACCENT,
             fg=WHITE,
-            font=("Segoe UI", 24, "bold"),
+            font=("Segoe UI", 20, "bold"), # Reduced from 24
         ).pack(side="left", padx=30)
 
         tk.Button(
             hdr,
             text="❌ Вихід",
-            font=("Arial", 16, "bold"),
+            font=("Arial", 14, "bold"), # Reduced from 16
             bg=RED,
             fg=WHITE,
             bd=0,
             command=self.destroy,
         ).pack(side="right", padx=20)
 
-        nav = tk.Frame(self, bg=WHITE, height=60)
+        nav = tk.Frame(self, bg=WHITE, height=50) # Reduced from 60
         nav.pack(fill="x")
         nav.pack_propagate(False)
 
-        btn_font = ("Segoe UI", 12, "bold")
+        btn_font = ("Segoe UI", 11, "bold") # Reduced from 12
         tk.Button(nav, text="1. Прямокутник", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_rectangle).pack(side="left", padx=10)
         tk.Button(nav, text="2. Периметр", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_perimeter).pack(side="left", padx=10)
         tk.Button(nav, text="3. Квадрат", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_square).pack(side="left", padx=10)
@@ -126,10 +126,10 @@ class RectSquareApp(tk.Tk):
 
     def _canvas_width(self, cv, fallback):
         w = int(cv.winfo_width())
-        if w < 300:
+        if w < 10:
             cv.update_idletasks()
             w = int(cv.winfo_width())
-        if w < 300:
+        if w < 10:
             w = int(fallback)
         return w
 
@@ -162,9 +162,9 @@ class RectSquareApp(tk.Tk):
         self.mode = "rectangle"
 
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20) # Reduced from 50/25
 
-        tk.Label(f, text="Прямокутник", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="Прямокутник", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced from 32
         tk.Label(
             f,
             text=(
@@ -172,25 +172,25 @@ class RectSquareApp(tk.Tk):
                 "Протилежні сторони прямокутника рівні (AB = DC, BC = AD).\n"
                 "Суміжні сторони можна називати довжиною і шириною."
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced from 18
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 160,
+            wraplength=self.SW - 120,
         ).pack(anchor="w")
 
-        cv = tk.Canvas(f, bg=WHITE, height=max(360, int(self.SH * 0.42)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=15, padx=10)
+        cv = tk.Canvas(f, bg=WHITE, height=max(300, int(self.SH * 0.38)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=10, padx=10) # Reduced pady
         self.after(80, lambda: self._draw_rectangle_demo(cv))
 
     def _draw_rectangle_demo(self, cv):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
-        if h < 260:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 260:
+        if h < 50:
             h = 360
 
         margin = int(w * 0.25)
@@ -221,9 +221,9 @@ class RectSquareApp(tk.Tk):
         self.mode = "perimeter"
 
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20)
 
-        tk.Label(f, text="Периметр прямокутника", font=("Segoe UI", 30, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="Периметр прямокутника", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced
         tk.Label(
             f,
             text=(
@@ -233,15 +233,15 @@ class RectSquareApp(tk.Tk):
                 "Якщо відомий периметр P і одна сторона a, то інша сторона:\n"
                 "b = P : 2 − a"
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 160,
+            wraplength=self.SW - 120,
         ).pack(anchor="w")
 
-        cv = tk.Canvas(f, bg=WHITE, height=max(320, int(self.SH * 0.36)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=15, padx=10)
+        cv = tk.Canvas(f, bg=WHITE, height=max(280, int(self.SH * 0.32)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=10, padx=10)
         self.after(80, lambda: self._draw_rectangle_ab(cv, a=8, b=5, unit="см", show_formula=True))
 
     def show_square(self):
@@ -249,9 +249,9 @@ class RectSquareApp(tk.Tk):
         self.mode = "square"
 
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20)
 
-        tk.Label(f, text="Квадрат", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="Квадрат", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced
         tk.Label(
             f,
             text=(
@@ -259,25 +259,25 @@ class RectSquareApp(tk.Tk):
                 "Периметр квадрата:\n"
                 "P = 4a"
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 160,
+            wraplength=self.SW - 120,
         ).pack(anchor="w")
 
-        cv = tk.Canvas(f, bg=WHITE, height=max(360, int(self.SH * 0.42)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=15, padx=10)
+        cv = tk.Canvas(f, bg=WHITE, height=max(300, int(self.SH * 0.38)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=10, padx=10)
         self.after(80, lambda: self._draw_square_demo(cv, a=6, unit="см"))
 
     def _draw_rectangle_ab(self, cv, a, b, unit, show_formula=False, ask_unknown=False):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
-        if h < 240:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 240:
+        if h < 50:
             h = 320
 
         margin = int(w * 0.25)
@@ -305,11 +305,11 @@ class RectSquareApp(tk.Tk):
 
         a_txt = "?" if ask_unknown == "a" else f"{a} {unit}"
         b_txt = "?" if ask_unknown == "b" else f"{b} {unit}"
-        cv.create_text(tx, ty, text=f"a = {a_txt}", font=("Segoe UI", 18, "bold"), fill=INDIGO)
-        cv.create_text(left, midy, text=f"b = {b_txt}", font=("Segoe UI", 18, "bold"), fill=INDIGO, anchor="w")
+        cv.create_text(tx, ty, text=f"a = {a_txt}", font=("Segoe UI", 16, "bold"), fill=INDIGO) # Reduced
+        cv.create_text(left, midy, text=f"b = {b_txt}", font=("Segoe UI", 16, "bold"), fill=INDIGO, anchor="w") # Reduced
 
         if show_formula:
-            cv.create_text(int(w * 0.06), int(h * 0.16), text="P = 2(a + b)", font=("Segoe UI", 20, "bold"), fill=SKY, anchor="w")
+            cv.create_text(int(w * 0.06), int(h * 0.16), text="P = 2(a + b)", font=("Segoe UI", 18, "bold"), fill=SKY, anchor="w") # Reduced
 
         cv.create_rectangle(x1, y1, x2, y2, outline=TEXT, width=2)
 
@@ -317,10 +317,10 @@ class RectSquareApp(tk.Tk):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
-        if h < 260:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 260:
+        if h < 50:
             h = 360
 
         size = min(w, h) * 0.55
@@ -342,9 +342,9 @@ class RectSquareApp(tk.Tk):
         cv.create_text(x1, y1 - 18, text="D", font=("Segoe UI", 14, "bold"), fill=TEXT)
 
         txt = "?" if ask_unknown else f"{a} {unit}"
-        cv.create_text((x1 + x2) / 2, y2 + 28, text=f"a = {txt}", font=("Segoe UI", 20, "bold"), fill=INDIGO)
+        cv.create_text((x1 + x2) / 2, y2 + 28, text=f"a = {txt}", font=("Segoe UI", 18, "bold"), fill=INDIGO) # Reduced
         if show_formula:
-            cv.create_text(int(w * 0.06), int(h * 0.14), text="P = 4a", font=("Segoe UI", 20, "bold"), fill=SKY, anchor="w")
+            cv.create_text(int(w * 0.06), int(h * 0.14), text="P = 4a", font=("Segoe UI", 18, "bold"), fill=SKY, anchor="w") # Reduced
 
         cv.create_rectangle(x1, y1, x2, y2, outline=TEXT, width=2)
 
@@ -359,28 +359,28 @@ class RectSquareApp(tk.Tk):
         left.pack(side="left", fill="both")
         left.pack_propagate(False)
 
-        tk.Label(left, text="Тренажер", font=("Segoe UI", 30, "bold"), bg=BG, fg=TEXT).pack(pady=(25, 5))
-        self.lbl_score = tk.Label(left, text="Рахунок: 0 / 0", font=("Segoe UI", 18, "bold"), bg=BG, fg=ACCENT)
-        self.lbl_score.pack(pady=(0, 10))
+        tk.Label(left, text="Тренажер", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(15, 5)) # Reduced
+        self.lbl_score = tk.Label(left, text="Рахунок: 0 / 0", font=("Segoe UI", 16, "bold"), bg=BG, fg=ACCENT)
+        self.lbl_score.pack(pady=(0, 5))
 
-        self.task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=30, pady=20)
+        self.task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=20, pady=15) # Reduced pad
         self.task_box.pack(pady=10, padx=20, fill="x")
-        self.task_text = tk.Label(self.task_box, text="", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT, justify="center", wraplength=LW - 200)
-        self.task_text.pack(anchor="center", pady=(10,0))
+        self.task_text = tk.Label(self.task_box, text="", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT, justify="center", wraplength=LW - 100) # Reduced from 18
+        self.task_text.pack(anchor="center", pady=(5,0))
 
-        self.task_canvas = tk.Canvas(left, bg=WHITE, height=300, bd=2, relief="ridge")
+        self.task_canvas = tk.Canvas(left, bg=WHITE, height=220, bd=2, relief="ridge") # Reduced from 300
         self.task_canvas.pack(pady=10, padx=20, fill="x")
 
         self.display_frame = tk.Frame(left, bg=WHITE, highlightbackground=ACCENT, highlightthickness=2)
-        self.display_frame.pack(pady=10, ipadx=24, ipady=10)
-        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 48, "bold"), width=12, anchor="e")
+        self.display_frame.pack(pady=5, ipadx=16, ipady=4)
+        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 32, "bold"), width=12, anchor="e") # Reduced from 48
         self.lbl_display.pack()
 
-        self.lbl_feedback = tk.Label(left, text="", font=("Segoe UI", 18, "bold"), bg=BG)
-        self.lbl_feedback.pack(pady=10)
+        self.lbl_feedback = tk.Label(left, text="", font=("Segoe UI", 16, "bold"), bg=BG)
+        self.lbl_feedback.pack(pady=5)
 
         self.kbd = tk.Frame(left, bg=BG)
-        self.kbd.pack(pady=10)
+        self.kbd.pack(pady=5)
         rows = [["7", "8", "9"], ["4", "5", "6"], ["1", "2", "3"], ["C", "0", "⌫"]]
         for row in rows:
             r = tk.Frame(self.kbd, bg=BG)
@@ -390,28 +390,28 @@ class RectSquareApp(tk.Tk):
                     r,
                     text=ch,
                     bg=RED_BG if ch in ("⌫", "C") else BTN_NUM,
-                    font=("Segoe UI", 20, "bold"),
+                    font=("Segoe UI", 16, "bold"),
                     width=6,
                     height=1,
                     relief="flat",
                     command=lambda c=ch: self._key_press(c),
-                ).pack(side="left", padx=5)
+                ).pack(side="left", padx=4) # Reduced size
 
         btn_f = tk.Frame(left, bg=BG)
-        btn_f.pack(pady=10)
-        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 18, "bold"), relief="flat", padx=40, pady=10, command=self.check_answer)
-        self.btn_ok.pack(side="left", padx=20)
-        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 18, "bold"), relief="flat", padx=40, pady=10, command=self.next_task)
+        btn_f.pack(pady=5)
+        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 14, "bold"), relief="flat", padx=30, pady=8, command=self.check_answer)
+        self.btn_ok.pack(side="left", padx=15)
+        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 14, "bold"), relief="flat", padx=30, pady=8, command=self.next_task)
 
         right = tk.Frame(self.main_area, bg=PANEL, width=RW, highlightbackground=BORDER, highlightthickness=1)
         right.pack(side="right", fill="y")
         right.pack_propagate(False)
 
         rpad = tk.Frame(right, bg=PANEL)
-        rpad.pack(fill="both", expand=True, padx=25, pady=25)
-        tk.Label(rpad, text="Підказки", font=("Segoe UI", 18, "bold"), bg=PANEL, fg=MUTED).pack(anchor="w")
+        rpad.pack(fill="both", expand=True, padx=20, pady=20)
+        tk.Label(rpad, text="Підказки", font=("Segoe UI", 16, "bold"), bg=PANEL, fg=MUTED).pack(anchor="w")
 
-        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=15, pady=15)
+        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=10, pady=10)
         hint_box.pack(fill="x", pady=10)
         tk.Label(
             hint_box,
@@ -421,7 +421,7 @@ class RectSquareApp(tk.Tk):
                 "• Квадрат: P = 4a\n"
                 "• Якщо відомий P квадрата: a = P : 4"
             ),
-            font=("Segoe UI", 12),
+            font=("Segoe UI", 11), # Reduced from 12
             bg="#eff6ff",
             justify="left",
         ).pack(anchor="w")
@@ -506,4 +506,3 @@ class RectSquareApp(tk.Tk):
 if __name__ == "__main__":
     app = RectSquareApp()
     app.mainloop()
-
