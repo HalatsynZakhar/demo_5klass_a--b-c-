@@ -28,23 +28,23 @@ NAV_FG    = "#ffffff"
 HDR_BG    = "#1d4ed8"
 
 # ── Fonts ─────────────────────────────────────────────────────────────────────
-F_TITLE  = ("Segoe UI", 34, "bold")
-F_HEAD   = ("Segoe UI", 26, "bold")
-F_SUB    = ("Segoe UI", 20, "bold")
-F_BODY   = ("Segoe UI", 17)
-F_BODYB  = ("Segoe UI", 17, "bold")
-F_BIG    = ("Segoe UI", 60, "bold")
-F_HUGE   = ("Segoe UI", 80, "bold")
-F_BTN    = ("Segoe UI", 19, "bold")
-F_NAV    = ("Segoe UI", 14, "bold")
-F_SCORE  = ("Segoe UI", 20, "bold")
-F_FEED   = ("Segoe UI", 18)
-F_NUM    = ("Segoe UI", 26, "bold")
-F_SMALL  = ("Segoe UI", 13)
+F_TITLE  = ("Segoe UI", 28, "bold") # Reduced from 34
+F_HEAD   = ("Segoe UI", 22, "bold") # Reduced from 26
+F_SUB    = ("Segoe UI", 16, "bold") # Reduced from 20
+F_BODY   = ("Segoe UI", 14) # Reduced from 17
+F_BODYB  = ("Segoe UI", 14, "bold") # Reduced from 17
+F_BIG    = ("Segoe UI", 48, "bold") # Reduced from 60
+F_HUGE   = ("Segoe UI", 60, "bold") # Reduced from 80
+F_BTN    = ("Segoe UI", 16, "bold") # Reduced from 19
+F_NAV    = ("Segoe UI", 12, "bold") # Reduced from 14
+F_SCORE  = ("Segoe UI", 16, "bold") # Reduced from 20
+F_FEED   = ("Segoe UI", 14) # Reduced from 18
+F_NUM    = ("Segoe UI", 20, "bold") # Reduced from 26
+F_SMALL  = ("Segoe UI", 11) # Reduced from 13
 
 
 def btn(parent, text, cmd, bg=ACCENT, fg=WHITE, font=F_BTN,
-        w=12, h=2, px=6, py=6):
+        w=12, h=1, px=4, py=4): # Reduced height/padding
     b = tk.Button(parent, text=text, command=cmd, bg=bg, fg=fg,
                   font=font, width=w, height=h,
                   relief="flat", bd=0, cursor="hand2",
@@ -70,20 +70,20 @@ def _lighten(hex_color, amt=30):
 
 
 def hline(parent, color=BORDER):
-    tk.Frame(parent, bg=color, height=2).pack(fill="x", pady=(4, 12))
+    tk.Frame(parent, bg=color, height=2).pack(fill="x", pady=(4, 8)) # Reduced pad
 
 
 def card(parent, title, body_text, bg_color, fg_text=TEXT, w=None):
-    f = tk.Frame(parent, bg=bg_color, padx=22, pady=14,
-                 highlightbackground=BORDER, highlightthickness=1)
-    kw = {"fill": "x", "pady": 6}
-    if w: kw = {"pady": 6}
+    f = tk.Frame(parent, bg=bg_color, padx=18, pady=10,
+                 highlightbackground=BORDER, highlightthickness=1) # Reduced pad
+    kw = {"fill": "x", "pady": 4} # Reduced pad
+    if w: kw = {"pady": 4}
     f.pack(**kw)
     tk.Label(f, text=title, font=F_BODYB, bg=bg_color, fg=fg_text,
              anchor="w").pack(fill="x")
     tk.Label(f, text=body_text, font=F_BODY, bg=bg_color, fg=fg_text,
-             justify="left", wraplength=1300, anchor="w").pack(fill="x",
-                                                                pady=(4, 0))
+             justify="left", wraplength=1100, anchor="w").pack(fill="x",
+                                                                pady=(2, 0)) # Reduced pad
     return f
 
 
@@ -146,17 +146,17 @@ class App(tk.Tk):
 
     # ── Chrome ────────────────────────────────────────────────────────────────
     def _build_chrome(self):
-        hdr = tk.Frame(self, bg=HDR_BG, height=70)
+        hdr = tk.Frame(self, bg=HDR_BG, height=60) # Reduced from 70
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
         tk.Label(hdr, text="§ 26.   Дільники і кратні натурального числа",
-                 bg=HDR_BG, fg=WHITE, font=("Segoe UI", 21, "bold")).pack(
-                 side="left", padx=30)
+                 bg=HDR_BG, fg=WHITE, font=("Segoe UI", 18, "bold")).pack(
+                 side="left", padx=30) # Reduced font
         btn(hdr, "✕  Вийти", self.destroy, bg="#b91c1c",
-            font=("Segoe UI", 13, "bold"), w=9, h=1).pack(
-            side="right", padx=18, pady=16)
+            font=("Segoe UI", 12, "bold"), w=8, h=1).pack(
+            side="right", padx=18, pady=12) # Reduced
 
-        nav = tk.Frame(self, bg=NAV_BG, height=52)
+        nav = tk.Frame(self, bg=NAV_BG, height=45) # Reduced from 52
         nav.pack(fill="x")
         nav.pack_propagate(False)
 
@@ -171,7 +171,7 @@ class App(tk.Tk):
                           bg=NAV_BG, fg=NAV_FG, font=F_NAV,
                           relief="flat", bd=0, cursor="hand2",
                           activebackground=ACCENT, activeforeground=WHITE,
-                          padx=18, pady=14)
+                          padx=14, pady=10) # Reduced pad
             b.pack(side="left")
             b.bind("<Enter>", lambda e, x=b: x.config(bg=ACCENT))
             b.bind("<Leave>", lambda e, x=b: x.config(bg=NAV_BG))
@@ -237,10 +237,10 @@ class App(tk.Tk):
         center = tk.Frame(self.current_frame, bg=BG)
         center.place(relx=.5, rely=.5, anchor="center")
 
-        tk.Label(center, text="Дільники і кратні", font=("Segoe UI", 54, "bold"),
+        tk.Label(center, text="Дільники і кратні", font=("Segoe UI", 48, "bold"), # Reduced from 54
                  bg=BG, fg=TEXT).pack(pady=(0, 4))
-        tk.Label(center, text="натурального числа", font=("Segoe UI", 30),
-                 bg=BG, fg=ACCENT).pack(pady=(0, 36))
+        tk.Label(center, text="натурального числа", font=("Segoe UI", 24), # Reduced from 30
+                 bg=BG, fg=ACCENT).pack(pady=(0, 24))
 
         cards_data = [
             ("📖", "Теорія\nДільники",   CARD_DIV, ACCENT,  self.show_divisors_theory),
@@ -251,13 +251,13 @@ class App(tk.Tk):
         row = tk.Frame(center, bg=BG)
         row.pack()
         for icon, title, bg_c, fg_c, cmd in cards_data:
-            c = tk.Frame(row, bg=bg_c, width=210, height=190,
+            c = tk.Frame(row, bg=bg_c, width=180, height=160, # Reduced size
                          highlightbackground=BORDER, highlightthickness=2)
-            c.pack(side="left", padx=14)
+            c.pack(side="left", padx=10) # Reduced pad
             c.pack_propagate(False)
-            tk.Label(c, text=icon, font=("Segoe UI", 38),
-                     bg=bg_c, fg=fg_c).pack(pady=(22, 4))
-            tk.Label(c, text=title, font=("Segoe UI", 15, "bold"),
+            tk.Label(c, text=icon, font=("Segoe UI", 32), # Reduced from 38
+                     bg=bg_c, fg=fg_c).pack(pady=(18, 4))
+            tk.Label(c, text=title, font=("Segoe UI", 14, "bold"), # Reduced from 15
                      bg=bg_c, fg=fg_c, justify="center").pack()
             for w in [c] + c.winfo_children():
                 w.bind("<Button-1>", lambda e, f=cmd: f())
@@ -265,7 +265,7 @@ class App(tk.Tk):
                 w.bind("<Leave>",    lambda e, x=c, col=bg_c: x.config(bg=col))
 
         tk.Label(center, text="Натисніть на картку або скористайтесь меню зверху",
-                 font=F_SMALL, bg=BG, fg=MUTED).pack(pady=20)
+                 font=F_SMALL, bg=BG, fg=MUTED).pack(pady=15)
 
     # ══════════════════════════════════════════════════════════════════════════
     # THEORY — DIVISORS  (5th grade: no square roots)
@@ -292,7 +292,7 @@ class App(tk.Tk):
                                win_id, width=e.width))
 
         p = tk.Frame(outer, bg=BG)
-        p.pack(fill="both", expand=True, padx=60, pady=28)
+        p.pack(fill="both", expand=True, padx=40, pady=20) # Reduced pad
 
         tk.Label(p, text="Дільники натурального числа",
                  font=F_TITLE, bg=BG, fg=TEXT).pack(anchor="w")
@@ -325,20 +325,20 @@ class App(tk.Tk):
              "#fef9c3")
 
         # ── Live demo ──────────────────────────────────────────────────────
-        demo_f = tk.Frame(p, bg=PANEL, padx=22, pady=16,
+        demo_f = tk.Frame(p, bg=PANEL, padx=18, pady=12, # Reduced pad
                           highlightbackground=BORDER, highlightthickness=1)
-        demo_f.pack(fill="x", pady=10)
+        demo_f.pack(fill="x", pady=8)
         tk.Label(demo_f, text="🔢  Спробуйте самі — введіть число:",
                  font=F_BODYB, bg=PANEL, fg=TEXT).pack(anchor="w")
         
         input_area = tk.Frame(demo_f, bg=PANEL)
-        input_area.pack(anchor="w", pady=8)
+        input_area.pack(anchor="w", pady=6)
 
         self.theory_div_entry_var = tk.StringVar(value=self.theory_div_input)
         self.theory_div_entry = tk.Entry(input_area, font=F_HEAD, width=7, bg=BTN_NUM, fg=TEXT,
                                          relief="flat", insertbackground=ACCENT, 
                                          textvariable=self.theory_div_entry_var)
-        self.theory_div_entry.pack(side="left", ipady=6, padx=(0, 10))
+        self.theory_div_entry.pack(side="left", ipady=4, padx=(0, 8)) # Reduced pad
         
         res_lbl = tk.Label(input_area, text="", font=F_BODYB, bg=PANEL, fg=ACCENT,
                            wraplength=self.SW - 300, justify="left")
@@ -363,7 +363,7 @@ class App(tk.Tk):
         
         # Numpad for theory divisors demo
         numpad_frame = tk.Frame(demo_f, bg=PANEL)
-        numpad_frame.pack(anchor="w", pady=(10, 0))
+        numpad_frame.pack(anchor="w", pady=(8, 0))
 
         keys = [
             ('1', '2', '3'),
@@ -380,9 +380,9 @@ class App(tk.Tk):
                 key_fg = WHITE if key in ('C', '⌫') else TEXT
                 cmd = lambda k=key: self._theory_div_key(k)
                 
-                tk.Button(row_frame, text=key, font=F_NUM, width=4, height=2,
+                tk.Button(row_frame, text=key, font=F_NUM, width=4, height=1, # Reduced height
                           bg=key_bg, fg=key_fg, relief="flat", bd=0, cursor="hand2",
-                          activebackground=_darken(key_bg, 15), command=cmd).pack(side="left", padx=5, pady=5)
+                          activebackground=_darken(key_bg, 15), command=cmd).pack(side="left", padx=4, pady=4) # Reduced pad
 
     # ══════════════════════════════════════════════════════════════════════════
     # THEORY — MULTIPLES
@@ -409,7 +409,7 @@ class App(tk.Tk):
                                win_id, width=e.width))
 
         p = tk.Frame(outer, bg=BG)
-        p.pack(fill="both", expand=True, padx=60, pady=28)
+        p.pack(fill="both", expand=True, padx=40, pady=20) # Reduced pad
 
         tk.Label(p, text="Кратні натурального числа",
                  font=F_TITLE, bg=BG, fg=TEXT).pack(anchor="w")
@@ -440,20 +440,20 @@ class App(tk.Tk):
              "#fef9c3")
 
         # ── Live demo ──────────────────────────────────────────────────────
-        demo_f = tk.Frame(p, bg=PANEL, padx=22, pady=16,
+        demo_f = tk.Frame(p, bg=PANEL, padx=18, pady=12, # Reduced pad
                           highlightbackground=BORDER, highlightthickness=1)
-        demo_f.pack(fill="x", pady=10)
+        demo_f.pack(fill="x", pady=8)
         tk.Label(demo_f, text="🔢  Спробуйте самі — введіть число:",
                  font=F_BODYB, bg=PANEL, fg=TEXT).pack(anchor="w")
         
         input_area = tk.Frame(demo_f, bg=PANEL)
-        input_area.pack(anchor="w", pady=8)
+        input_area.pack(anchor="w", pady=6)
 
         self.theory_mul_entry_var = tk.StringVar(value=self.theory_mul_input)
         self.theory_mul_entry = tk.Entry(input_area, font=F_HEAD, width=7, bg=BTN_NUM, fg=TEXT,
                                          relief="flat", insertbackground=ACCENT, 
                                          textvariable=self.theory_mul_entry_var)
-        self.theory_mul_entry.pack(side="left", ipady=6, padx=(0, 10))
+        self.theory_mul_entry.pack(side="left", ipady=4, padx=(0, 8)) # Reduced pad
         
         res_lbl = tk.Label(input_area, text="", font=F_BODYB, bg=PANEL, fg=ACCENT2,
                            wraplength=self.SW - 300, justify="left")
@@ -477,7 +477,7 @@ class App(tk.Tk):
         
         # Numpad for theory multiples demo
         numpad_frame = tk.Frame(demo_f, bg=PANEL)
-        numpad_frame.pack(anchor="w", pady=(10, 0))
+        numpad_frame.pack(anchor="w", pady=(8, 0))
 
         keys = [
             ('1', '2', '3'),
@@ -494,9 +494,9 @@ class App(tk.Tk):
                 key_fg = WHITE if key in ('C', '⌫') else TEXT
                 cmd = lambda k=key: self._theory_mul_key(k)
                 
-                tk.Button(row_frame, text=key, font=F_NUM, width=4, height=2,
+                tk.Button(row_frame, text=key, font=F_NUM, width=4, height=1, # Reduced height
                           bg=key_bg, fg=key_fg, relief="flat", bd=0, cursor="hand2",
-                          activebackground=_darken(key_bg, 15), command=cmd).pack(side="left", padx=5, pady=5)
+                          activebackground=_darken(key_bg, 15), command=cmd).pack(side="left", padx=4, pady=4) # Reduced pad
                 
                 
 
@@ -513,7 +513,7 @@ class App(tk.Tk):
         cf = self.current_frame
 
         # ── Score bar ─────────────────────────────────────────────────────
-        sbar = tk.Frame(cf, bg=PANEL, height=56,
+        sbar = tk.Frame(cf, bg=PANEL, height=50, # Reduced height
                         highlightbackground=BORDER, highlightthickness=1)
         sbar.pack(fill="x")
         sbar.pack_propagate(False)
@@ -529,22 +529,22 @@ class App(tk.Tk):
         # Task question
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=30, pady=14)
-        task_f.pack(pady=(20, 8))
+                          padx=20, pady=10) # Reduced pad
+        task_f.pack(pady=(15, 6)) # Reduced pad
         tk.Label(task_f,
                  text="Знайдіть ВСІ дільники числа — вводьте по ОДНОМУ:",
-                 font=F_SUB, bg=PANEL, fg=TEXT).pack(side="left", padx=(0, 20))
+                 font=F_SUB, bg=PANEL, fg=TEXT).pack(side="left", padx=(0, 15))
         self.div_num_lbl = tk.Label(task_f, text="", font=F_BIG,
                                      bg=PANEL, fg=ACCENT)
         self.div_num_lbl.pack(side="left")
 
         # Progress: found / remaining
         prog_f = tk.Frame(center, bg=BG)
-        prog_f.pack(pady=4)
+        prog_f.pack(pady=3)
         tk.Label(prog_f, text="Знайдені:", font=F_BODYB, bg=BG, fg=GREEN).pack(side="left")
         self.div_found_lbl = tk.Label(prog_f, text="", font=F_BODYB,
                                        bg=BG, fg=GREEN)
-        self.div_found_lbl.pack(side="left", padx=(4, 30))
+        self.div_found_lbl.pack(side="left", padx=(4, 25))
         self.div_remain_lbl = tk.Label(prog_f, text="", font=F_SMALL,
                                         bg=BG, fg=MUTED)
         self.div_remain_lbl.pack(side="left")
@@ -552,10 +552,10 @@ class App(tk.Tk):
         # Input display
         inp_f = tk.Frame(center, bg=BTN_NUM,
                          highlightbackground=ACCENT, highlightthickness=2,
-                         padx=16, pady=8)
-        inp_f.pack(pady=8)
+                         padx=12, pady=6) # Reduced pad
+        inp_f.pack(pady=6)
         tk.Label(inp_f, text="Ваше число:", font=F_BODY, bg=BTN_NUM, fg=MUTED).pack(side="left")
-        self.div_input_lbl = tk.Label(inp_f, text="", font=("Segoe UI", 44, "bold"),
+        self.div_input_lbl = tk.Label(inp_f, text="", font=("Segoe UI", 36, "bold"), # Reduced font
                                        bg=BTN_NUM, fg=ACCENT, width=5)
         self.div_input_lbl.pack(side="left", padx=10)
 
@@ -563,11 +563,11 @@ class App(tk.Tk):
         self.div_feed_lbl = tk.Label(center, text="", font=F_FEED,
                                       bg=BG, fg=ORANGE,
                                       wraplength=680, justify="center")
-        self.div_feed_lbl.pack(pady=4)
+        self.div_feed_lbl.pack(pady=3)
 
         # ── Numpad (centred) ───────────────────────────────────────────────
         np_outer = tk.Frame(center, bg=BG)
-        np_outer.pack(pady=10)
+        np_outer.pack(pady=8)
 
         layout = [
             ("7", "8", "9"),
@@ -579,7 +579,7 @@ class App(tk.Tk):
         NP_TEXT = TEXT
         for row_chars in layout:
             row_f = tk.Frame(np_outer, bg=BG)
-            row_f.pack(pady=4)
+            row_f.pack(pady=3) # Reduced pad
             for ch in row_chars:
                 if ch.isdigit():
                     bg_c, fg_c = NP_BG, NP_TEXT
@@ -588,23 +588,23 @@ class App(tk.Tk):
                 else:  # ⌫
                     bg_c, fg_c = CARD_MUL, ACCENT2
                 b = tk.Button(row_f, text=ch, font=F_NUM,
-                              width=4, height=2,
+                              width=4, height=1, # Reduced height
                               bg=bg_c, fg=fg_c, relief="flat",
                               cursor="hand2",
                               command=lambda c=ch: self._div_key(c))
-                b.pack(side="left", padx=5)
+                b.pack(side="left", padx=4) # Reduced pad
                 b.bind("<Enter>", lambda e, x=b, col=bg_c: x.config(
                     bg=_darken(col, 20)))
                 b.bind("<Leave>", lambda e, x=b, col=bg_c: x.config(bg=col))
 
         # Check / Next buttons
         act = tk.Frame(center, bg=BG)
-        act.pack(pady=14)
+        act.pack(pady=10) # Reduced pad
         self.div_check_btn = btn(act, "✔  Перевірити", self._div_check,
-                                  bg=GREEN, w=14, h=2)
+                                  bg=GREEN, w=14, h=1) # Reduced height
         self.div_check_btn.pack(side="left", padx=10)
         self.div_next_btn = btn(act, "▶  Наступне завдання", self._div_new,
-                                 bg=ACCENT, w=18, h=2)
+                                 bg=ACCENT, w=18, h=1) # Reduced height
         self.div_next_btn.pack(side="left", padx=10)
 
         self._div_new()
@@ -720,7 +720,7 @@ class App(tk.Tk):
         cf = self.current_frame
 
         # ── Score bar ─────────────────────────────────────────────────────
-        sbar = tk.Frame(cf, bg=PANEL, height=56,
+        sbar = tk.Frame(cf, bg=PANEL, height=50, # Reduced height
                         highlightbackground=BORDER, highlightthickness=1)
         sbar.pack(fill="x")
         sbar.pack_propagate(False)
@@ -736,42 +736,42 @@ class App(tk.Tk):
         # Task
         task_f = tk.Frame(center, bg=PANEL,
                           highlightbackground=BORDER, highlightthickness=1,
-                          padx=30, pady=14)
-        task_f.pack(pady=(18, 10))
+                          padx=20, pady=10) # Reduced pad
+        task_f.pack(pady=(12, 8)) # Reduced pad
         tk.Label(task_f,
                  text="Натисніть ВСІ числа, кратні числу:",
-                 font=F_SUB, bg=PANEL, fg=TEXT).pack(side="left", padx=(0, 20))
+                 font=F_SUB, bg=PANEL, fg=TEXT).pack(side="left", padx=(0, 15))
         self.mul_num_lbl = tk.Label(task_f, text="", font=F_BIG,
                                      bg=PANEL, fg=ACCENT)
         self.mul_num_lbl.pack(side="left")
 
         # Options grid — 2 rows × 5 cols
         grid_f = tk.Frame(center, bg=BG)
-        grid_f.pack(pady=12)
+        grid_f.pack(pady=8)
         self.mul_btns = []
         for i in range(10):
-            b = tk.Button(grid_f, text="", font=("Segoe UI", 24, "bold"),
-                          width=8, height=2,
+            b = tk.Button(grid_f, text="", font=("Segoe UI", 20, "bold"), # Reduced font
+                          width=6, height=1, # Reduced size
                           bg=BTN_NUM, fg=TEXT,
                           relief="flat", cursor="hand2",
                           command=lambda idx=i: self._mul_toggle(idx))
-            b.grid(row=i // 5, column=i % 5, padx=7, pady=7)
+            b.grid(row=i // 5, column=i % 5, padx=6, pady=6) # Reduced pad
             self.mul_btns.append(b)
 
         # Feedback
         self.mul_feed_lbl = tk.Label(center, text="", font=F_FEED,
                                       bg=BG, fg=ORANGE,
                                       wraplength=700, justify="center")
-        self.mul_feed_lbl.pack(pady=6)
+        self.mul_feed_lbl.pack(pady=4)
 
         # Action buttons
         act = tk.Frame(center, bg=BG)
-        act.pack(pady=12)
+        act.pack(pady=10) # Reduced pad
         self.mul_check_btn = btn(act, "✔  Перевірити", self._mul_check,
-                                  bg=GREEN, w=14, h=2)
+                                  bg=GREEN, w=14, h=1) # Reduced height
         self.mul_check_btn.pack(side="left", padx=10)
         self.mul_next_btn = btn(act, "▶  Наступне завдання", self._mul_new,
-                                 bg=ACCENT, w=18, h=2)
+                                 bg=ACCENT, w=18, h=1) # Reduced height
         self.mul_next_btn.pack(side="left", padx=10)
 
         self._mul_new()
