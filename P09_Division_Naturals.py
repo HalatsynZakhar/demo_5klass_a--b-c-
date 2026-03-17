@@ -62,20 +62,20 @@ class DivisionApp(tk.Tk):
         self.show_intro()
 
     def _build_ui(self):
-        # ── Header
-        hdr = tk.Frame(self, bg=ACCENT, height=80)
+        # ── Header (Reduced height 80 -> 60)
+        hdr = tk.Frame(self, bg=ACCENT, height=60)
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
         
-        tk.Label(hdr, text="Ділення натуральних чисел (§ 9)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 24, "bold")).pack(side="left", padx=30)
-        tk.Button(hdr, text="❌ Вихід", font=("Arial", 16, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20)
+        tk.Label(hdr, text="Ділення натуральних чисел (§ 9)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 20, "bold")).pack(side="left", padx=30)
+        tk.Button(hdr, text="❌ Вихід", font=("Arial", 14, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20)
         
-        # ── Navigation Menu
-        nav = tk.Frame(self, bg=WHITE, height=60)
+        # ── Navigation Menu (Reduced height 60 -> 50)
+        nav = tk.Frame(self, bg=WHITE, height=50)
         nav.pack(fill="x")
         nav.pack_propagate(False)
         
-        btn_font = ("Segoe UI", 16, "bold")
+        btn_font = ("Segoe UI", 12, "bold") # Reduced from 16
         tk.Button(nav, text="1. Що таке ділення?", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_intro).pack(side="left", padx=20)
         tk.Button(nav, text="2. На нуль ділити не можна!", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_zero_warning).pack(side="left", padx=20)
         tk.Button(nav, text="3. Окремі випадки", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_special_cases).pack(side="left", padx=20)
@@ -100,22 +100,22 @@ class DivisionApp(tk.Tk):
         self.clear_main()
         
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=50)
+        f.pack(expand=True, fill="both", padx=30, pady=30) # Reduced from 50
         
-        tk.Label(f, text="Ділення як обернена дія до множення", font=("Segoe UI", 36, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 30))
+        tk.Label(f, text="Ділення як обернена дія до множення", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20)) # Reduced from 36
         
-        box = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=40, pady=30)
-        box.pack(pady=20)
+        box = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=20, pady=20) # Reduced padding
+        box.pack(pady=15)
         
-        tk.Label(box, text="48 : 6 = 8, оскільки 8 ∙ 6 = 48", font=("Consolas", 32, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w")
-        tk.Label(box, text="Ділене : Дільник = Частка", font=("Segoe UI", 24, "bold"), bg=WHITE, fg=ACCENT).pack(anchor="w", pady=(20, 0))
+        tk.Label(box, text="48 : 6 = 8, оскільки 8 ∙ 6 = 48", font=("Consolas", 24, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w") # Reduced from 32
+        tk.Label(box, text="Ділене : Дільник = Частка", font=("Segoe UI", 18, "bold"), bg=WHITE, fg=ACCENT).pack(anchor="w", pady=(15, 0)) # Reduced from 24
 
         desc = (
             "• Частка показує, у скільки разів ділене більше за дільник.\n"
             "• Якщо дільник > 1, то ділення означає зменшення числа в кілька разів.\n"
             "• Правильність ділення завжди можна перевірити множенням."
         )
-        tk.Label(f, text=desc, font=("Segoe UI", 24), bg=BG, fg=TEXT, justify="left").pack(pady=30)
+        tk.Label(f, text=desc, font=("Segoe UI", 18), bg=BG, fg=TEXT, justify="left").pack(pady=20) # Reduced from 24
 
     # ══════════════════════════════════════════════════════════════════
     #  SCENE 2: ZERO WARNING
@@ -124,22 +124,22 @@ class DivisionApp(tk.Tk):
         self.clear_main()
         
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=50)
+        f.pack(expand=True, fill="both", padx=30, pady=30) # Reduced from 50
         
-        tk.Label(f, text="❗️ На нуль ділити не можна!", font=("Segoe UI", 48, "bold"), bg=BG, fg=RED).pack(pady=(0, 40))
+        tk.Label(f, text="❗️ На нуль ділити не можна!", font=("Segoe UI", 32, "bold"), bg=BG, fg=RED).pack(pady=(0, 20)) # Reduced from 48
         
-        box = tk.Frame(f, bg=RED_BG, bd=3, relief="solid", padx=50, pady=40)
-        box.pack(pady=20)
+        box = tk.Frame(f, bg=RED_BG, bd=3, relief="solid", padx=30, pady=20) # Reduced padding
+        box.pack(pady=15)
         
         logic = (
             "Чому це так?\n\n"
             "Припустимо, що 5 : 0 = b.\n"
-            "Тоді за правилом перевірки: b ∙ 0 = 5.\n"
+            "Тобі за правилом перевірки: b ∙ 0 = 5.\n"
             "Але ми знаємо, що будь-яке число при множенні на 0 дає 0!\n\n"
             "❌ Рівність b ∙ 0 = 5 неможлива.\n"
             "Отже, ділення на нуль не має смислу."
         )
-        tk.Label(box, text=logic, font=("Segoe UI", 24), bg=RED_BG, fg=TEXT, justify="left").pack()
+        tk.Label(box, text=logic, font=("Segoe UI", 18), bg=RED_BG, fg=TEXT, justify="left").pack() # Reduced from 24
 
     # ══════════════════════════════════════════════════════════════════
     #  SCENE 3: SPECIAL CASES
@@ -148,9 +148,9 @@ class DivisionApp(tk.Tk):
         self.clear_main()
         
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=50)
+        f.pack(expand=True, fill="both", padx=30, pady=20) # Reduced from 50
         
-        tk.Label(f, text="Окремі випадки ділення", font=("Segoe UI", 36, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 30))
+        tk.Label(f, text="Окремі випадки ділення", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 20)) # Reduced from 36
         
         cases = [
             ("Число на саме себе", "а : а = 1", "7 : 7 = 1", "Будь-яке число (крім 0), поділене на себе, дає 1."),
@@ -160,15 +160,15 @@ class DivisionApp(tk.Tk):
         ]
         
         for title, formula, example, desc in cases:
-            p_frame = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=20, pady=15)
-            p_frame.pack(fill="x", pady=5)
+            p_frame = tk.Frame(f, bg=WHITE, bd=2, relief="solid", padx=15, pady=10) # Reduced padding
+            p_frame.pack(fill="x", pady=4) # Reduced pady
             
             h_f = tk.Frame(p_frame, bg=WHITE)
             h_f.pack(fill="x")
-            tk.Label(h_f, text=title, font=("Segoe UI", 18, "bold"), bg=WHITE, fg=CYAN).pack(side="left")
-            tk.Label(h_f, text=formula, font=("Consolas", 22, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10).pack(side="right")
+            tk.Label(h_f, text=title, font=("Segoe UI", 14, "bold"), bg=WHITE, fg=CYAN).pack(side="left") # Reduced from 18
+            tk.Label(h_f, text=formula, font=("Consolas", 18, "bold"), bg=YELLOW_BG, fg=HL_FG, padx=10).pack(side="right") # Reduced from 22
             
-            tk.Label(p_frame, text=f"{desc} Приклад: {example}", font=("Segoe UI", 16), bg=WHITE, fg=TEXT).pack(anchor="w", pady=(5, 0))
+            tk.Label(p_frame, text=f"{desc} Приклад: {example}", font=("Segoe UI", 14), bg=WHITE, fg=TEXT).pack(anchor="w", pady=(2, 0)) # Reduced from 16
 
     # ══════════════════════════════════════════════════════════════════
     #  SCENE 4: TRAINER
@@ -184,45 +184,45 @@ class DivisionApp(tk.Tk):
         left.pack_propagate(False)
 
         # Task Box
-        self.task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=40, pady=40)
-        self.task_box.pack(pady=50)
+        self.task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=20, pady=20) # Reduced padding
+        self.task_box.pack(pady=20) # Reduced from 50
         
-        self.task_text = tk.Label(self.task_box, text="", font=("Segoe UI", 48, "bold"), bg=WHITE, fg=TEXT)
+        self.task_text = tk.Label(self.task_box, text="", font=("Segoe UI", 32, "bold"), bg=WHITE, fg=TEXT) # Reduced from 48
         self.task_text.pack()
 
         # Input display
         self.display_frame = tk.Frame(left, bg=WHITE, highlightbackground=ACCENT, highlightthickness=2)
-        self.display_frame.pack(pady=10, ipadx=24, ipady=10)
+        self.display_frame.pack(pady=5, ipadx=16, ipady=4) # Reduced padding/margin
         
-        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 48, "bold"), width=12, anchor="e")
+        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 32, "bold"), width=12, anchor="e") # Reduced from 48
         self.lbl_display.pack()
 
-        self.lbl_feedback = tk.Label(left, text="", bg=BG, font=("Segoe UI", 20, "bold"), justify="center")
-        self.lbl_feedback.pack(pady=10)
+        self.lbl_feedback = tk.Label(left, text="", bg=BG, font=("Segoe UI", 14, "bold"), justify="center") # Reduced from 20
+        self.lbl_feedback.pack(pady=5)
 
         # Numpad
         kbd = tk.Frame(left, bg=BG)
-        kbd.pack(pady=20)
+        kbd.pack(pady=5) # Reduced from 20
         self.kbd_buttons = []
         rows = [["7","8","9"], ["4","5","6"], ["1","2","3"], ["C","0","⌫"]]
         for row in rows:
             r = tk.Frame(kbd, bg=BG)
-            r.pack(pady=5)
+            r.pack(pady=2)
             for ch in row:
-                btn = tk.Button(r, text=ch, bg=RED_BG if ch in ("⌫", "C") else BTN_NUM, font=("Segoe UI", 22, "bold"), width=6, height=2, relief="flat", command=lambda c=ch: self._key_press(c))
-                btn.pack(side="left", padx=6)
+                btn = tk.Button(r, text=ch, bg=RED_BG if ch in ("⌫", "C") else BTN_NUM, font=("Segoe UI", 16, "bold"), width=6, height=1, relief="flat", command=lambda c=ch: self._key_press(c)) # Reduced from 22/2
+                btn.pack(side="left", padx=4)
                 self.kbd_buttons.append(btn)
 
         # Bottom buttons
         btn_f = tk.Frame(left, bg=BG)
-        btn_f.pack(pady=20)
+        btn_f.pack(pady=10)
 
-        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 18, "bold"),
-                                relief="flat", bd=0, cursor="hand2", padx=40, pady=15, command=self.check_answer)
-        self.btn_ok.pack(side="left", padx=20)
+        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 14, "bold"),
+                                relief="flat", bd=0, cursor="hand2", padx=30, pady=10, command=self.check_answer) # Reduced font & padding
+        self.btn_ok.pack(side="left", padx=10)
 
-        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 18, "bold"),
-                                  relief="flat", bd=0, cursor="hand2", padx=40, pady=15, command=self.next_task)
+        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 14, "bold"),
+                                  relief="flat", bd=0, cursor="hand2", padx=30, pady=10, command=self.next_task)
 
         # Right side
         right = tk.Frame(self.main_area, bg=PANEL, width=RW, highlightbackground=BORDER, highlightthickness=1)
@@ -230,16 +230,16 @@ class DivisionApp(tk.Tk):
         right.pack_propagate(False)
 
         rpad = tk.Frame(right, bg=PANEL)
-        rpad.pack(fill="both", expand=True, padx=30, pady=40)
-        
-        tk.Label(rpad, text="Підказка", font=("Segoe UI", 18, "bold"), bg=PANEL).pack(anchor="w")
-        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=15, pady=15)
-        hint_box.pack(fill="x", pady=10)
-        
-        tk.Label(hint_box, text="• 0 : а = 0\n• а : а = 1\n• а : 1 = а\n• 250 : 10 = 25", font=("Segoe UI", 16), bg="#eff6ff", justify="left").pack()
+        rpad.pack(fill="both", expand=True, padx=15, pady=20) # Reduced from 30/40
 
-        self.lbl_score = tk.Label(rpad, text="Рахунок: 0 / 0", font=("Segoe UI", 24, "bold"), bg=PANEL, fg=ACCENT)
-        self.lbl_score.pack(side="bottom", pady=40)
+        tk.Label(rpad, text="Підказка", font=("Segoe UI", 14, "bold"), bg=PANEL).pack(anchor="w") # Reduced from 18
+        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=10, pady=10)
+        hint_box.pack(fill="x", pady=5)
+        
+        tk.Label(hint_box, text="• 0 : а = 0\n• а : а = 1\n• а : 1 = а\n• 250 : 10 = 25", font=("Segoe UI", 12), bg="#eff6ff", justify="left").pack() # Reduced from 16
+
+        self.lbl_score = tk.Label(rpad, text="Рахунок: 0 / 0", font=("Segoe UI", 18, "bold"), bg=PANEL, fg=ACCENT) # Reduced from 24
+        self.lbl_score.pack(side="bottom", pady=20)
 
         self.next_task()
 
