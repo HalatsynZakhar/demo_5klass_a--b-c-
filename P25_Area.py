@@ -71,7 +71,7 @@ class AreaApp(tk.Tk):
             cv.create_line(x, y, x, y + size, fill=SKY, width=4)
 
     def _build_ui(self):
-        hdr = tk.Frame(self, bg=ACCENT, height=80)
+        hdr = tk.Frame(self, bg=ACCENT, height=60) # Reduced from 80
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
 
@@ -80,24 +80,24 @@ class AreaApp(tk.Tk):
             text="Площа прямокутника і квадрата (§ 25)",
             bg=ACCENT,
             fg=WHITE,
-            font=("Segoe UI", 24, "bold"),
+            font=("Segoe UI", 20, "bold"), # Reduced from 24
         ).pack(side="left", padx=30)
 
         tk.Button(
             hdr,
             text="❌ Вихід",
-            font=("Arial", 16, "bold"),
+            font=("Arial", 14, "bold"), # Reduced from 16
             bg=RED,
             fg=WHITE,
             bd=0,
             command=self.destroy,
         ).pack(side="right", padx=20)
 
-        nav = tk.Frame(self, bg=WHITE, height=60)
+        nav = tk.Frame(self, bg=WHITE, height=50) # Reduced from 60
         nav.pack(fill="x")
         nav.pack_propagate(False)
 
-        btn_font = ("Segoe UI", 12, "bold")
+        btn_font = ("Segoe UI", 11, "bold") # Reduced from 12
         tk.Button(nav, text="1. Поняття про площу", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_concept_of_area).pack(side="left", padx=10)
         tk.Button(nav, text="2. Площа прямокутника", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_rectangle_area).pack(side="left", padx=10)
         tk.Button(nav, text="3. Площа квадрата", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_square_area).pack(side="left", padx=10)
@@ -115,7 +115,7 @@ class AreaApp(tk.Tk):
     def _canvas_width(self, cv, fallback):
         cv.update_idletasks()
         w = cv.winfo_width()
-        if w < 300:
+        if w < 10:
             w = fallback
         return w
 
@@ -147,8 +147,8 @@ class AreaApp(tk.Tk):
         self.clear_main()
         self.mode = "concept_of_area"
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
-        tk.Label(f, text="Поняття про площу фігури", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        f.pack(expand=True, fill="both", padx=30, pady=20) # Reduced pad
+        tk.Label(f, text="Поняття про площу фігури", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced from 32
         text_content = """Одиницею вимірювання площі вважають площу одиничного квадрата (квадрата, сторона якого дорівнює \
 одиниці довжини). Наприклад, якщо сторона квадрата дорівнює 1 см, то його площа 1 см².\n
 Знайти площу фігури — означає дізнатися, скільки одиничних квадратів уміщується в цій фігурі. Якщо, \
@@ -156,34 +156,35 @@ class AreaApp(tk.Tk):
         tk.Label(
             f,
             text=text_content,
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced from 18
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 200,
-        ).pack(anchor="w", pady=(0, 25))
-        cv = tk.Canvas(f, bg=WHITE, height=max(480, int(self.SH * 0.55)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=25, padx=10)
+            wraplength=self.SW - 120,
+        ).pack(anchor="w", pady=(0, 20))
+        cv = tk.Canvas(f, bg=WHITE, height=max(400, int(self.SH * 0.50)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=20, padx=10)
         self.after(80, lambda: self._draw_area_concept_demo(cv))
 
     def _draw_area_concept_demo(self, cv):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
+        if h < 50: h = 400
         
         # Draw a larger square
         side = min(w, h) * 0.5
         x0, y0 = (w / 2) - (side * 1.2), (h - side) / 2
         
         cv.create_rectangle(x0, y0, x0 + side, y0 + side, outline=TEXT, width=3)
-        cv.create_text(x0 + side/2, y0 - 20, text="1 см", font=("Segoe UI", 18), fill=TEXT)
-        cv.create_text(x0 - 25, y0 + side/2, text="1 см", font=("Segoe UI", 18), fill=TEXT, angle=90)
-        cv.create_text(x0 + side/2, y0 + side/2, text="1 см²", font=("Segoe UI", 28, "bold"), fill=INDIGO)
+        cv.create_text(x0 + side/2, y0 - 20, text="1 см", font=("Segoe UI", 16), fill=TEXT) # Reduced
+        cv.create_text(x0 - 25, y0 + side/2, text="1 см", font=("Segoe UI", 16), fill=TEXT, angle=90) # Reduced
+        cv.create_text(x0 + side/2, y0 + side/2, text="1 см²", font=("Segoe UI", 24, "bold"), fill=INDIGO) # Reduced
 
         # Draw a grid of smaller squares
         num_cols = 5
         num_rows = 4
-        square_size = 50
+        square_size = 40 # Reduced from 50
         start_x = (w / 2) + (side * 0.2)
         start_y = (h - num_rows * square_size) / 2
 
@@ -195,27 +196,27 @@ class AreaApp(tk.Tk):
                 y2 = y1 + square_size
                 cv.create_rectangle(x1, y1, x2, y2, outline=MUTED, width=1)
         
-        cv.create_text(start_x + num_cols * square_size / 2, start_y - 20, text=f"Площа = {num_cols * num_rows} см²", font=("Segoe UI", 18, "bold"), fill=TEXT)
+        cv.create_text(start_x + num_cols * square_size / 2, start_y - 20, text=f"Площа = {num_cols * num_rows} см²", font=("Segoe UI", 16, "bold"), fill=TEXT) # Reduced
 
 
     def show_rectangle_area(self):
         self.clear_main()
         self.mode = "rectangle_area"
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
-        tk.Label(f, text="Формула площі прямокутника", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        f.pack(expand=True, fill="both", padx=30, pady=20)
+        tk.Label(f, text="Формула площі прямокутника", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced
         text_content = """S — площа прямокутника, а і b — його довжина і ширина.\n\nЩоб знайти площу прямокутника, треба його довжину помножити на ширину.\nS = a • b\n\nЯкщо сторони прямокутника задано в метрах, то площу S отримаємо у квадратних метрах, якщо в сантиметрах, то \nплощу отримаємо у квадратних сантиметрах і т. д.\n\nЗадача 1. Знайти площу прямокутника зі сторонами завдовжки 1 дм і 8 см.\nРозв’язання. 1 дм = 10 см, тоді S = а • b = 10 • 8 = 80 (см²).\nВідповідь: 80 см²."""
         tk.Label(
             f,
             text=text_content,
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 240,
-        ).pack(anchor="w", pady=(0, 25))
-        cv = tk.Canvas(f, bg=WHITE, height=max(480, int(self.SH * 0.55)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=25, padx=10)
+            wraplength=self.SW - 120,
+        ).pack(anchor="w", pady=(0, 20))
+        cv = tk.Canvas(f, bg=WHITE, height=max(400, int(self.SH * 0.50)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=20, padx=10)
         self.after(80, lambda: self._draw_rectangle_area_demo(cv, a=10, b=8, unit_a="см", unit_b="см"))
 
 
@@ -223,6 +224,7 @@ class AreaApp(tk.Tk):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200 if not is_trainer else cv.winfo_width())
         h = int(cv.winfo_height())
+        if h < 50: h = 300
 
         if is_trainer:
             rect_width = min(w * 0.8, 200) 
@@ -235,7 +237,7 @@ class AreaApp(tk.Tk):
         else: 
             rect_width = 300
             rect_height = 240
-            font_size_sides = 18
+            font_size_sides = 16 # Reduced
             offset_sides_y = 25
             offset_sides_x = 30
             offset_y0 = 30
@@ -254,28 +256,28 @@ class AreaApp(tk.Tk):
         cv.create_text(x0 - offset_sides_x, y0 + rect_height / 2, text=f"b = {b} {unit_b}", font=("Segoe UI", font_size_sides, "bold"), fill=INDIGO, angle=90)
         
         if not is_trainer:
-            cv.create_text(w / 2, y0 + rect_height / 2, text=f"S = a × b", font=("Segoe UI", 30, "bold"), fill=SKY, anchor="center")
-            cv.create_text(w / 2, y0 + rect_height + 70, text=f"S = {a} × {b} = {a*b} {unit_a}²", font=("Segoe UI", 22, "bold"), fill=TEXT, anchor="center")
+            cv.create_text(w / 2, y0 + rect_height / 2, text=f"S = a × b", font=("Segoe UI", 26, "bold"), fill=SKY, anchor="center") # Reduced
+            cv.create_text(w / 2, y0 + rect_height + 60, text=f"S = {a} × {b} = {a*b} {unit_a}²", font=("Segoe UI", 20, "bold"), fill=TEXT, anchor="center") # Reduced
 
 
     def show_square_area(self):
         self.clear_main()
         self.mode = "square_area"
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
-        tk.Label(f, text="Формула площі квадрата", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        f.pack(expand=True, fill="both", padx=30, pady=20)
+        tk.Label(f, text="Формула площі квадрата", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced
         text_content = """Щоб знайти площу квадрата, треба довжину його сторони піднести до другого степеня, тобто піднести до квадрата.\nS = a²\n\nСаме тому, що площу квадрата знаходять за формулою S = a², число в другому степені називають квадратом.\n\nЗадача 2. Знайти площу квадрата зі стороною 2 см 5 мм.\nРозв’язання. 2 см 5 мм = 25 мм. Тоді S = a² = 25² = 25 • 25 = 625 (мм²).\nВідповідь: 625 мм²."""
         tk.Label(
             f,
             text=text_content,
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 240,
-        ).pack(anchor="w", pady=(0, 40))
-        cv = tk.Canvas(f, bg=WHITE, height=max(400, int(self.SH * 0.45)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=30, padx=10)
+            wraplength=self.SW - 120,
+        ).pack(anchor="w", pady=(0, 30)) # Reduced
+        cv = tk.Canvas(f, bg=WHITE, height=max(360, int(self.SH * 0.40)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=20, padx=10)
         self.after(80, lambda: self._draw_square_area_demo(cv, a=25, unit="мм"))
 
 
@@ -283,6 +285,7 @@ class AreaApp(tk.Tk):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
+        if h < 50: h = 300
 
         if is_trainer:
             side_len = min(w * 0.7, h * 0.7, 120) 
@@ -293,7 +296,7 @@ class AreaApp(tk.Tk):
             angle_size = 15
         else:
             side_len = 250
-            font_size_sides = 18
+            font_size_sides = 16 # Reduced
             offset_sides_y = 25
             offset_sides_x = 30
             offset_y0 = 30
@@ -311,39 +314,40 @@ class AreaApp(tk.Tk):
         cv.create_text(x0 + side_len / 2, y0 + side_len + offset_sides_y, text=f"a = {a} {unit}", font=("Segoe UI", font_size_sides, "bold"), fill=INDIGO)
         cv.create_text(x0 - offset_sides_x, y0 + side_len / 2, text=f"a = {a} {unit}", font=("Segoe UI", font_size_sides, "bold"), fill=INDIGO, angle=90)
         if not is_trainer:
-            cv.create_text(w / 2, y0 + side_len / 2, text=f"S = a²", font=("Segoe UI", 30, "bold"), fill=SKY, anchor="center")
-            cv.create_text(w / 2, y0 + side_len + 70, text=f"S = {a}² = {a*a} {unit}²", font=("Segoe UI", 22, "bold"), fill=TEXT, anchor="center")
+            cv.create_text(w / 2, y0 + side_len / 2, text=f"S = a²", font=("Segoe UI", 26, "bold"), fill=SKY, anchor="center") # Reduced
+            cv.create_text(w / 2, y0 + side_len + 60, text=f"S = {a}² = {a*a} {unit}²", font=("Segoe UI", 20, "bold"), fill=TEXT, anchor="center") # Reduced
 
 
     def show_properties_of_area(self):
         self.clear_main()
         self.mode = "properties_of_area"
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
-        tk.Label(f, text="Властивості площі", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        f.pack(expand=True, fill="both", padx=30, pady=20) # Reduced pad
+        tk.Label(f, text="Властивості площі", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced
         text_content = """Розглянемо прямокутник, який складається з 10 клітинок у довжину і 6 клітинок у ширину. Його загальна площа S = 10 • 6 = 60 клітинок.\n\nЯкщо ми розділимо цей прямокутник на дві частини (наприклад, два менших прямокутники: один розміром 10 х 3 клітинки, а інший також 10 х 3 клітинки), то площа першої частини S1 = 10 • 3 = 30 клітинок, а площа другої частини S2 = 10 • 3 = 30 клітинок.\n\nМи бачимо, що S1 + S2 = 30 + 30 = 60 клітинок, що дорівнює загальній площі вихідного прямокутника.\n\nОтже, площа фігури дорівнює сумі площ її частин."""
         tk.Label(
             f,
             text=text_content,
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 200,
-        ).pack(anchor="w", pady=(0, 25))
-        cv = tk.Canvas(f, bg=WHITE, height=max(480, int(self.SH * 0.55)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=25, padx=10)
+            wraplength=self.SW - 120,
+        ).pack(anchor="w", pady=(0, 20))
+        cv = tk.Canvas(f, bg=WHITE, height=max(400, int(self.SH * 0.50)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=20, padx=10)
         self.after(80, lambda: self._draw_area_properties_demo(cv))
 
     def _draw_area_properties_demo(self, cv):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
+        if h < 50: h = 400
 
         # Dimensions for the overall rectangle
         total_width_units = 10
         total_height_units = 6
-        unit_size = 40 # Pixels per unit
+        unit_size = 35 # Pixels per unit, reduced from 40
         split_height_units = 3 # Split into two parts, 3 units high and 3 units high
 
         total_rect_width = total_width_units * unit_size
@@ -372,18 +376,18 @@ class AreaApp(tk.Tk):
 
         # Text labels for dimensions and areas
         area1 = total_width_units * split_height_units
-        cv.create_text(start_x + total_rect_width / 2, start_y + part1_height / 2, text=f"S1 = {total_width_units} × {split_height_units} = {area1}", font=("Segoe UI", 18, "bold"), fill=RED)
-        cv.create_text(start_x - 15, start_y + part1_height / 2, text=f"{split_height_units} од.", font=("Segoe UI", 14), fill=TEXT, angle=90)
-        cv.create_text(start_x + total_rect_width / 2, start_y - 15, text=f"{total_width_units} од.", font=("Segoe UI", 14), fill=TEXT)
+        cv.create_text(start_x + total_rect_width / 2, start_y + part1_height / 2, text=f"S1 = {total_width_units} × {split_height_units} = {area1}", font=("Segoe UI", 16, "bold"), fill=RED) # Reduced
+        cv.create_text(start_x - 15, start_y + part1_height / 2, text=f"{split_height_units} од.", font=("Segoe UI", 12), fill=TEXT, angle=90) # Reduced
+        cv.create_text(start_x + total_rect_width / 2, start_y - 15, text=f"{total_width_units} од.", font=("Segoe UI", 12), fill=TEXT) # Reduced
 
         area2 = total_width_units * (total_height_units - split_height_units)
-        cv.create_text(start_x + total_rect_width / 2, part2_start_y + part2_height / 2, text=f"S2 = {total_width_units} × {total_height_units - split_height_units} = {area2}", font=("Segoe UI", 18, "bold"), fill=INDIGO)
-        cv.create_text(start_x - 15, part2_start_y + part2_height / 2, text=f"{total_height_units - split_height_units} од.", font=("Segoe UI", 14), fill=TEXT, angle=90)
+        cv.create_text(start_x + total_rect_width / 2, part2_start_y + part2_height / 2, text=f"S2 = {total_width_units} × {total_height_units - split_height_units} = {area2}", font=("Segoe UI", 16, "bold"), fill=INDIGO) # Reduced
+        cv.create_text(start_x - 15, part2_start_y + part2_height / 2, text=f"{total_height_units - split_height_units} од.", font=("Segoe UI", 12), fill=TEXT, angle=90) # Reduced
 
 
         # Total area
         total_area = area1 + area2
-        cv.create_text(w / 2, start_y + total_rect_height + 40, text=f"S = S1 + S2 = {area1} + {area2} = {total_area} од².", font=("Segoe UI", 22, "bold"), fill=TEXT)
+        cv.create_text(w / 2, start_y + total_rect_height + 30, text=f"S = S1 + S2 = {area1} + {area2} = {total_area} од².", font=("Segoe UI", 20, "bold"), fill=TEXT) # Reduced
 
 
 
@@ -391,46 +395,47 @@ class AreaApp(tk.Tk):
         self.clear_main()
         self.mode = "unit_conversion"
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
-        tk.Label(f, text="Співвідношення між одиницями вимірювання площі", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        f.pack(expand=True, fill="both", padx=30, pady=20) # Reduced pad
+        tk.Label(f, text="Співвідношення між одиницями вимірювання площі", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced
         text_content = """Установимо співвідношення між одиницями вимірювання площі.\n1 дм² = 1 дм • 1 дм = 10 см • 10 см = 100 см².\nМіркуючи аналогічно, можна показати, що:\n1 м² = 100 дм² = 10 000 см².\n1 км² = 1 000 000 м².\nАр — це площа квадрата зі стороною 10 м: 1 а = 100 м².\nГектар — це площа квадрата зі стороною 100 м: 1 га = 10 000 м² = 100 а.\nОтже, 1 км² = 100 га."""
         tk.Label(
             f,
             text=text_content,
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 200,
-        ).pack(anchor="w", pady=(0, 25))
+            wraplength=self.SW - 120,
+        ).pack(anchor="w", pady=(0, 20))
 
-        cv = tk.Canvas(f, bg=WHITE, height=max(480, int(self.SH * 0.55)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=25, padx=10)
+        cv = tk.Canvas(f, bg=WHITE, height=max(400, int(self.SH * 0.50)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=20, padx=10)
         self.after(80, lambda: self._draw_unit_conversion_demo(cv))
 
     def _draw_unit_conversion_demo(self, cv):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
+        if h < 50: h = 400
 
         # Draw 1 dm2 = 100 cm2 example
-        dm_side = 200 # pixels for 1 dm
-        cm_side = 20 # pixels for 1 cm
+        dm_side = 180 # pixels for 1 dm, reduced
+        cm_side = 18 # pixels for 1 cm, reduced
         
         x0 = (w - dm_side) / 2
-        y0 = (h - dm_side) / 2 - 30
+        y0 = (h - dm_side) / 2 - 20
 
         cv.create_rectangle(x0, y0, x0 + dm_side, y0 + dm_side, outline=TEXT, width=3)
-        cv.create_text(x0 + dm_side / 2, y0 - 25, text="1 дм", font=("Segoe UI", 18), fill=TEXT)
-        cv.create_text(x0 - 30, y0 + dm_side / 2, text="1 дм", font=("Segoe UI", 18), fill=TEXT, angle=90)
+        cv.create_text(x0 + dm_side / 2, y0 - 20, text="1 дм", font=("Segoe UI", 16), fill=TEXT) # Reduced
+        cv.create_text(x0 - 25, y0 + dm_side / 2, text="1 дм", font=("Segoe UI", 16), fill=TEXT, angle=90) # Reduced
         
         # Draw cm grid inside
         for i in range(1, 10):
             cv.create_line(x0 + i * cm_side, y0, x0 + i * cm_side, y0 + dm_side, fill=MUTED, dash=(2,2))
             cv.create_line(x0, y0 + i * cm_side, x0 + dm_side, y0 + i * cm_side, fill=MUTED, dash=(2,2))
         
-        cv.create_text(w / 2, y0 + dm_side / 2, text="100 см²", font=("Segoe UI", 30, "bold"), fill=SKY, anchor="center")
-        cv.create_text(w / 2, y0 + dm_side + 30, text="1 дм² = 100 см²", font=("Segoe UI", 22, "bold"), fill=TEXT, anchor="center")
+        cv.create_text(w / 2, y0 + dm_side / 2, text="100 см²", font=("Segoe UI", 26, "bold"), fill=SKY, anchor="center") # Reduced
+        cv.create_text(w / 2, y0 + dm_side + 25, text="1 дм² = 100 см²", font=("Segoe UI", 20, "bold"), fill=TEXT, anchor="center") # Reduced
 
 
 
@@ -445,28 +450,28 @@ class AreaApp(tk.Tk):
         left.pack(side="left", fill="both")
         left.pack_propagate(False)
 
-        tk.Label(left, text="Тренажер", font=("Segoe UI", 30, "bold"), bg=BG, fg=TEXT).pack(pady=(25, 5))
-        self.lbl_score = tk.Label(left, text="Рахунок: 0 / 0", font=("Segoe UI", 18, "bold"), bg=BG, fg=ACCENT)
-        self.lbl_score.pack(pady=(0, 10))
+        tk.Label(left, text="Тренажер", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(15, 5)) # Reduced
+        self.lbl_score = tk.Label(left, text="Рахунок: 0 / 0", font=("Segoe UI", 16, "bold"), bg=BG, fg=ACCENT)
+        self.lbl_score.pack(pady=(0, 5))
 
-        self.task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=30, pady=20)
+        self.task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=20, pady=15) # Reduced pad
         self.task_box.pack(pady=10, padx=20, fill="x")
-        self.task_text = tk.Label(self.task_box, text="", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT, justify="center", wraplength=LW - 200)
-        self.task_text.pack(anchor="center", pady=(10,0))
+        self.task_text = tk.Label(self.task_box, text="", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT, justify="center", wraplength=LW - 100) # Reduced
+        self.task_text.pack(anchor="center", pady=(5,0))
 
-        self.task_canvas = tk.Canvas(left, bg=WHITE, height=300, bd=2, relief="ridge")
+        self.task_canvas = tk.Canvas(left, bg=WHITE, height=220, bd=2, relief="ridge") # Reduced height
         self.task_canvas.pack(pady=10, padx=20, fill="x")
 
         self.display_frame = tk.Frame(left, bg=WHITE, highlightbackground=ACCENT, highlightthickness=2)
-        self.display_frame.pack(pady=10, ipadx=24, ipady=10)
-        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 48, "bold"), width=12, anchor="e")
+        self.display_frame.pack(pady=5, ipadx=16, ipady=4)
+        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 32, "bold"), width=12, anchor="e") # Reduced from 48
         self.lbl_display.pack()
 
-        self.lbl_feedback = tk.Label(left, text="", font=("Segoe UI", 18, "bold"), bg=BG)
-        self.lbl_feedback.pack(pady=10)
+        self.lbl_feedback = tk.Label(left, text="", font=("Segoe UI", 16, "bold"), bg=BG)
+        self.lbl_feedback.pack(pady=5)
 
         self.kbd = tk.Frame(left, bg=BG)
-        self.kbd.pack(pady=10)
+        self.kbd.pack(pady=5)
         rows = [["7", "8", "9"], ["4", "5", "6"], ["1", "2", "3"], ["C", "0", "⌫"]]
         for row in rows:
             r = tk.Frame(self.kbd, bg=BG)
@@ -476,28 +481,28 @@ class AreaApp(tk.Tk):
                     r,
                     text=ch,
                     bg=RED_BG if ch in ("⌫", "C") else BTN_NUM,
-                    font=("Segoe UI", 20, "bold"),
+                    font=("Segoe UI", 16, "bold"),
                     width=6,
                     height=1,
                     relief="flat",
                     command=lambda c=ch: self._key_press(c),
-                ).pack(side="left", padx=5)
+                ).pack(side="left", padx=4) # Reduced size
 
         btn_f = tk.Frame(left, bg=BG)
-        btn_f.pack(pady=10)
-        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 18, "bold"), relief="flat", padx=40, pady=10, command=self.check_answer)
-        self.btn_ok.pack(side="left", padx=20)
-        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 18, "bold"), relief="flat", padx=40, pady=10, command=self.next_task)
+        btn_f.pack(pady=5)
+        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 14, "bold"), relief="flat", padx=30, pady=8, command=self.check_answer)
+        self.btn_ok.pack(side="left", padx=15)
+        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 14, "bold"), relief="flat", padx=30, pady=8, command=self.next_task)
 
         right = tk.Frame(self.main_area, bg=PANEL, width=RW, highlightbackground=BORDER, highlightthickness=1)
         right.pack(side="right", fill="y")
         right.pack_propagate(False)
 
         rpad = tk.Frame(right, bg=PANEL)
-        rpad.pack(fill="both", expand=True, padx=25, pady=25)
-        tk.Label(rpad, text="Підказки", font=("Segoe UI", 18, "bold"), bg=PANEL, fg=MUTED).pack(anchor="w")
+        rpad.pack(fill="both", expand=True, padx=20, pady=20)
+        tk.Label(rpad, text="Підказки", font=("Segoe UI", 16, "bold"), bg=PANEL, fg=MUTED).pack(anchor="w")
 
-        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=15, pady=15)
+        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=10, pady=10)
         hint_box.pack(fill="x", pady=10)
         tk.Label(
             hint_box,
@@ -517,7 +522,7 @@ class AreaApp(tk.Tk):
                 "• 1 га = 100 ар = 10 000 м² (100м * 100м)\n"
                 "• 1 км² = 100 га = 1 000 000 м² (1000м * 1000м)"
             ),
-            font=("Segoe UI", 12),
+            font=("Segoe UI", 11), # Reduced from 12
             bg="#eff6ff",
             justify="left",
         ).pack(anchor="w")
