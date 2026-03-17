@@ -115,6 +115,8 @@ class App(tk.Tk):
         self.zoom_center = 0.5
         self._drag_x0 = None
         self._drag_c0 = None
+        self.il_digits = [0, 5, 0, 0, 0, 0]
+        self.il_places = 2
 
         self._build_chrome()
         self.show_main_menu()
