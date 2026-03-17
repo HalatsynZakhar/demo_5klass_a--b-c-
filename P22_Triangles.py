@@ -77,18 +77,18 @@ class TrianglesApp(tk.Tk):
         self.show_triangle()
 
     def _build_ui(self):
-        hdr = tk.Frame(self, bg=ACCENT, height=80)
+        hdr = tk.Frame(self, bg=ACCENT, height=60) # Reduced from 80
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
 
-        tk.Label(hdr, text="Трикутник і його периметр. Види трикутників (§ 22)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 22, "bold")).pack(side="left", padx=30)
-        tk.Button(hdr, text="❌ Вихід", font=("Arial", 16, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20)
+        tk.Label(hdr, text="Трикутник і його периметр. Види трикутників (§ 22)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 20, "bold")).pack(side="left", padx=30) # Reduced from 22
+        tk.Button(hdr, text="❌ Вихід", font=("Arial", 14, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20) # Reduced from 16
 
-        nav = tk.Frame(self, bg=WHITE, height=60)
+        nav = tk.Frame(self, bg=WHITE, height=50) # Reduced from 60
         nav.pack(fill="x")
         nav.pack_propagate(False)
 
-        btn_font = ("Segoe UI", 12, "bold")
+        btn_font = ("Segoe UI", 11, "bold") # Reduced from 12
         tk.Button(nav, text="1. Трикутник", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_triangle).pack(side="left", padx=10)
         tk.Button(nav, text="2. Периметр", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_perimeter).pack(side="left", padx=10)
         tk.Button(nav, text="3. Види за сторонами", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_types_sides).pack(side="left", padx=10)
@@ -104,10 +104,10 @@ class TrianglesApp(tk.Tk):
 
     def _canvas_width(self, cv, fallback):
         w = int(cv.winfo_width())
-        if w < 300:
+        if w < 10:
             cv.update_idletasks()
             w = int(cv.winfo_width())
-        if w < 300:
+        if w < 10:
             w = int(fallback)
         return w
 
@@ -121,10 +121,10 @@ class TrianglesApp(tk.Tk):
             return
         nx, ny = -dy / ln, dx / ln
         tx, ty = mx + nx * offset, my + ny * offset
-        tid = cv.create_text(tx, ty, text=str(text), font=("Segoe UI", 14, "bold"), fill=fill)
+        tid = cv.create_text(tx, ty, text=str(text), font=("Segoe UI", 12, "bold"), fill=fill) # Reduced font
         bb = cv.bbox(tid)
         if bb:
-            rid = cv.create_rectangle(bb[0] - 6, bb[1] - 2, bb[2] + 6, bb[3] + 2, fill=WHITE, outline="")
+            rid = cv.create_rectangle(bb[0] - 4, bb[1] - 1, bb[2] + 4, bb[3] + 1, fill=WHITE, outline="")
             cv.tag_lower(rid, tid)
 
     def _triangle_points_from_angles(self, A_deg, B_deg, C_deg, w, h):
@@ -149,7 +149,7 @@ class TrianglesApp(tk.Tk):
         if maxx - minx < 1e-6 or maxy - miny < 1e-6:
             return None
 
-        margin = 60
+        margin = 50 # Reduced margin
         sx = (w - 2 * margin) / (maxx - minx)
         sy = (h - 2 * margin) / (maxy - miny)
         scale = max(1e-6, min(sx, sy))
@@ -251,12 +251,12 @@ class TrianglesApp(tk.Tk):
             return
         ux, uy = ux / ulen, uy / ulen
         vx, vy = vx / vlen, vy / vlen
-        s = 16
+        s = 14 # Reduced
         p1 = (P[0] + ux * s, P[1] + uy * s)
         p3 = (P[0] + vx * s, P[1] + vy * s)
         p2 = (p1[0] + vx * s, p1[1] + vy * s)
-        cv.create_line(p1[0], p1[1], p2[0], p2[1], width=3, fill=color)
-        cv.create_line(p2[0], p2[1], p3[0], p3[1], width=3, fill=color)
+        cv.create_line(p1[0], p1[1], p2[0], p2[1], width=2, fill=color)
+        cv.create_line(p2[0], p2[1], p3[0], p3[1], width=2, fill=color)
 
     def _on_key_press(self, event):
         if event.char.isdigit():
@@ -283,9 +283,9 @@ class TrianglesApp(tk.Tk):
         self.mode = "triangle"
 
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20) # Reduced pad
 
-        tk.Label(f, text="Трикутник", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="Трикутник", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced
         tk.Label(
             f,
             text=(
@@ -295,56 +295,56 @@ class TrianglesApp(tk.Tk):
                 "• кути трикутника: ∠ABC, ∠BCA, ∠CAB\n\n"
                 "Трикутник позначають знаком △, наприклад △ABC."
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 160,
+            wraplength=self.SW - 120,
         ).pack(anchor="w")
 
-        cv = tk.Canvas(f, bg=WHITE, height=max(360, int(self.SH * 0.42)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=15, padx=10)
+        cv = tk.Canvas(f, bg=WHITE, height=max(300, int(self.SH * 0.38)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=10, padx=10)
         self.after(80, lambda: self._draw_basic_triangle(cv))
 
     def _draw_basic_triangle(self, cv):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
-        if h < 260:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 260:
-            h = 360
+        if h < 50:
+            h = 300
 
-        margin = 80
+        margin = 60
         A = (int(w * 0.30), int(h * 0.72))
         B = (int(w * 0.70), int(h * 0.72))
         C = (int(w * 0.52), int(h * 0.25))
 
-        cv.create_polygon(A[0], A[1], B[0], B[1], C[0], C[1], outline=TEXT, fill="", width=5)
+        cv.create_polygon(A[0], A[1], B[0], B[1], C[0], C[1], outline=TEXT, fill="", width=4)
         for name, (x, y) in (("A", A), ("B", B), ("C", C)):
-            cv.create_oval(x - 8, y - 8, x + 8, y + 8, fill=ORANGE, outline="")
-            cv.create_text(x, y - 22, text=name, font=("Segoe UI", 16, "bold"), fill=TEXT)
+            cv.create_oval(x - 6, y - 6, x + 6, y + 6, fill=ORANGE, outline="")
+            cv.create_text(x, y - 20, text=name, font=("Segoe UI", 14, "bold"), fill=TEXT) # Reduced
 
-        cv.create_text(int(w * 0.06), int(h * 0.12), text="△ABC", font=("Segoe UI", 24, "bold"), fill=INDIGO, anchor="w")
-        cv.create_text(int(w * 0.06), int(h * 0.22), text="Вершини — точки A, B, C", font=("Segoe UI", 14, "bold"), fill=MUTED, anchor="w")
-        cv.create_text(int(w * 0.06), int(h * 0.30), text="Сторони — відрізки AB, BC, AC", font=("Segoe UI", 14, "bold"), fill=MUTED, anchor="w")
+        cv.create_text(int(w * 0.06), int(h * 0.12), text="△ABC", font=("Segoe UI", 20, "bold"), fill=INDIGO, anchor="w") # Reduced
+        cv.create_text(int(w * 0.06), int(h * 0.22), text="Вершини — точки A, B, C", font=("Segoe UI", 12, "bold"), fill=MUTED, anchor="w") # Reduced
+        cv.create_text(int(w * 0.06), int(h * 0.30), text="Сторони — відрізки AB, BC, AC", font=("Segoe UI", 12, "bold"), fill=MUTED, anchor="w") # Reduced
 
     def show_perimeter(self):
         self.clear_main()
         self.mode = "perimeter"
 
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20)
 
-        tk.Label(f, text="Периметр трикутника", font=("Segoe UI", 30, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="Периметр трикутника", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced
         tk.Label(
             f,
             text=(
                 "Периметр трикутника — це сума довжин усіх його сторін.\n"
                 "Формула: P = AB + BC + AC"
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced
             bg=BG,
             fg=MUTED,
             justify="left",
@@ -353,31 +353,31 @@ class TrianglesApp(tk.Tk):
         cards = tk.Frame(f, bg=BG)
         cards.pack(fill="both", expand=True, pady=10)
 
-        c1 = tk.Frame(cards, bg=WHITE, bd=2, relief="ridge", padx=18, pady=18)
-        c1.pack(side="left", expand=True, fill="both", padx=10, pady=10)
-        tk.Label(c1, text="Приклад (арифметично)", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w")
+        c1 = tk.Frame(cards, bg=WHITE, bd=2, relief="ridge", padx=15, pady=15) # Reduced pad
+        c1.pack(side="left", expand=True, fill="both", padx=8, pady=8)
+        tk.Label(c1, text="Приклад (арифметично)", font=("Segoe UI", 14, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w")
         tk.Label(
             c1,
             text="Нехай AB = 6 см, BC = 8 см, AC = 5 см.\nТоді P = 6 + 8 + 5 = 19 см.",
-            font=("Segoe UI", 14),
+            font=("Segoe UI", 12),
             bg=WHITE,
             fg=MUTED,
             justify="left",
-        ).pack(anchor="w", pady=(10, 0))
+        ).pack(anchor="w", pady=(8, 0))
 
-        c2 = tk.Frame(cards, bg=WHITE, bd=2, relief="ridge", padx=18, pady=18)
-        c2.pack(side="left", expand=True, fill="both", padx=10, pady=10)
-        tk.Label(c2, text="Як знайти невідому сторону", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w")
+        c2 = tk.Frame(cards, bg=WHITE, bd=2, relief="ridge", padx=15, pady=15)
+        c2.pack(side="left", expand=True, fill="both", padx=8, pady=8)
+        tk.Label(c2, text="Як знайти невідому сторону", font=("Segoe UI", 14, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w")
         tk.Label(
             c2,
             text="Якщо P відомий, а дві сторони відомі:\nAC = P − AB − BC",
-            font=("Segoe UI", 14),
+            font=("Segoe UI", 12),
             bg=WHITE,
             fg=MUTED,
             justify="left",
-        ).pack(anchor="w", pady=(10, 0))
+        ).pack(anchor="w", pady=(8, 0))
 
-        cv = tk.Canvas(f, bg=WHITE, height=max(300, int(self.SH * 0.32)), bd=2, relief="ridge")
+        cv = tk.Canvas(f, bg=WHITE, height=max(260, int(self.SH * 0.30)), bd=2, relief="ridge") # Reduced height
         cv.pack(fill="x", pady=10, padx=10)
         self.after(80, lambda: self._draw_perimeter_triangle(cv))
 
@@ -385,29 +385,29 @@ class TrianglesApp(tk.Tk):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
-        if h < 220:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 220:
+        if h < 50:
             h = 300
 
         A = (int(w * 0.28), int(h * 0.78))
         B = (int(w * 0.72), int(h * 0.78))
         C = (int(w * 0.55), int(h * 0.22))
-        cv.create_polygon(A[0], A[1], B[0], B[1], C[0], C[1], outline=TEXT, fill="", width=5)
+        cv.create_polygon(A[0], A[1], B[0], B[1], C[0], C[1], outline=TEXT, fill="", width=4)
         for name, (x, y) in (("A", A), ("B", B), ("C", C)):
-            cv.create_oval(x - 8, y - 8, x + 8, y + 8, fill=ORANGE, outline="")
-            cv.create_text(x, y - 22, text=name, font=("Segoe UI", 14, "bold"), fill=TEXT)
-        cv.create_text(int(w * 0.50), int(h * 0.90), text="P = AB + BC + AC", font=("Segoe UI", 18, "bold"), fill=INDIGO, anchor="center")
+            cv.create_oval(x - 6, y - 6, x + 6, y + 6, fill=ORANGE, outline="")
+            cv.create_text(x, y - 20, text=name, font=("Segoe UI", 12, "bold"), fill=TEXT)
+        cv.create_text(int(w * 0.50), int(h * 0.90), text="P = AB + BC + AC", font=("Segoe UI", 16, "bold"), fill=INDIGO, anchor="center")
 
     def show_types_sides(self):
         self.clear_main()
         self.mode = "types_sides"
 
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20)
 
-        tk.Label(f, text="Види трикутників за сторонами", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="Види трикутників за сторонами", font=("Segoe UI", 26, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
         tk.Label(
             f,
             text=(
@@ -415,24 +415,24 @@ class TrianglesApp(tk.Tk):
                 "• рівнобедрений — дві сторони рівні\n"
                 "• різносторонній — усі сторони різні"
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16),
             bg=BG,
             fg=MUTED,
             justify="left",
         ).pack(anchor="w")
 
-        cv = tk.Canvas(f, bg=WHITE, height=max(420, int(self.SH * 0.50)), bd=2, relief="ridge")
-        cv.pack(fill="x", pady=15, padx=10)
+        cv = tk.Canvas(f, bg=WHITE, height=max(360, int(self.SH * 0.45)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="x", pady=10, padx=10)
         self.after(80, lambda: self._draw_side_types(cv))
 
     def _draw_side_types(self, cv):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
-        if h < 320:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 320:
+        if h < 50:
             h = 420
 
         cells = [
@@ -442,18 +442,18 @@ class TrianglesApp(tk.Tk):
         ]
 
         cw = w / 3
-        margin = 30
+        margin = 25
         for i, (name, sides, col) in enumerate(cells):
             x0 = int(i * cw)
             cx = int(x0 + cw * 0.5)
-            cv.create_text(cx, int(h * 0.12), text=name, font=("Segoe UI", 16, "bold"), fill=TEXT)
-            cv.create_text(cx, int(h * 0.20), text=f"AB={sides[0]}, BC={sides[1]}, CA={sides[2]}", font=("Segoe UI", 12, "bold"), fill=MUTED)
+            cv.create_text(cx, int(h * 0.12), text=name, font=("Segoe UI", 14, "bold"), fill=TEXT)
+            cv.create_text(cx, int(h * 0.20), text=f"AB={sides[0]}, BC={sides[1]}, CA={sides[2]}", font=("Segoe UI", 11, "bold"), fill=MUTED)
 
             box_w = int(cw)
             box_h = int(h * 0.66)
             box_x0 = x0
             box_y0 = int(h * 0.26)
-            pts = self._triangle_points_from_sides_box(sides[0], sides[1], sides[2], box_x0, box_y0, box_w, box_h, margin=34)
+            pts = self._triangle_points_from_sides_box(sides[0], sides[1], sides[2], box_x0, box_y0, box_w, box_h, margin=30)
             if pts is None:
                 cy = int(h * 0.62)
                 r = min(cw, h) * 0.30
@@ -463,13 +463,13 @@ class TrianglesApp(tk.Tk):
             else:
                 A, B, C = pts
 
-            cv.create_polygon(A[0], A[1], B[0], B[1], C[0], C[1], outline=col, fill="#f8fafc", width=5)
+            cv.create_polygon(A[0], A[1], B[0], B[1], C[0], C[1], outline=col, fill="#f8fafc", width=4)
             for p in (A, B, C):
-                cv.create_oval(p[0] - 6, p[1] - 6, p[0] + 6, p[1] + 6, fill=WHITE, outline=col, width=2)
+                cv.create_oval(p[0] - 5, p[1] - 5, p[0] + 5, p[1] + 5, fill=WHITE, outline=col, width=2)
 
-            self._label_on_segment(cv, A, B, sides[0], offset=22, fill=INDIGO)
-            self._label_on_segment(cv, B, C, sides[1], offset=22, fill=INDIGO)
-            self._label_on_segment(cv, C, A, sides[2], offset=22, fill=INDIGO)
+            self._label_on_segment(cv, A, B, sides[0], offset=20, fill=INDIGO)
+            self._label_on_segment(cv, B, C, sides[1], offset=20, fill=INDIGO)
+            self._label_on_segment(cv, C, A, sides[2], offset=20, fill=INDIGO)
             if i < 2:
                 cv.create_line(int((i + 1) * cw), margin, int((i + 1) * cw), h - margin, fill=BORDER, width=2)
 
@@ -478,12 +478,12 @@ class TrianglesApp(tk.Tk):
         self.mode = "types_angles"
 
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20)
 
-        tk.Label(f, text="Види трикутників за кутами", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
-        card = tk.Frame(f, bg=WHITE, bd=2, relief="ridge", padx=18, pady=14)
-        card.pack(fill="x", padx=10, pady=(0, 12))
-        tk.Label(card, text="Головні правила", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w")
+        tk.Label(f, text="Види трикутників за кутами", font=("Segoe UI", 26, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        card = tk.Frame(f, bg=WHITE, bd=2, relief="ridge", padx=15, pady=12)
+        card.pack(fill="x", padx=10, pady=(0, 10))
+        tk.Label(card, text="Головні правила", font=("Segoe UI", 14, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w")
         tk.Label(
             card,
             text=(
@@ -492,24 +492,24 @@ class TrianglesApp(tk.Tk):
                 "3) Прямокутний: один кут = 90° (і більше прямого бути не може).\n"
                 "4) Тупокутний: один кут > 90° (і більше тупого бути не може)."
             ),
-            font=("Segoe UI", 14),
+            font=("Segoe UI", 12),
             bg=WHITE,
             fg=MUTED,
             justify="left",
-        ).pack(anchor="w", pady=(8, 0))
+        ).pack(anchor="w", pady=(6, 0))
 
-        cv = tk.Canvas(f, bg=WHITE, height=max(420, int(self.SH * 0.52)), bd=2, relief="ridge")
-        cv.pack(fill="both", expand=True, pady=15, padx=10)
+        cv = tk.Canvas(f, bg=WHITE, height=max(360, int(self.SH * 0.45)), bd=2, relief="ridge") # Reduced height
+        cv.pack(fill="both", expand=True, pady=10, padx=10)
         self.after(80, lambda: self._draw_angle_types(cv))
 
     def _draw_angle_types(self, cv):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW - 200)
         h = int(cv.winfo_height())
-        if h < 320:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 320:
+        if h < 50:
             h = 420
 
         items = [
@@ -519,18 +519,18 @@ class TrianglesApp(tk.Tk):
         ]
 
         cw = w / 3
-        margin = 30
+        margin = 25
         for i, (name, angs, col) in enumerate(items):
             x0 = int(i * cw)
             cx = int(x0 + cw * 0.5)
-            cv.create_text(cx, int(h * 0.12), text=name, font=("Segoe UI", 16, "bold"), fill=TEXT)
-            cv.create_text(cx, int(h * 0.20), text=f"Кути: {angs[0]}°, {angs[1]}°, {angs[2]}°", font=("Segoe UI", 12, "bold"), fill=MUTED)
+            cv.create_text(cx, int(h * 0.12), text=name, font=("Segoe UI", 14, "bold"), fill=TEXT)
+            cv.create_text(cx, int(h * 0.20), text=f"Кути: {angs[0]}°, {angs[1]}°, {angs[2]}°", font=("Segoe UI", 11, "bold"), fill=MUTED)
 
             box_w = int(cw)
             box_h = int(h * 0.60)
             box_x0 = x0
             box_y0 = int(h * 0.26)
-            pts = self._triangle_points_from_angles_box(angs[0], angs[1], angs[2], box_x0, box_y0, box_w, box_h, margin=28)
+            pts = self._triangle_points_from_angles_box(angs[0], angs[1], angs[2], box_x0, box_y0, box_w, box_h, margin=24)
             if pts is None:
                 cy = int(h * 0.62)
                 r = min(cw, h) * 0.30
@@ -540,9 +540,9 @@ class TrianglesApp(tk.Tk):
             else:
                 A, B, C = pts
 
-            cv.create_polygon(A[0], A[1], B[0], B[1], C[0], C[1], outline=col, fill="#f8fafc", width=5)
+            cv.create_polygon(A[0], A[1], B[0], B[1], C[0], C[1], outline=col, fill="#f8fafc", width=4)
             for px, py in (A, B, C):
-                cv.create_oval(px - 6, py - 6, px + 6, py + 6, fill=WHITE, outline=col, width=2)
+                cv.create_oval(px - 5, py - 5, px + 5, py + 5, fill=WHITE, outline=col, width=2)
 
             if angs[0] == 90:
                 self._draw_right_mark(cv, A, B, C, color=BLUE)
@@ -552,7 +552,7 @@ class TrianglesApp(tk.Tk):
                 self._draw_right_mark(cv, C, A, B, color=BLUE)
             if i < 2:
                 cv.create_line(int((i + 1) * cw), margin, int((i + 1) * cw), h - margin, fill=BORDER, width=2)
-        cv.create_text(int(w * 0.06), int(h * 0.90), text="Сума кутів: A + B + C = 180°", font=("Segoe UI", 16, "bold"), fill=INDIGO, anchor="w")
+        cv.create_text(int(w * 0.06), int(h * 0.90), text="Сума кутів: A + B + C = 180°", font=("Segoe UI", 14, "bold"), fill=INDIGO, anchor="w")
 
     def show_trainer(self):
         self.clear_main()
@@ -565,34 +565,34 @@ class TrianglesApp(tk.Tk):
         left.pack(side="left", fill="both")
         left.pack_propagate(False)
 
-        tk.Label(left, text="Тренажер", font=("Segoe UI", 30, "bold"), bg=BG, fg=TEXT).pack(pady=(25, 5))
-        self.lbl_score = tk.Label(left, text="Рахунок: 0 / 0", font=("Segoe UI", 18, "bold"), bg=BG, fg=ACCENT)
-        self.lbl_score.pack(pady=(0, 10))
+        tk.Label(left, text="Тренажер", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(15, 5)) # Reduced
+        self.lbl_score = tk.Label(left, text="Рахунок: 0 / 0", font=("Segoe UI", 16, "bold"), bg=BG, fg=ACCENT)
+        self.lbl_score.pack(pady=(0, 5))
 
-        self.task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=30, pady=20)
+        self.task_box = tk.Frame(left, bg=WHITE, bd=3, relief="solid", padx=20, pady=15) # Reduced pad
         self.task_box.pack(pady=10, padx=20, fill="x")
-        self.task_text = tk.Label(self.task_box, text="", font=("Segoe UI", 18, "bold"), bg=WHITE, fg=TEXT, justify="left", wraplength=LW - 120)
+        self.task_text = tk.Label(self.task_box, text="", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT, justify="left", wraplength=LW - 100) # Reduced from 18
         self.task_text.pack(anchor="w")
 
-        self.task_canvas = tk.Canvas(left, bg=WHITE, height=300, bd=2, relief="ridge")
+        self.task_canvas = tk.Canvas(left, bg=WHITE, height=220, bd=2, relief="ridge") # Reduced from 300
         self.task_canvas.pack(pady=10, padx=20, fill="x")
 
         self.choice_frame = tk.Frame(left, bg=BG)
-        self.choice_msg = tk.Label(self.choice_frame, text="", font=("Segoe UI", 18, "bold"), bg=BG, fg=MUTED)
+        self.choice_msg = tk.Label(self.choice_frame, text="", font=("Segoe UI", 16, "bold"), bg=BG, fg=MUTED) # Reduced from 18
         self.choice_msg.pack()
         self.choice_btns = tk.Frame(self.choice_frame, bg=BG)
-        self.choice_btns.pack(pady=10)
+        self.choice_btns.pack(pady=5)
 
         self.display_frame = tk.Frame(left, bg=WHITE, highlightbackground=ACCENT, highlightthickness=2)
-        self.display_frame.pack(pady=10, ipadx=24, ipady=10)
-        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 48, "bold"), width=12, anchor="e")
+        self.display_frame.pack(pady=5, ipadx=16, ipady=4)
+        self.lbl_display = tk.Label(self.display_frame, text="", bg=WHITE, fg=TEXT, font=("Segoe UI", 32, "bold"), width=12, anchor="e")
         self.lbl_display.pack()
 
-        self.lbl_feedback = tk.Label(left, text="", font=("Segoe UI", 18, "bold"), bg=BG)
-        self.lbl_feedback.pack(pady=10)
+        self.lbl_feedback = tk.Label(left, text="", font=("Segoe UI", 16, "bold"), bg=BG)
+        self.lbl_feedback.pack(pady=5)
 
         self.kbd = tk.Frame(left, bg=BG)
-        self.kbd.pack(pady=10)
+        self.kbd.pack(pady=5)
         rows = [["7", "8", "9"], ["4", "5", "6"], ["1", "2", "3"], ["C", "0", "⌫"]]
         for row in rows:
             r = tk.Frame(self.kbd, bg=BG)
@@ -602,28 +602,28 @@ class TrianglesApp(tk.Tk):
                     r,
                     text=ch,
                     bg=RED_BG if ch in ("⌫", "C") else BTN_NUM,
-                    font=("Segoe UI", 20, "bold"),
+                    font=("Segoe UI", 16, "bold"),
                     width=6,
                     height=1,
                     relief="flat",
                     command=lambda c=ch: self._key_press(c),
-                ).pack(side="left", padx=5)
+                ).pack(side="left", padx=4) # Reduced size
 
         btn_f = tk.Frame(left, bg=BG)
-        btn_f.pack(pady=10)
-        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 18, "bold"), relief="flat", padx=40, pady=10, command=self.check_answer)
-        self.btn_ok.pack(side="left", padx=20)
-        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 18, "bold"), relief="flat", padx=40, pady=10, command=self.next_task)
+        btn_f.pack(pady=5)
+        self.btn_ok = tk.Button(btn_f, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 14, "bold"), relief="flat", padx=30, pady=8, command=self.check_answer)
+        self.btn_ok.pack(side="left", padx=15)
+        self.btn_next = tk.Button(btn_f, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 14, "bold"), relief="flat", padx=30, pady=8, command=self.next_task)
 
         right = tk.Frame(self.main_area, bg=PANEL, width=RW, highlightbackground=BORDER, highlightthickness=1)
         right.pack(side="right", fill="y")
         right.pack_propagate(False)
 
         rpad = tk.Frame(right, bg=PANEL)
-        rpad.pack(fill="both", expand=True, padx=25, pady=25)
-        tk.Label(rpad, text="Підказки", font=("Segoe UI", 18, "bold"), bg=PANEL, fg=MUTED).pack(anchor="w")
+        rpad.pack(fill="both", expand=True, padx=20, pady=20)
+        tk.Label(rpad, text="Підказки", font=("Segoe UI", 16, "bold"), bg=PANEL, fg=MUTED).pack(anchor="w")
 
-        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=15, pady=15)
+        hint_box = tk.Frame(rpad, bg="#eff6ff", highlightbackground="#bfdbfe", highlightthickness=1, padx=10, pady=10)
         hint_box.pack(fill="x", pady=10)
         tk.Label(
             hint_box,
@@ -634,7 +634,7 @@ class TrianglesApp(tk.Tk):
                 "• Сума кутів трикутника = 180°\n"
                 "• Трикутник існує, якщо сума двох сторін більша за третю"
             ),
-            font=("Segoe UI", 12),
+            font=("Segoe UI", 11), # Reduced from 12
             bg="#eff6ff",
             justify="left",
         ).pack(anchor="w")
@@ -650,13 +650,13 @@ class TrianglesApp(tk.Tk):
 
         if mode == "number":
             self.choice_frame.pack_forget()
-            self.display_frame.pack(pady=10, ipadx=24, ipady=10)
-            self.kbd.pack(pady=10)
+            self.display_frame.pack(pady=5, ipadx=16, ipady=4)
+            self.kbd.pack(pady=5)
             self.btn_ok.config(state="normal")
         else:
             self.kbd.pack_forget()
             self.display_frame.pack_forget()
-            self.choice_frame.pack(pady=10)
+            self.choice_frame.pack(pady=5)
             self.btn_ok.config(state="disabled")
 
     def next_task(self):
@@ -709,7 +709,7 @@ class TrianglesApp(tk.Tk):
             self._draw_triangle_sides(self.task_canvas, a, b, c)
             self.choice_msg.config(text="Обери відповідь:")
             for opt in ["Рівносторонній", "Рівнобедрений", "Різносторонній"]:
-                tk.Button(self.choice_btns, text=opt, font=("Segoe UI", 18, "bold"), bg=BTN_NUM, bd=0, padx=18, pady=10, command=lambda o=opt: self._pick_choice(o)).pack(
+                tk.Button(self.choice_btns, text=opt, font=("Segoe UI", 14, "bold"), bg=BTN_NUM, bd=0, padx=14, pady=8, command=lambda o=opt: self._pick_choice(o)).pack(
                     side="left", padx=10
                 )
         elif t == "type_angles":
@@ -741,7 +741,7 @@ class TrianglesApp(tk.Tk):
             self._draw_triangle_angles(self.task_canvas, A, B, C)
             self.choice_msg.config(text="Обери відповідь:")
             for opt in ["Гострокутний", "Прямокутний", "Тупокутний"]:
-                tk.Button(self.choice_btns, text=opt, font=("Segoe UI", 18, "bold"), bg=BTN_NUM, bd=0, padx=18, pady=10, command=lambda o=opt: self._pick_choice(o)).pack(
+                tk.Button(self.choice_btns, text=opt, font=("Segoe UI", 14, "bold"), bg=BTN_NUM, bd=0, padx=14, pady=8, command=lambda o=opt: self._pick_choice(o)).pack(
                     side="left", padx=10
                 )
         else:
@@ -755,7 +755,7 @@ class TrianglesApp(tk.Tk):
             self._draw_triangle_sides(self.task_canvas, a, b, c)
             self.choice_msg.config(text="Обери відповідь:")
             for opt in ["Так", "Ні"]:
-                tk.Button(self.choice_btns, text=opt, font=("Segoe UI", 18, "bold"), bg=BTN_NUM, bd=0, padx=26, pady=10, command=lambda o=opt: self._pick_choice(o)).pack(
+                tk.Button(self.choice_btns, text=opt, font=("Segoe UI", 14, "bold"), bg=BTN_NUM, bd=0, padx=20, pady=8, command=lambda o=opt: self._pick_choice(o)).pack(
                     side="left", padx=12
                 )
 
@@ -828,10 +828,10 @@ class TrianglesApp(tk.Tk):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW * 0.62 - 60)
         h = int(cv.winfo_height())
-        if h < 240:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 240:
+        if h < 50:
             h = 300
 
         A = (int(w * 0.22), int(h * 0.78))
@@ -850,10 +850,10 @@ class TrianglesApp(tk.Tk):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW * 0.62 - 60)
         h = int(cv.winfo_height())
-        if h < 240:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 240:
+        if h < 50:
             h = 300
 
         A = (int(w * 0.22), int(h * 0.78))
@@ -869,10 +869,10 @@ class TrianglesApp(tk.Tk):
         cv.delete("all")
         w = self._canvas_width(cv, self.SW * 0.62 - 60)
         h = int(cv.winfo_height())
-        if h < 240:
+        if h < 50:
             cv.update_idletasks()
             h = int(cv.winfo_height())
-        if h < 240:
+        if h < 50:
             h = 300
         if Cang is None:
             Cfull = 180 - Aang - Bang
