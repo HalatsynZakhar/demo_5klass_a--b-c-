@@ -77,6 +77,19 @@ def build_numpad(p,fn,bg=BG):
             o=bc; b.bind("<Enter>",lambda e,x=b,oo=o:x.config(bg=_dk(oo,18))); b.bind("<Leave>",lambda e,x=b,oo=o:x.config(bg=oo))
     return np
 
+# ── Utilities for Interactive Visuals ────────────────────────────────────────
+PLACE_NAMES  = ["Одиниці", "Десяті", "Соті", "Тисячні", "Дес-тис.", "Сто-тис."]
+
+def digits_to_val(digits):
+    v = float(digits[0])
+    for i in range(1, 6):
+        if i < len(digits):
+            v += digits[i] * (10**-i)
+    return round(v, 5)
+
+def fmt(val, places):
+    return f"{val:.{places}f}".replace(".", ",")
+
 # ═══════════════════════════════════════════════════════════════════════════════
 class App(tk.Tk):
     def __init__(self):
@@ -669,33 +682,82 @@ class App(tk.Tk):
             
         self._pv_cake_canvas.draw()
 
+    def _digits_to_val(self, digits):
+        return digits_to_val(digits)
+
     def show_interactive_line(self):
         self.clear_main(); cf=self.current_frame
+        
         hdr = tk.Frame(cf, bg=PANEL, height=60, highlightbackground=BORDER, highlightthickness=1)
         hdr.pack(fill="x"); hdr.pack_propagate(False)
         tk.Label(hdr, text="📏 Інтерактивна пряма (0–10)", font=F_HEAD, bg=PANEL).pack(side="left", padx=20)
         tk.Label(hdr, text="Коліщатко: Зум  |  Мишка: Перетягування", font=F_BODY, bg=PANEL, fg=MUTED).pack(side="right", padx=20)
         
-        val=float(self.pv_digits[0])
-        for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
-        val=round(val,self.pv_places)
+        ws = tk.Frame(cf, bg=BG); ws.pack(fill="both", expand=True, padx=10, pady=10)
         
-        self.zoom_center, self.zoom_range = val, 1.0
-        self._il_fig = Figure(figsize=(12, 6), facecolor=WHITE)
-        self._il_canvas = FigureCanvasTkAgg(self._il_fig, master=cf)
+        # Left side: Counter
+        left = tk.Frame(ws, bg=PANEL, highlightbackground=BORDER, highlightthickness=1, width=380)
+        left.pack(side="left", fill="y", padx=(0, 10)); left.pack_propagate(False)
+        
+        tk.Label(left, text="Зміна числа:", font=F_SUB, bg=PANEL, fg=MUTED).pack(pady=(15, 5))
+        self._il_ctrl_f = tk.Frame(left, bg=PANEL); self._il_ctrl_f.pack(fill="x", padx=10)
+        
+        # Right side: Plot
+        right = tk.Frame(ws, bg=PANEL, highlightbackground=BORDER, highlightthickness=1)
+        right.pack(side="right", fill="both", expand=True)
+        
+        self.zoom_center = digits_to_val(self.il_digits)
+        self.zoom_range = 1.0
+        
+        self._il_fig = Figure(figsize=(10, 6), facecolor=WHITE)
+        self._il_canvas = FigureCanvasTkAgg(self._il_fig, master=right)
         widget = self._il_canvas.get_tk_widget(); widget.pack(fill="both", expand=True)
         
         widget.bind("<MouseWheel>", self._il_wheel)
         widget.bind("<ButtonPress-1>", self._il_drag_start)
         widget.bind("<B1-Motion>", self._il_drag_move)
         widget.bind("<ButtonRelease-1>", self._il_drag_end)
+        
+        self._il_rebuild_ctrl()
         self._il_redraw()
+
+    def _il_rebuild_ctrl(self):
+        for w in self._il_ctrl_f.winfo_children(): w.destroy()
+        for i in range(self.il_places + 1):
+            color = self.PVCOLORS[i]
+            row = tk.Frame(self._il_ctrl_f, bg=BTN_NUM, pady=6, padx=8); row.pack(fill="x", pady=3)
+            # Use self.PVNAMES if PLACE_NAMES global fails (but it shouldn't)
+            pname = PLACE_NAMES[i] if i < len(PLACE_NAMES) else self.PVNAMES[i]
+            tk.Label(row, text=pname, font=("Segoe UI", 13, "bold"), bg=BTN_NUM, fg=color, width=10, anchor="w").pack(side="left")
+            
+            def make_cmd(idx, delta): return lambda: self._il_change(idx, delta)
+            
+            tk.Button(row, text="−", font=("Segoe UI", 16, "bold"), width=2, bg=PANEL, command=make_cmd(i, -1), relief="flat").pack(side="left", padx=4)
+            tk.Label(row, text=str(self.il_digits[i]), font=("Courier New", 24, "bold"), bg=BTN_NUM, fg=color, width=2).pack(side="left", padx=4)
+            tk.Button(row, text="+", font=("Segoe UI", 16, "bold"), width=2, bg=PANEL, command=make_cmd(i, 1), relief="flat").pack(side="left", padx=4)
+
+    def _il_change(self, idx, delta):
+        val = self.il_digits[idx] + delta
+        if idx == 0: self.il_digits[0] = max(0, min(9, val))
+        elif val > 9: self.il_digits[idx] = 0; self._il_carry(idx - 1, 1)
+        elif val < 0:
+            if idx > 0 and self.il_digits[idx-1] > 0: self.il_digits[idx] = 9; self._il_carry(idx - 1, -1)
+            else: self.il_digits[idx] = 0
+        else: self.il_digits[idx] = val
+        self._il_rebuild_ctrl(); self._il_redraw()
+
+    def _il_carry(self, idx, delta):
+        new = self.il_digits[idx] + delta
+        if idx == 0: self.il_digits[0] = max(0, min(9, new))
+        elif new > 9: self.il_digits[idx] = 0; (self._il_carry(idx - 1, 1) if idx > 0 else None)
+        elif new < 0:
+            if idx > 0 and self.il_digits[idx-1] > 0: self.il_digits[idx] = 9; self._il_carry(idx - 1, -1)
+            else: self.il_digits[idx] = 0
+        else: self.il_digits[idx] = new
 
     def _il_redraw(self):
         self._il_fig.clear(); ax = self._il_fig.add_subplot(111); ax.set_facecolor(BG); ax.axis("off")
-        val=float(self.pv_digits[0])
-        for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
-        val=round(val,self.pv_places)
+        val = self._digits_to_val(self.il_digits)
         
         half = self.zoom_range / 2
         start = max(-0.05, self.zoom_center - half); end = min(10.05, start + self.zoom_range)
@@ -722,7 +784,7 @@ class App(tk.Tk):
             
         ax.axhline(0, color=TEXT, lw=2)
         ax.plot(val, 0, "o", color=ACCENT, markersize=20, markeredgecolor="white", markeredgewidth=3, zorder=10)
-        ax.text(val, 0.5, f"{val:.{self.pv_places}f}".replace(".",","), ha="center", va="bottom", 
+        ax.text(val, 0.5, f"{val:.{self.il_places}f}".replace(".",","), ha="center", va="bottom", 
                 color=ACCENT, fontsize=24, fontweight="bold", bbox=dict(facecolor="white", edgecolor=ACCENT, boxstyle="round,pad=0.5"))
         self._il_canvas.draw_idle()
 
