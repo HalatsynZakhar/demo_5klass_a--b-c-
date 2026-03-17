@@ -648,7 +648,7 @@ class App(tk.Tk):
         mpl_cv.draw()
 
     def _pv_draw_cake(self):
-        # Максимально великі тортики в 2 ряди по 5
+        # Динамічна візуалізація: показуємо лише потрібну кількість тортів
         self._pv_cake_fig.clear()
         val=float(self.pv_digits[0])
         for i in range(1,self.pv_places+1): val+=self.pv_digits[i]*(10**-i)
@@ -656,29 +656,39 @@ class App(tk.Tk):
         
         int_part = int(val)
         frac = val - int_part
-        total_pies = 10 # Завжди показуємо 10 для стабільності масштабу
         
-        gs = gridspec.GridSpec(2, 5, figure=self._pv_cake_fig, wspace=0.01, hspace=0.1)
-        self._pv_cake_fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
+        # Кількість тортів: цілі + 1 для дробової частини
+        total_pies = int_part + (1 if frac > 0 or int_part == 0 else 0)
+        if total_pies < 1: total_pies = 1
         
-        for i in range(10):
+        # Визначаємо сітку для максимального масштабування
+        if total_pies <= 5:
+            rows, cols = 1, total_pies
+        else:
+            rows, cols = 2, (total_pies + 1) // 2 if total_pies < 10 else 5
+            
+        gs = gridspec.GridSpec(rows, cols, figure=self._pv_cake_fig, wspace=0.05, hspace=0.2)
+        self._pv_cake_fig.subplots_adjust(left=0.02, right=0.98, top=0.95, bottom=0.05)
+        
+        for i in range(total_pies):
             ax = self._pv_cake_fig.add_subplot(gs[i])
             ax.set_aspect("equal"); ax.axis("off")
             
-            # Фон
-            ax.add_patch(Circle((0,0), 1.0, facecolor="white", edgecolor=BORDER, lw=1.5))
+            # Фон (білий круг)
+            ax.add_patch(Circle((0,0), 1.0, facecolor="white", edgecolor=BORDER, lw=2))
             
             if i < int_part:
+                # Повний торт
                 ax.add_patch(Circle((0,0), 1.0, facecolor=self.PVCOLORS[1], edgecolor="white", lw=1))
             elif i == int_part:
+                # Дробова частина
                 if frac > 0:
                     angle = 360 * frac
                     w = Wedge((0,0), 1.0, 90 - angle, 90, facecolor=self.PVCOLORS[2], edgecolor="white", lw=1)
                     ax.add_patch(w)
             
-            ax.text(0, -1.15, str(i+1), ha="center", va="top", fontsize=12, color=MUTED, fontweight="bold")
-            # Максимально щільні межі для великого радіусу
-            ax.set_xlim(-1.02, 1.02); ax.set_ylim(-1.35, 1.02)
+            ax.text(0, -1.3, str(i+1), ha="center", va="top", fontsize=12, color=MUTED, fontweight="bold")
+            ax.set_xlim(-1.1, 1.1); ax.set_ylim(-1.5, 1.1)
             
         self._pv_cake_canvas.draw()
 
