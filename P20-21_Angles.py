@@ -83,14 +83,14 @@ class AngleTrainerFrame(tk.Frame):
         pad = tk.Frame(right, bg=BG)
         pad.place(relx=0.5, rely=0.5, anchor="center", width=right_w - 44)
 
-        self.lbl_score = tk.Label(pad, text="", bg=BG, fg=ACCENT, font=("Segoe UI", 14, "bold"))
-        self.lbl_score.pack(pady=(0, 10))
+        self.lbl_score = tk.Label(pad, text="", bg=BG, fg=ACCENT, font=("Segoe UI", 12, "bold")) # Reduced from 14
+        self.lbl_score.pack(pady=(0, 5)) # Reduced from 10
 
-        self.lbl_task = tk.Label(pad, text="", bg=BG, fg=TEXT, font=("Segoe UI", 17, "bold"), wraplength=right_w - 60, justify="center")
-        self.lbl_task.pack(pady=(0, 6))
+        self.lbl_task = tk.Label(pad, text="", bg=BG, fg=TEXT, font=("Segoe UI", 15, "bold"), wraplength=right_w - 60, justify="center") # Reduced from 17
+        self.lbl_task.pack(pady=(0, 4)) # Reduced from 6
 
-        self.lbl_sub = tk.Label(pad, text="", bg=BG, fg=MUTED, font=("Segoe UI", 12), wraplength=right_w - 60, justify="center")
-        self.lbl_sub.pack(pady=(0, 20))
+        self.lbl_sub = tk.Label(pad, text="", bg=BG, fg=MUTED, font=("Segoe UI", 11), wraplength=right_w - 60, justify="center") # Reduced from 12
+        self.lbl_sub.pack(pady=(0, 15)) # Reduced from 20
 
         self.btn_frame = tk.Frame(pad, bg=BG)
         self.btn_frame.pack(fill="x")
@@ -102,24 +102,24 @@ class AngleTrainerFrame(tk.Frame):
                 text=f"{t['icon']}  {t['name']}",
                 bg=WHITE,
                 fg=TEXT,
-                font=("Segoe UI", 13, "bold"),
+                font=("Segoe UI", 12, "bold"), # Reduced from 13
                 relief="flat",
                 bd=0,
                 cursor="hand2",
-                pady=13,
+                pady=10, # Reduced from 13
                 highlightbackground=BORDER,
                 highlightthickness=1,
                 command=lambda n=t["name"]: self._on_classify(n),
             )
-            btn.pack(fill="x", pady=5)
+            btn.pack(fill="x", pady=4) # Reduced from 5
             btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#e8edf8") if b["bg"] == WHITE else None)
             btn.bind("<Leave>", lambda e, b=btn: b.config(bg=WHITE) if b["bg"] == "#e8edf8" else None)
             self.buttons[t["name"]] = btn
 
-        self.lbl_result = tk.Label(pad, text="", bg=BG, font=("Segoe UI", 13, "bold"), wraplength=right_w - 60, justify="center")
-        self.lbl_result.pack(pady=(20, 6))
+        self.lbl_result = tk.Label(pad, text="", bg=BG, font=("Segoe UI", 12, "bold"), wraplength=right_w - 60, justify="center") # Reduced from 13
+        self.lbl_result.pack(pady=(15, 5)) # Reduced from 20/6
 
-        self.btn_action = tk.Button(pad, text="", bg=ACCENT, fg=WHITE, font=("Segoe UI", 13, "bold"), relief="flat", bd=0, cursor="hand2", pady=13, command=self._on_action_button_click)
+        self.btn_action = tk.Button(pad, text="", bg=ACCENT, fg=WHITE, font=("Segoe UI", 12, "bold"), relief="flat", bd=0, cursor="hand2", pady=10, command=self._on_action_button_click) # Reduced from 13/13
         self.btn_action.pack(fill="x", pady=4)
 
     def _new_question(self):
@@ -309,37 +309,37 @@ class Practice2Frame(tk.Frame):
         pad = tk.Frame(right, bg=BG)
         pad.place(relx=0.5, rely=0.5, anchor="center", width=right_w - 44)
 
-        tk.Label(pad, text="Практика 2", bg=BG, fg=TEXT, font=("Segoe UI", 18, "bold")).pack(pady=(0, 10))
+        tk.Label(pad, text="Практика 2", bg=BG, fg=TEXT, font=("Segoe UI", 16, "bold")).pack(pady=(0, 8)) # Reduced from 18/10
 
         tab = tk.Frame(pad, bg=BG)
-        tab.pack(fill="x", pady=(0, 12))
+        tab.pack(fill="x", pady=(0, 10)) # Reduced pad
 
-        self.btn_tab_name = tk.Button(tab, text="1) Найменування", bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 12, "bold"), bd=0, padx=10, pady=10, command=lambda: self.set_mode("name"))
-        self.btn_tab_build = tk.Button(tab, text="2) Побудова", bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 12, "bold"), bd=0, padx=10, pady=10, command=lambda: self.set_mode("build"))
-        self.btn_tab_points = tk.Button(tab, text="3) Точки", bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 12, "bold"), bd=0, padx=10, pady=10, command=lambda: self.set_mode("points"))
-        self.btn_tab_name.pack(fill="x", pady=4)
-        self.btn_tab_build.pack(fill="x", pady=4)
-        self.btn_tab_points.pack(fill="x", pady=4)
+        self.btn_tab_name = tk.Button(tab, text="1) Найменування", bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 11, "bold"), bd=0, padx=8, pady=8, command=lambda: self.set_mode("name")) # Reduced font & pad
+        self.btn_tab_build = tk.Button(tab, text="2) Побудова", bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 11, "bold"), bd=0, padx=8, pady=8, command=lambda: self.set_mode("build"))
+        self.btn_tab_points = tk.Button(tab, text="3) Точки", bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 11, "bold"), bd=0, padx=8, pady=8, command=lambda: self.set_mode("points"))
+        self.btn_tab_name.pack(fill="x", pady=3) # Reduced pad
+        self.btn_tab_build.pack(fill="x", pady=3)
+        self.btn_tab_points.pack(fill="x", pady=3)
 
-        self.lbl_score = tk.Label(pad, text="", bg=BG, fg=ACCENT, font=("Segoe UI", 14, "bold"))
-        self.lbl_score.pack(pady=(6, 10))
+        self.lbl_score = tk.Label(pad, text="", bg=BG, fg=ACCENT, font=("Segoe UI", 12, "bold")) # Reduced from 14
+        self.lbl_score.pack(pady=(5, 8)) # Reduced pad
 
-        self.lbl_task = tk.Label(pad, text="", bg=BG, fg=TEXT, font=("Segoe UI", 16, "bold"), wraplength=right_w - 60, justify="center")
-        self.lbl_task.pack(pady=(0, 6))
-        self.lbl_sub = tk.Label(pad, text="", bg=BG, fg=MUTED, font=("Segoe UI", 12), wraplength=right_w - 60, justify="center")
-        self.lbl_sub.pack(pady=(0, 14))
+        self.lbl_task = tk.Label(pad, text="", bg=BG, fg=TEXT, font=("Segoe UI", 14, "bold"), wraplength=right_w - 60, justify="center") # Reduced from 16
+        self.lbl_task.pack(pady=(0, 5)) # Reduced pad
+        self.lbl_sub = tk.Label(pad, text="", bg=BG, fg=MUTED, font=("Segoe UI", 11), wraplength=right_w - 60, justify="center") # Reduced from 12
+        self.lbl_sub.pack(pady=(0, 12)) # Reduced pad
 
         self.answers = tk.Frame(pad, bg=BG)
         self.answers.pack(fill="x")
 
-        self.lbl_result = tk.Label(pad, text="", bg=BG, fg=TEXT, font=("Segoe UI", 13, "bold"), wraplength=right_w - 60, justify="center")
-        self.lbl_result.pack(pady=(16, 6))
+        self.lbl_result = tk.Label(pad, text="", bg=BG, fg=TEXT, font=("Segoe UI", 12, "bold"), wraplength=right_w - 60, justify="center") # Reduced from 13
+        self.lbl_result.pack(pady=(12, 5)) # Reduced pad
 
-        self.btn_action = tk.Button(pad, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 13, "bold"), relief="flat", bd=0, cursor="hand2", pady=12, command=self.new_task)
-        self.btn_action.pack(fill="x", pady=4)
+        self.btn_action = tk.Button(pad, text="▶ Наступне", bg=ACCENT, fg=WHITE, font=("Segoe UI", 12, "bold"), relief="flat", bd=0, cursor="hand2", pady=10, command=self.new_task) # Reduced font/pad
+        self.btn_action.pack(fill="x", pady=3)
 
-        self.btn_check = tk.Button(pad, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 13, "bold"), relief="flat", bd=0, cursor="hand2", pady=12, command=self.check_points_task)
-        self.btn_check.pack(fill="x", pady=4)
+        self.btn_check = tk.Button(pad, text="✓ Перевірити", bg=GREEN, fg=WHITE, font=("Segoe UI", 12, "bold"), relief="flat", bd=0, cursor="hand2", pady=10, command=self.check_points_task) # Reduced font/pad
+        self.btn_check.pack(fill="x", pady=3)
 
         self._update_score()
         self._update_tabs()
@@ -432,7 +432,7 @@ class Practice2Frame(tk.Frame):
 
         self.task = {"type": "name", "accept": set(accept), "canonical": canonical, "letters": (a, o, b)}
         for opt in options:
-            tk.Button(self.answers, text=opt, bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 16, "bold"), bd=0, padx=18, pady=12, command=lambda v=opt: self._pick_name(v)).pack(fill="x", pady=6)
+            tk.Button(self.answers, text=opt, bg=BTN_NUM, fg=TEXT, font=("Segoe UI", 14, "bold"), bd=0, padx=16, pady=10, command=lambda v=opt: self._pick_name(v)).pack(fill="x", pady=5) # Reduced sizes
 
         self._draw_named_angle(a, o, b)
 
@@ -763,18 +763,18 @@ class AnglesApp(tk.Tk):
         self.show_s20_angle()
 
     def _build_ui(self):
-        hdr = tk.Frame(self, bg=ACCENT, height=80)
+        hdr = tk.Frame(self, bg=ACCENT, height=60) # Reduced from 80
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
 
-        tk.Label(hdr, text="Кути (§ 20–21)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 24, "bold")).pack(side="left", padx=30)
-        tk.Button(hdr, text="❌ Вихід", font=("Arial", 16, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20)
+        tk.Label(hdr, text="Кути (§ 20–21)", bg=ACCENT, fg=WHITE, font=("Segoe UI", 20, "bold")).pack(side="left", padx=30) # Reduced from 24
+        tk.Button(hdr, text="❌ Вихід", font=("Arial", 14, "bold"), bg=RED, fg=WHITE, bd=0, command=self.destroy).pack(side="right", padx=20) # Reduced from 16
 
-        nav = tk.Frame(self, bg=WHITE, height=60)
+        nav = tk.Frame(self, bg=WHITE, height=50) # Reduced from 60
         nav.pack(fill="x")
         nav.pack_propagate(False)
 
-        btn_font = ("Segoe UI", 12, "bold")
+        btn_font = ("Segoe UI", 11, "bold") # Reduced from 12
         tk.Button(nav, text="§20: Кут", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_s20_angle).pack(side="left", padx=10)
         tk.Button(nav, text="§20: Види", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_s20_types).pack(side="left", padx=10)
         tk.Button(nav, text="§20: Точки/Поділ", font=btn_font, bg=WHITE, bd=0, cursor="hand2", command=self.show_s20_points_split).pack(side="left", padx=10)
@@ -805,9 +805,9 @@ class AnglesApp(tk.Tk):
     def show_s20_angle(self):
         self.clear_main()
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20) # Reduced pad
 
-        tk.Label(f, text="§ 20. Кут", font=("Segoe UI", 32, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="§ 20. Кут", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced from 32
         tk.Label(
             f,
             text=(
@@ -818,16 +818,16 @@ class AnglesApp(tk.Tk):
                 "• кут називають за трьома літерами: ∠AOB (вершина завжди посередині)\n"
                 "  або за вершиною: ∠O"
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced from 18
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 160,
+            wraplength=self.SW - 120,
         ).pack(anchor="w", pady=(0, 10))
 
-        cv_h = max(360, int(self.SH * 0.42))
+        cv_h = max(300, int(self.SH * 0.38)) # Reduced
         cv = tk.Canvas(f, bg=WHITE, height=cv_h, bd=2, relief="ridge")
-        cv.pack(fill="x", pady=15, padx=10)
+        cv.pack(fill="x", pady=10, padx=10) # Reduced pady
         self.after(80, lambda: self._draw_basic_angle(cv))
 
     def _draw_basic_angle(self, cv):
@@ -862,9 +862,9 @@ class AnglesApp(tk.Tk):
     def show_s20_types(self):
         self.clear_main()
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20)
 
-        tk.Label(f, text="§ 20. Види кутів", font=("Segoe UI", 30, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="§ 20. Види кутів", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced from 30
         tk.Label(
             f,
             text=(
@@ -873,15 +873,15 @@ class AnglesApp(tk.Tk):
                 "• тупий — більший за 90°, але менший за 180°\n"
                 "• розгорнутий — дорівнює 180° (сторони — доповняльні промені)"
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced from 18
             bg=BG,
             fg=MUTED,
             justify="left",
         ).pack(anchor="w", pady=(0, 10))
 
-        cv_h = max(420, int(self.SH * 0.50))
+        cv_h = max(360, int(self.SH * 0.45)) # Reduced
         cv = tk.Canvas(f, bg=WHITE, height=cv_h, bd=2, relief="ridge")
-        cv.pack(fill="x", pady=15, padx=10)
+        cv.pack(fill="x", pady=10, padx=10) # Reduced pady
         self.after(80, lambda: self._draw_angle_types(cv))
 
     def _draw_angle_types(self, cv):
@@ -914,7 +914,7 @@ class AnglesApp(tk.Tk):
             margin = 42
             rr = min(cell_w - 2 * margin, cell_h - 2 * margin) * 0.50
 
-            cv.create_text(cx, int(r * cell_h + 32), text=f"{name}: {deg}°", font=("Segoe UI", 18, "bold"), fill=TEXT)
+            cv.create_text(cx, int(r * cell_h + 32), text=f"{name}: {deg}°", font=("Segoe UI", 16, "bold"), fill=TEXT) # Reduced from 18
             cv.create_line(cx, cy, cx + rr, cy, width=5, fill=TEXT, arrow="last")
             ang = deg
             x2 = cx + rr * math.cos(math.radians(ang))
@@ -930,9 +930,9 @@ class AnglesApp(tk.Tk):
     def show_s20_points_split(self):
         self.clear_main()
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20)
 
-        tk.Label(f, text="§ 20. Розміщення точок. Поділ кута", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="§ 20. Розміщення точок. Поділ кута", font=("Segoe UI", 26, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced from 28
         tk.Label(
             f,
             text=(
@@ -942,7 +942,7 @@ class AnglesApp(tk.Tk):
                 "• поза кутом\n\n"
                 "Якщо з вершини кута провести промінь, він поділить кут на два кути."
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced from 18
             bg=BG,
             fg=MUTED,
             justify="left",
@@ -953,16 +953,16 @@ class AnglesApp(tk.Tk):
 
         c1 = tk.Frame(cards, bg=WHITE, bd=2, relief="ridge")
         c1.pack(side="left", expand=True, fill="both", padx=(10, 6), pady=10)
-        tk.Label(c1, text="Точки відносно кута", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w", padx=14, pady=(12, 6))
-        tk.Label(c1, text="Зелений — всередині, синій — на стороні, червоний — поза кутом", font=("Segoe UI", 12), bg=WHITE, fg=MUTED).pack(anchor="w", padx=14)
-        cv1 = tk.Canvas(c1, bg=WHITE, height=max(320, int(self.SH * 0.42)), highlightthickness=0)
+        tk.Label(c1, text="Точки відносно кута", font=("Segoe UI", 14, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w", padx=14, pady=(12, 6)) # Reduced from 16
+        tk.Label(c1, text="Зелений — всередині, синій — на стороні, червоний — поза кутом", font=("Segoe UI", 11), bg=WHITE, fg=MUTED).pack(anchor="w", padx=14) # Reduced from 12
+        cv1 = tk.Canvas(c1, bg=WHITE, height=max(280, int(self.SH * 0.38)), highlightthickness=0) # Reduced
         cv1.pack(fill="both", expand=True, padx=10, pady=10)
 
         c2 = tk.Frame(cards, bg=WHITE, bd=2, relief="ridge")
         c2.pack(side="left", expand=True, fill="both", padx=(6, 10), pady=10)
-        tk.Label(c2, text="Поділ кута променем", font=("Segoe UI", 16, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w", padx=14, pady=(12, 6))
-        tk.Label(c2, text="Промінь з вершини ділить кут на два кути", font=("Segoe UI", 12), bg=WHITE, fg=MUTED).pack(anchor="w", padx=14)
-        cv2 = tk.Canvas(c2, bg=WHITE, height=max(320, int(self.SH * 0.42)), highlightthickness=0)
+        tk.Label(c2, text="Поділ кута променем", font=("Segoe UI", 14, "bold"), bg=WHITE, fg=TEXT).pack(anchor="w", padx=14, pady=(12, 6)) # Reduced from 16
+        tk.Label(c2, text="Промінь з вершини ділить кут на два кути", font=("Segoe UI", 11), bg=WHITE, fg=MUTED).pack(anchor="w", padx=14) # Reduced from 12
+        cv2 = tk.Canvas(c2, bg=WHITE, height=max(280, int(self.SH * 0.38)), highlightthickness=0) # Reduced
         cv2.pack(fill="both", expand=True, padx=10, pady=10)
 
         self.after(80, lambda: self._draw_points_in_angle(cv1))
@@ -1036,9 +1036,9 @@ class AnglesApp(tk.Tk):
     def show_s21_protractor(self):
         self.clear_main()
         f = tk.Frame(self.main_area, bg=BG)
-        f.pack(expand=True, fill="both", padx=50, pady=25)
+        f.pack(expand=True, fill="both", padx=30, pady=20)
 
-        tk.Label(f, text="§ 21. Величина кута. Транспортир", font=("Segoe UI", 28, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10))
+        tk.Label(f, text="§ 21. Величина кута. Транспортир", font=("Segoe UI", 26, "bold"), bg=BG, fg=TEXT).pack(pady=(0, 10)) # Reduced from 28
         tk.Label(
             f,
             text=(
@@ -1047,28 +1047,28 @@ class AnglesApp(tk.Tk):
                 "Транспортир — прилад для вимірювання та побудови кутів.\n"
                 "Його шкала має 180 поділок (1 поділка = 1°) і зазвичай дві нумерації: зліва і справа."
             ),
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 16), # Reduced from 18
             bg=BG,
             fg=MUTED,
             justify="left",
-            wraplength=self.SW - 160,
+            wraplength=self.SW - 120,
         ).pack(anchor="w", pady=(0, 10))
 
         top = tk.Frame(f, bg=BG)
         top.pack(fill="x", pady=(0, 10))
-        self.lbl_protractor = tk.Label(top, text="", font=("Segoe UI", 16, "bold"), bg=BG, fg=MUTED)
+        self.lbl_protractor = tk.Label(top, text="", font=("Segoe UI", 14, "bold"), bg=BG, fg=MUTED) # Reduced from 16
         self.lbl_protractor.pack(side="left")
-        tk.Button(top, text="🎲 Приклад", font=("Segoe UI", 14, "bold"), bg=ACCENT, fg=WHITE, bd=0, padx=16, pady=10, command=self._new_protractor_example).pack(side="right", padx=10)
+        tk.Button(top, text="🎲 Приклад", font=("Segoe UI", 12, "bold"), bg=ACCENT, fg=WHITE, bd=0, padx=14, pady=8, command=self._new_protractor_example).pack(side="right", padx=10) # Reduced
 
         tk.Label(
             f,
             text="Як виміряти: центр = вершина; одна сторона через 0°; друга сторона показує градуси.",
-            font=("Segoe UI", 13, "bold"),
+            font=("Segoe UI", 12, "bold"), # Reduced from 13
             bg=BG,
             fg=MUTED,
         ).pack(anchor="w", pady=(0, 8))
 
-        self.protractor_canvas = tk.Canvas(f, bg=WHITE, height=max(420, int(self.SH * 0.52)), bd=2, relief="ridge")
+        self.protractor_canvas = tk.Canvas(f, bg=WHITE, height=max(360, int(self.SH * 0.45)), bd=2, relief="ridge") # Reduced
         self.protractor_canvas.pack(fill="x", pady=10, padx=10)
 
         self.after(80, self._new_protractor_example)
@@ -1125,8 +1125,8 @@ class AnglesApp(tk.Tk):
         f = tk.Frame(self.main_area, bg=BG)
         f.pack(expand=True, fill="both")
 
-        tk.Label(f, text="Практика: побудуй кут і визнач його вид", font=("Segoe UI", 22, "bold"), bg=BG, fg=TEXT).pack(pady=(16, 0))
-        tk.Label(f, text="Порада: гострий < 90°, прямий = 90°, тупий між 90° і 180°, розгорнутий = 180°.", font=("Segoe UI", 14), bg=BG, fg=MUTED).pack(pady=(4, 10))
+        tk.Label(f, text="Практика: побудуй кут і визнач його вид", font=("Segoe UI", 20, "bold"), bg=BG, fg=TEXT).pack(pady=(12, 0)) # Reduced from 22/16
+        tk.Label(f, text="Порада: гострий < 90°, прямий = 90°, тупий між 90° і 180°, розгорнутий = 180°.", font=("Segoe UI", 12), bg=BG, fg=MUTED).pack(pady=(4, 10)) # Reduced from 14
 
         wrap = tk.Frame(f, bg=BG)
         wrap.pack(fill="both", expand=True)
@@ -1139,8 +1139,8 @@ class AnglesApp(tk.Tk):
         f = tk.Frame(self.main_area, bg=BG)
         f.pack(expand=True, fill="both")
 
-        tk.Label(f, text="Практика 2: назви, побудова, точки", font=("Segoe UI", 22, "bold"), bg=BG, fg=TEXT).pack(pady=(16, 0))
-        tk.Label(f, text="Тут є 3 режими: найменування кута, побудова кута за точками, вибір точок (всередині/на стороні/поза).", font=("Segoe UI", 14), bg=BG, fg=MUTED).pack(
+        tk.Label(f, text="Практика 2: назви, побудова, точки", font=("Segoe UI", 20, "bold"), bg=BG, fg=TEXT).pack(pady=(12, 0)) # Reduced from 22/16
+        tk.Label(f, text="Тут є 3 режими: найменування кута, побудова кута за точками, вибір точок (всередині/на стороні/поза).", font=("Segoe UI", 12), bg=BG, fg=MUTED).pack(
             pady=(4, 10)
         )
 
